@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Búsqueda de Patentes | Capstone</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #ffffff;
+      color: #212529;
+      line-height: 1.5;
+      padding: 30px 20px;
+    }
+    .container {
+      max-width: 950px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 2px solid #e9ecef;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: 21px;
+      font-weight: 600;
+      color: #1a1a1a;
+      letter-spacing: -0.3px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #6c757d;
+      margin-top: 4px;
+    }
+    .search-card {
+      background-color: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 6px;
+      padding: 18px;
+      margin-bottom: 24px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #333;
+    }
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px 14px;
+      font-size: 14px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      outline: none;
+      background-color: #fff;
+    }
+    input[type="text"]:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.15);
+    }
+    button.btn-primary {
+      padding: 10px 22px;
+      font-size: 14px;
+      font-weight: 500;
+      background-color: #0d6efd;
+      color: white;
+      border: 1px solid #0d6efd;
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    button.btn-primary:hover {
+      background-color: #0b5ed7;
+    }
+    button:disabled {
+      background-color: #6c757d;
+      border-color: #6c757d;
+      cursor: not-allowed;
+    }
+    .status-bar {
+      font-size: 12px;
+      font-family: monospace;
+      color: #495057;
+      margin-top: 10px;
+      padding: 6px 10px;
+      background-color: #e9ecef;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .view-tabs {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #dee2e6;
+      margin-bottom: 16px;
+      padding-bottom: 4px;
+    }
+    .tabs-group {
+      display: flex;
+      gap: 4px;
+    }
+    .tab-btn {
+      background: none;
+      border: 1px solid transparent;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #6c757d;
+      border-radius: 4px 4px 0 0;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      color: #0d6efd;
+      border-color: #dee2e6 #dee2e6 #fff;
+      background-color: #fff;
+      margin-bottom: -5px;
+      border-bottom: 2px solid #0d6efd;
+      font-weight: 600;
+    }
+    .btn-secondary {
+      background-color: #fff;
+      color: #495057;
+      border: 1px solid #ced4da;
+      padding: 5px 12px;
+      font-size: 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-secondary:hover {
+      background-color: #f8f9fa;
+    }
+    /* Cards View */
+    .patents-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .patent-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 14px 16px;
+      background-color: #fff;
+      transition: border-color 0.15s ease;
+    }
+    .patent-card:hover {
+      border-color: #b0c4de;
+    }
+    .patent-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 4px;
+    }
+    .patent-id {
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0d6efd;
+      background-color: #e7f1ff;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+    .patent-date {
+      font-size: 12px;
+      color: #6c757d;
+    }
+    .patent-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #212529;
+      margin-bottom: 4px;
+      line-height: 1.35;
+    }
+    .patent-assignee {
+      font-size: 13px;
+      color: #495057;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    .patent-snippet {
+      font-size: 13px;
+      color: #6c757d;
+      line-height: 1.45;
+    }
+    .patent-links {
+      margin-top: 8px;
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+    }
+    .patent-links a {
+      color: #0d6efd;
+      text-decoration: none;
+    }
+    .patent-links a:hover {
+      text-decoration: underline;
+    }
+    /* Raw JSON View */
+    pre {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 15px;
+      font-size: 12px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      color: #212529;
+      max-height: 600px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    footer {
+      margin-top: 40px;
+      padding-top: 18px;
+      border-top: 1px solid #e9ecef;
+      font-size: 12px;
+      color: #adb5bd;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Sistema de Vigilancia Tecnológica y Patentes</h1>
+      <div class="subtitle">Módulo de consulta a bases oficiales y agregadores de patentes &bull; Capstone Céntrika - Awake</div>
+    </header>
+
+    <div class="search-card">
+      <label for="query-input">Ecuación o Términos de Búsqueda de Patentes:</label>
+      <div class="input-row">
+        <input 
+          type="text" 
+          id="query-input" 
+          placeholder="Ej: piezoelectric footwear, calzado sensores, Rogowski coil" 
+          value="piezoelectric footwear"
+        >
+        <button id="search-btn" class="btn-primary" onclick="ejecutarBusqueda()">Buscar Patentes</button>
+      </div>
+      <div id="status-bar" class="status-bar" style="display: none;">
+        <span id="status-text">Listo</span>
+        <span id="metrics-text"></span>
+      </div>
+    </div>
+
+    <div class="view-tabs">
+      <div class="tabs-group">
+        <button id="tab-cards" class="tab-btn active" onclick="cambiarVista('cards')">Listado de Patentes</button>
+        <button id="tab-raw" class="tab-btn" onclick="cambiarVista('raw')">Salida en Crudo (Raw JSON)</button>
+      </div>
+      <div>
+        <button class="btn-secondary" id="copy-btn" onclick="copiarJson()">Copiar JSON</button>
+      </div>
+    </div>
+
+    <!-- Vista de Tarjetas -->
+    <div id="view-cards-container" class="patents-list">
+      <div style="color: #6c757d; font-size: 13px; padding: 20px 0; text-align: center;">
+        Iniciando consulta de patentes...
+      </div>
+    </div>
+
+    <!-- Vista Raw JSON -->
+    <div id="view-raw-container" style="display: none;">
+      <pre id="raw-output">// Presione "Buscar Patentes" para obtener el payload de la API...</pre>
+    </div>
+
+    <footer>
+      Universidad del Rosario &bull; Proyecto Capstone Grupo 6 &bull; Awake Consulting
+    </footer>
+  </div>
+
+  <script>
+    let rawPayload = null;
+    let currentView = 'cards';
+
+    function cambiarVista(vista) {
+      currentView = vista;
+      document.getElementById('tab-cards').className = vista === 'cards' ? 'tab-btn active' : 'tab-btn';
+      document.getElementById('tab-raw').className = vista === 'raw' ? 'tab-btn active' : 'tab-btn';
+
+      document.getElementById('view-cards-container').style.display = vista === 'cards' ? 'flex' : 'none';
+      document.getElementById('view-raw-container').style.display = vista === 'raw' ? 'block' : 'none';
+    }
+
+    async function ejecutarBusqueda() {
+      const q = document.getElementById('query-input').value.trim();
+      if (!q) return;
+
+      const btn = document.getElementById('search-btn');
+      const statusBar = document.getElementById('status-bar');
+      const statusText = document.getElementById('status-text');
+      const metricsText = document.getElementById('metrics-text');
+      const cardsContainer = document.getElementById('view-cards-container');
+      const rawOutput = document.getElementById('raw-output');
+
+      btn.disabled = true;
+      btn.textContent = "Consultando...";
+      statusBar.style.display = "flex";
+      statusText.textContent = "Conectando con el motor de patentes...";
+      metricsText.textContent = "";
+
+      const t0 = performance.now();
+
+      try {
+        const response = await fetch(`/api/patents?q=${encodeURIComponent(q)}`);
+        const data = await response.json();
+        const duration = Math.round(performance.now() - t0);
+
+        rawPayload = data;
+        rawOutput.textContent = JSON.stringify(data, null, 2);
+
+        const organic = data.organic_results || [];
+        const total = data.search_information ? data.search_information.total_results : organic.length;
+
+        statusText.textContent = `Estado: 200 OK | ${organic.length} patentes desplegadas (${total} encontradas a nivel mundial)`;
+        metricsText.textContent = `Tiempo: ${duration} ms`;
+
+        renderizarTarjetas(organic);
+      } catch (err) {
+        statusText.textContent = "Error al consultar la API: " + err.message;
+        cardsContainer.innerHTML = `<div style="color: #dc3545; font-size: 13px; padding: 20px;">Fallo en la conexión: ${err.message}</div>`;
+        rawOutput.textContent = JSON.stringify({ error: err.message }, null, 2);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Buscar Patentes";
+      }
+    }
+
+    function renderizarTarjetas(patents) {
+      const container = document.getElementById('view-cards-container');
+      if (!patents || patents.length === 0) {
+        container.innerHTML = `<div style="color: #6c757d; font-size: 13px; padding: 30px; text-align: center;">No se encontraron patentes para esta ecuación.</div>`;
+        return;
+      }
+
+      container.innerHTML = patents.map(p => {
+        const patentId = p.patent_id || p.publication_number || 'N/A';
+        const title = p.title || 'Sin título registrado';
+        const assignee = p.assignee ? `Titular: ${p.assignee}` : 'Titular no especificado';
+        const date = p.publication_date || p.filing_date || '';
+        const snippet = p.snippet || '';
+        const pdfLink = p.pdf || (p.patent_link ? p.patent_link : null);
+
+        return `
+          <div class="patent-card">
+            <div class="patent-top">
+              <span class="patent-id">${patentId}</span>
+              <span class="patent-date">${date}</span>
+            </div>
+            <div class="patent-title">${title}</div>
+            <div class="patent-assignee">${assignee}</div>
+            <div class="patent-snippet">${snippet}</div>
+            <div class="patent-links">
+              ${p.patent_link ? `<a href="${p.patent_link}" target="_blank" rel="noopener">Ver en Google Patents &rarr;</a>` : ''}
+              ${pdfLink ? `<a href="${pdfLink}" target="_blank" rel="noopener">Descargar Documento Oficial (PDF) &rarr;</a>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function copiarJson() {
+      if (!rawPayload) return;
+      navigator.clipboard.writeText(JSON.stringify(rawPayload, null, 2));
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = "Copiado";
+      setTimeout(() => btn.textContent = "Copiar JSON", 1500);
+    }
+
+    document.getElementById('query-input').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        ejecutarBusqueda();
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      ejecutarBusqueda();
+    });
+  </script>
+</body>
+</html>
