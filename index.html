@@ -2,330 +2,870 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buscador de Patentes | Capstone</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0d6efd">
+  <title>Buscador de Patentes | Capstone Awake - Céntrika</title>
   <style>
+    :root {
+      --primary: #0d6efd;
+      --primary-hover: #0b5ed7;
+      --lens-color: #0284c7;
+      --cpc-color: #7c3aed;
+      --bg-gray: #f8fafc;
+      --border-color: #e2e8f0;
+      --text-dark: #1e293b;
+      --text-muted: #64748b;
+      --success-bg: #dcfce7;
+      --success-text: #166534;
+      --warn-bg: #fef9c3;
+      --warn-text: #854d0e;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background-color: #ffffff;
-      color: #212529;
+      color: var(--text-dark);
       line-height: 1.5;
-      padding: 25px 20px;
+      padding: 16px;
+      -webkit-font-smoothing: antialiased;
     }
+
     .container {
-      max-width: 960px;
+      max-width: 1040px;
       margin: 0 auto;
     }
+
+    /* Header */
     header {
-      border-bottom: 2px solid #e9ecef;
+      border-bottom: 1px solid var(--border-color);
       padding-bottom: 14px;
-      margin-bottom: 20px;
-    }
-    h1 {
-      font-size: 20px;
-      font-weight: 600;
-      color: #1a1a1a;
-    }
-    .subtitle {
-      font-size: 13px;
-      color: #6c757d;
-      margin-top: 3px;
-    }
-    /* Search Box */
-    .search-section {
-      background-color: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 6px;
-      padding: 16px;
-      margin-bottom: 20px;
-    }
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: #333;
-    }
-    .input-row {
+      margin-bottom: 16px;
       display: flex;
-      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
     }
-    input[type="text"] {
-      flex: 1;
-      padding: 9px 12px;
-      font-size: 14px;
-      border: 1px solid #ced4da;
-      border-radius: 4px;
-      font-family: monospace;
-      outline: none;
-      background-color: #ffffff;
+    .header-title h1 {
+      font-size: 19px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.01em;
     }
-    input[type="text"]:focus {
-      border-color: #0d6efd;
-      box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.15);
+    .header-title .subtitle {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
     }
-    button.btn-search {
-      padding: 9px 20px;
-      font-size: 14px;
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #f1f5f9;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      color: #334155;
       font-weight: 500;
-      background-color: #0d6efd;
-      color: #ffffff;
-      border: 1px solid #0d6efd;
-      border-radius: 4px;
-      cursor: pointer;
-      white-space: nowrap;
     }
-    button.btn-search:hover {
-      background-color: #0b5ed7;
+    .header-badge span.dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: #22c55e;
+      display: inline-block;
     }
-    button:disabled {
-      background-color: #6c757d;
-      border-color: #6c757d;
-      cursor: not-allowed;
+
+    /* Usage Quota Bar */
+    .quota-container {
+      background-color: var(--bg-gray);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
     }
-    /* Metrics bar */
-    .metrics-bar {
-      margin-top: 10px;
-      padding: 6px 10px;
-      background-color: #e9ecef;
-      border-radius: 4px;
-      font-size: 12px;
-      font-family: monospace;
-      color: #495057;
+    .quota-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
-    /* View tabs */
-    .tabs-header {
+    .quota-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 10px;
+    }
+    .quota-card {
+      background-color: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 9px 12px;
+      font-size: 12px;
+    }
+    .quota-card-title {
+      font-weight: 600;
       display: flex;
       justify-content: space-between;
-      align-items: flex-end;
-      border-bottom: 1px solid #dee2e6;
-      margin-bottom: 15px;
+      align-items: center;
+      margin-bottom: 4px;
     }
-    .tabs-group {
+    .quota-numbers {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+    .progress-bar-bg {
+      background-color: #e2e8f0;
+      height: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background-color: var(--primary);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+    .status-badge {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .badge-ok { background-color: var(--success-bg); color: var(--success-text); }
+    .badge-pending { background-color: var(--warn-bg); color: var(--warn-text); }
+
+    /* Search Section */
+    .search-card {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .search-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .search-input-wrap {
+      flex: 1;
+      min-width: 240px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type="text"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12);
+    }
+    .source-select-wrap {
+      min-width: 170px;
+    }
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 13px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background-color: #ffffff;
+      outline: none;
+      cursor: pointer;
+    }
+    button.btn-primary {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      background-color: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: background-color 0.2s;
+    }
+    button.btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Surveillance Intelligence Panel (CPC/IPC) */
+    .intel-panel {
+      background-color: #faf5ff;
+      border: 1px solid #e9d5ff;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .intel-header {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #6b21a8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .intel-desc {
+      font-size: 12px;
+      color: #581c87;
+      margin-bottom: 10px;
+    }
+    .cpc-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .cpc-chip {
+      background-color: #ffffff;
+      border: 1px solid #d8b4fe;
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 11.5px;
+      color: #6b21a8;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .cpc-chip:hover {
+      background-color: #f3e8ff;
+      border-color: #a855f7;
+    }
+    .cpc-chip strong {
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .cpc-pct {
+      background-color: #f3e8ff;
+      padding: 1px 5px;
+      border-radius: 10px;
+      font-size: 10.5px;
+      font-weight: 600;
+    }
+
+    /* Notices / Status Info */
+    .notices-box {
+      margin-bottom: 14px;
+      display: none;
+    }
+    .notice-item {
+      background-color: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    /* View Switcher Tabs */
+    .tabs-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 14px;
+      gap: 8px;
+    }
+    .tabs-left {
       display: flex;
       gap: 4px;
     }
     .tab-btn {
       background: none;
       border: 1px solid transparent;
-      padding: 7px 15px;
+      padding: 8px 14px;
       font-size: 13px;
       font-weight: 500;
-      color: #6c757d;
-      border-radius: 4px 4px 0 0;
+      color: var(--text-muted);
+      border-radius: 6px 6px 0 0;
       cursor: pointer;
     }
     .tab-btn.active {
-      color: #0d6efd;
-      border-color: #dee2e6 #dee2e6 #ffffff;
+      color: var(--primary);
+      border-color: var(--border-color) var(--border-color) #ffffff;
       background-color: #ffffff;
-      margin-bottom: -1px;
-      border-bottom: 2px solid #0d6efd;
+      border-bottom: 2px solid var(--primary);
       font-weight: 600;
+      margin-bottom: -1px;
     }
-    .btn-secondary {
+    .btn-ghost {
       background-color: #ffffff;
-      color: #495057;
-      border: 1px solid #ced4da;
-      padding: 4px 10px;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      padding: 5px 10px;
       font-size: 12px;
-      border-radius: 4px;
+      border-radius: 5px;
       cursor: pointer;
     }
-    .btn-secondary:hover {
-      background-color: #f8f9fa;
+    .btn-ghost:hover {
+      background-color: #f1f5f9;
     }
-    /* Structured View (Industry standard) */
+
+    /* Patents List & Cards */
     .patents-list {
       display: flex;
       flex-direction: column;
       gap: 14px;
     }
+
     .patent-card {
-      border: 1px solid #dee2e6;
-      border-radius: 6px;
-      padding: 14px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
       background-color: #ffffff;
       box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
     .patent-card:hover {
-      border-color: #b0c4de;
+      border-color: #94a3b8;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.04);
     }
-    .patent-header-line {
+
+    .patent-card-layout {
+      display: flex;
+      gap: 16px;
+    }
+    .patent-main-content {
+      flex: 1;
+      min-width: 0;
+    }
+    .patent-thumbnail-col {
+      width: 140px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 6px;
+    }
+    .patent-thumb-img {
+      width: 100%;
+      height: 140px;
+      object-fit: contain;
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 4px;
+      transition: transform 0.2s;
+    }
+    .patent-thumb-img:hover {
+      transform: scale(1.03);
+      border-color: var(--primary);
+    }
+    .no-thumb-box {
+      width: 100%;
+      height: 120px;
+      background-color: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+      font-size: 11px;
+      text-align: center;
+      padding: 8px;
+    }
+
+    /* Header line */
+    .patent-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .patent-header-left {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .source-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .source-google { background-color: #e0f2fe; color: #0369a1; }
+    .source-lens { background-color: #e0e7ff; color: #3730a3; }
+    .source-epo { background-color: #fef3c7; color: #92400e; }
+
+    .patent-id-badge {
+      font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+      background-color: #f1f5f9;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .patent-status-badge {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .patent-dates-text {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+
+    /* Title */
+    .patent-title-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 8px;
+      line-height: 1.35;
+    }
+
+    /* Meta Grid */
+    .patent-meta-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 3px 10px;
+      font-size: 12.5px;
+      margin-bottom: 10px;
+      color: #334155;
+    }
+    .meta-lbl {
+      color: var(--text-muted);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .meta-val {
+      color: #0f172a;
+      overflow-wrap: break-word;
+    }
+    .meta-val.assignee-val {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Classifications pills */
+    .classif-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+    .classif-pill {
+      font-size: 11px;
+      font-family: monospace;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .cpc-pill { background-color: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+    .ipc-pill { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+
+    /* Abstract snippet & Translation */
+    .abstract-box {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 3px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 10px 12px;
+      font-size: 12.5px;
+      color: #334155;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    .abstract-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 6px;
     }
-    .patent-meta-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .patent-number {
-      font-family: monospace;
-      font-size: 13px;
-      font-weight: 700;
-      color: #0d6efd;
-      background-color: #e7f1ff;
-      padding: 2px 7px;
-      border-radius: 3px;
-    }
-    .patent-status {
+    .abstract-label {
       font-size: 11px;
-      font-weight: 600;
-      color: #198754;
-      background-color: #d1e7dd;
-      padding: 1px 6px;
-      border-radius: 3px;
+      font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
     }
-    .patent-dates {
-      font-size: 12px;
-      color: #6c757d;
-      font-family: monospace;
-    }
-    .patent-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: #1a1a1a;
-      margin-bottom: 6px;
-      line-height: 1.35;
-    }
-    .patent-details-grid {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 4px 12px;
-      font-size: 12px;
-      margin-bottom: 8px;
-      color: #495057;
-    }
-    .detail-label {
-      font-weight: 600;
-      color: #6c757d;
-    }
-    .detail-value {
-      color: #212529;
-    }
-    .detail-value.assignee {
-      font-weight: 600;
-      color: #0b5ed7;
-    }
-    .patent-snippet {
-      font-size: 13px;
-      color: #495057;
-      line-height: 1.45;
-      background-color: #fbfbfb;
-      padding: 8px 10px;
+    .btn-translate {
+      background: none;
+      border: 1px solid #cbd5e1;
       border-radius: 4px;
-      border-left: 3px solid #dee2e6;
-      margin-top: 6px;
-    }
-    .patent-actions {
-      margin-top: 10px;
-      padding-top: 8px;
-      border-top: 1px solid #f1f3f5;
-      display: flex;
-      gap: 16px;
-      font-size: 12px;
-    }
-    .patent-actions a {
-      color: #0d6efd;
-      text-decoration: none;
+      padding: 2px 8px;
+      font-size: 11px;
+      color: var(--primary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background-color: #ffffff;
       font-weight: 500;
     }
-    .patent-actions a:hover {
+    .btn-translate:hover {
+      background-color: #eff6ff;
+      border-color: #93c5fd;
+    }
+
+    /* Actions line */
+    .patent-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 12px;
+      padding-top: 8px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .patent-links a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .patent-links a:hover {
       text-decoration: underline;
     }
-    /* Raw JSON View */
+    .patent-links a.pdf-link {
+      color: #dc2626;
+      font-weight: 600;
+    }
+
+    /* Modal for Image Preview */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+    .modal-content {
+      background: #ffffff;
+      border-radius: 8px;
+      max-width: 90vw;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+      padding: 10px 16px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .modal-body {
+      padding: 16px;
+      overflow: auto;
+      text-align: center;
+    }
+    .modal-body img {
+      max-width: 100%;
+      max-height: 75vh;
+      object-fit: contain;
+    }
+    .btn-close-modal {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #64748b;
+    }
+
+    /* Raw JSON view */
     pre {
-      background-color: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 4px;
-      padding: 14px;
-      font-size: 12px;
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-      color: #212529;
+      background-color: var(--bg-gray);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 11.5px;
+      font-family: SFMono-Regular, Consolas, monospace;
       max-height: 600px;
       overflow: auto;
       white-space: pre-wrap;
       word-break: break-all;
     }
+
     footer {
-      margin-top: 35px;
+      margin-top: 30px;
       padding-top: 14px;
-      border-top: 1px solid #e9ecef;
+      border-top: 1px solid var(--border-color);
       font-size: 12px;
-      color: #adb5bd;
+      color: var(--text-muted);
       text-align: center;
+    }
+
+    /* Mobile Responsive Optimizations */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px 8px;
+      }
+      .header-title h1 {
+        font-size: 17px;
+      }
+      .quota-grid {
+        grid-template-columns: 1fr;
+      }
+      .search-row {
+        flex-direction: column;
+      }
+      .source-select-wrap, button.btn-primary {
+        width: 100%;
+      }
+      .patent-card-layout {
+        flex-direction: column-reverse;
+      }
+      .patent-thumbnail-col {
+        width: 100%;
+        height: auto;
+      }
+      .patent-thumb-img {
+        height: 180px;
+        width: 100%;
+      }
+      .patent-links {
+        gap: 8px;
+        flex-direction: column;
+      }
     }
   </style>
 </head>
 <body>
 
   <div class="container">
+    <!-- Header -->
     <header>
-      <h1>Sistema de Búsqueda de Patentes (Capstone)</h1>
-      <div class="subtitle">Módulo de consulta a bases de patentes oficiales &bull; Céntrika - Awake</div>
+      <div class="header-title">
+        <h1>Sistema de Vigilancia y Búsqueda de Patentes</h1>
+        <div class="subtitle">Proyecto Capstone Grupo 6 &bull; Céntrika &bull; Awake</div>
+      </div>
+      <div class="header-badge">
+        <span class="dot"></span>
+        <span id="header-engine-status">Multi-fuente Conectado</span>
+      </div>
     </header>
 
-    <!-- Search Section -->
-    <div class="search-section">
-      <label for="query-input">Términos de búsqueda o ecuación de patentes:</label>
-      <div class="input-row">
-        <input 
-          type="text" 
-          id="query-input" 
-          placeholder="Ingrese cualquier término o ecuación (ej: piezoelectric footwear, calzado sensores, Rogowski coil)"
-          value="piezoelectric footwear"
-        >
-        <button id="search-btn" class="btn-search" onclick="buscar()">Buscar</button>
+    <!-- Quota & Consumption Meter (Medidor en Vivo) -->
+    <div class="quota-container">
+      <div class="quota-header">
+        <span>Medidor de Consumo y Estado de APIs</span>
+        <button class="btn-ghost" onclick="cargarConsumo()" style="padding: 2px 8px; font-size: 11px;">Actualizar Métricas</button>
       </div>
-      <div id="metrics-bar" class="metrics-bar" style="display: none;">
-        <span id="status-info">Listo</span>
-        <span id="duration-info"></span>
+      <div class="quota-grid" id="quota-cards-grid">
+        <!-- Google Patents Card -->
+        <div class="quota-card" id="quota-serpapi">
+          <div class="quota-card-title">
+            <span>Google Patents (SerpApi)</span>
+            <span class="status-badge badge-ok" id="serpapi-status-badge">Activa</span>
+          </div>
+          <div class="quota-numbers">
+            <span id="serpapi-usage-text">Cargando métricas...</span>
+            <span id="serpapi-pct-text">-%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="serpapi-progress" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- The Lens API Card -->
+        <div class="quota-card" id="quota-lens">
+          <div class="quota-card-title">
+            <span>The Lens API</span>
+            <span class="status-badge badge-ok" id="lens-status-badge">Token Configurado</span>
+          </div>
+          <div class="quota-numbers">
+            <span id="lens-usage-text">Plan: Trial Access (14 días)</span>
+            <span>1,000 reqs</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: 2%; background-color: #0284c7;"></div>
+          </div>
+        </div>
+
+        <!-- EPO OPS Card -->
+        <div class="quota-card" id="quota-epo">
+          <div class="quota-card-title">
+            <span>EPO OPS (Oficina Europea)</span>
+            <span class="status-badge badge-pending">Validación EPO (Ref: 46581)</span>
+          </div>
+          <div class="quota-numbers">
+            <span>Cuota académica gratuita</span>
+            <span>2.5 GB / sem</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: 0%; background-color: #d97706;"></div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- View Switcher Tabs -->
-    <div class="tabs-header">
-      <div class="tabs-group">
-        <button id="tab-cards" class="tab-btn active" onclick="cambiarVista('cards')">Resultados Estructurados</button>
-        <button id="tab-raw" class="tab-btn" onclick="cambiarVista('raw')">Salida en Crudo (Raw JSON)</button>
+    <!-- Search Box -->
+    <div class="search-card">
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <input 
+            type="text" 
+            id="query-input" 
+            placeholder="Ecuación de búsqueda o palabras clave (ej: piezoelectric footwear, calzado sensores)"
+            value="piezoelectric footwear"
+          >
+        </div>
+        <div class="source-select-wrap">
+          <select id="source-select">
+            <option value="all">Todas las fuentes</option>
+            <option value="google">Google Patents (SerpApi)</option>
+            <option value="lens">The Lens API</option>
+            <option value="epo">EPO OPS (En aprobación)</option>
+          </select>
+        </div>
+        <button id="search-btn" class="btn-primary" onclick="buscar()">
+          <span>Buscar Patentes</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Surveillance Intelligence (CPC / IPC Refinement Panel) -->
+    <div id="intel-panel" class="intel-panel">
+      <div class="intel-header">
+        <span>🔬 Inteligencia de Clasificaciones Tecnológicas (CPC / IPC)</span>
+      </div>
+      <div class="intel-desc">
+        Clasificaciones más frecuentes detectadas en estos resultados. Haz clic en cualquiera para <strong>refinar la ecuación</strong> o realizar una <strong>segunda búsqueda por similitud de clase</strong>:
+      </div>
+      <div class="cpc-chips" id="cpc-chips-container">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+
+    <!-- System Notices -->
+    <div id="notices-box" class="notices-box"></div>
+
+    <!-- Tabs & Metrics bar -->
+    <div class="tabs-bar">
+      <div class="tabs-left">
+        <button id="tab-cards" class="tab-btn active" onclick="cambiarVista('cards')">
+          Resultados (<span id="results-count-badge">0</span>)
+        </button>
+        <button id="tab-raw" class="tab-btn" onclick="cambiarVista('raw')">
+          JSON en Crudo
+        </button>
       </div>
       <div>
-        <button class="btn-secondary" id="copy-btn" onclick="copiarJson()">Copiar JSON</button>
+        <button class="btn-ghost" id="copy-btn" onclick="copiarJson()">Copiar JSON</button>
       </div>
     </div>
 
-    <!-- 1. Structured Results Container -->
+    <!-- 1. Structured Cards List -->
     <div id="view-cards" class="patents-list">
-      <div style="color: #6c757d; font-size: 13px; padding: 25px 0; text-align: center;">
-        Iniciando consulta...
+      <div style="color: #64748b; font-size: 13px; padding: 25px 0; text-align: center;">
+        Iniciando consulta a las bases de datos...
       </div>
     </div>
 
-    <!-- 2. Raw JSON Container -->
+    <!-- 2. Raw JSON View -->
     <div id="view-raw" style="display: none;">
       <pre id="raw-output">// Presione "Buscar" para obtener el JSON en crudo...</pre>
     </div>
 
     <footer>
-      Grupo 6 Capstone &bull; Consulta en vivo a Google Patents API
+      Grupo 6 &bull; Fabián Osorio, Mariana Álvarez, Kevin Cruz, Lina Peña &bull; Capstone Ingeniería
     </footer>
+  </div>
+
+  <!-- Modal Lightbox for Technical Drawings / Figures -->
+  <div id="image-modal" class="modal-overlay" onclick="cerrarModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <span id="modal-patent-title">Figura de Patente</span>
+        <button class="btn-close-modal" onclick="cerrarModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <img id="modal-img-src" src="" alt="Ilustración Técnica">
+      </div>
+    </div>
   </div>
 
   <script>
     let rawJsonData = null;
     let currentTab = 'cards';
+    const translationCache = {};
+
+    // Cargar métricas de uso de API
+    async function cargarConsumo() {
+      try {
+        const res = await fetch('/api/usage');
+        if (!res.ok) return;
+        const data = await res.json();
+        
+        // SerpApi
+        if (data.serpapi) {
+          const s = data.serpapi;
+          const used = s.used_this_month ?? 0;
+          const total = s.total_monthly ?? 250;
+          const left = s.remaining ?? (total - used);
+          const pct = s.percentage_used ?? ((used / total) * 100).toFixed(1);
+
+          document.getElementById('serpapi-usage-text').textContent = `${used} usadas / ${left} restantes`;
+          document.getElementById('serpapi-pct-text').textContent = `${pct}% consumido`;
+          document.getElementById('serpapi-progress').style.width = `${Math.min(pct, 100)}%`;
+        }
+
+        // Lens
+        if (data.lens) {
+          document.getElementById('lens-usage-text').textContent = `${data.lens.plan} &bull; ${data.lens.limit_total} reqs`;
+        }
+      } catch (e) {
+        console.warn("No se pudo obtener métricas de consumo:", e);
+      }
+    }
 
     function cambiarVista(tab) {
       currentTab = tab;
@@ -336,118 +876,251 @@
       document.getElementById('view-raw').style.display = tab === 'raw' ? 'block' : 'none';
     }
 
-    async function buscar() {
+    async function buscar(customQuery) {
+      if (customQuery) {
+        document.getElementById('query-input').value = customQuery;
+      }
       const q = document.getElementById('query-input').value.trim();
+      const source = document.getElementById('source-select').value;
       if (!q) return;
 
       const btn = document.getElementById('search-btn');
-      const metricsBar = document.getElementById('metrics-bar');
-      const statusInfo = document.getElementById('status-info');
-      const durationInfo = document.getElementById('duration-info');
       const cardsContainer = document.getElementById('view-cards');
       const rawOutput = document.getElementById('raw-output');
+      const noticesBox = document.getElementById('notices-box');
+      const intelPanel = document.getElementById('intel-panel');
+      const countBadge = document.getElementById('results-count-badge');
 
       btn.disabled = true;
-      btn.textContent = "Buscando...";
-      metricsBar.style.display = "flex";
-      statusInfo.textContent = "Consultando Google Patents...";
-      durationInfo.textContent = "";
-
-      const t0 = performance.now();
+      btn.innerHTML = '<span>Consultando...</span>';
+      cardsContainer.innerHTML = '<div style="color: #64748b; font-size: 13px; padding: 30px; text-align: center;">Consultando bases oficiales de patentes...</div>';
 
       try {
-        const res = await fetch(`/api/patents?q=${encodeURIComponent(q)}`);
+        const res = await fetch(`/api/patents?q=${encodeURIComponent(q)}&source=${encodeURIComponent(source)}`);
         const data = await res.json();
-        const duration = Math.round(performance.now() - t0);
 
         rawJsonData = data;
         rawOutput.textContent = JSON.stringify(data, null, 2);
 
-        const organic = data.organic_results || [];
-        const totalFound = data.search_information && data.search_information.total_results 
-          ? Number(data.search_information.total_results).toLocaleString() 
-          : organic.length;
+        // Desplegar avisos si existen
+        if (data.notices && data.notices.length > 0) {
+          noticesBox.style.display = 'block';
+          noticesBox.innerHTML = data.notices.map(n => `<div class="notice-item">&bull; ${n}</div>`).join('');
+        } else {
+          noticesBox.style.display = 'none';
+        }
 
-        statusInfo.textContent = `Estado: 200 OK | ${organic.length} patentes desplegadas de aprox. ${totalFound} encontradas a nivel mundial`;
-        durationInfo.textContent = `${duration} ms`;
+        // Panel de Inteligencia CPC / IPC
+        if (data.cpc_summary && data.cpc_summary.length > 0) {
+          intelPanel.style.display = 'block';
+          const chipsContainer = document.getElementById('cpc-chips-container');
+          chipsContainer.innerHTML = data.cpc_summary.map(item => `
+            <div class="cpc-chip" onclick="refinarConCPC('${item.code}')" title="Hacer clic para refinar con ${item.code}">
+              <span>${item.type}:</span>
+              <strong>${item.code}</strong>
+              <span class="cpc-pct">${item.percentage}%</span>
+            </div>
+          `).join('');
+        } else {
+          intelPanel.style.display = 'none';
+        }
 
-        renderizarPatentes(organic);
+        const results = data.organic_results || [];
+        countBadge.textContent = results.length;
+        renderizarPatentes(results);
+
+        // Actualizar consumo en tiempo real
+        cargarConsumo();
+
       } catch (err) {
-        statusInfo.textContent = "Error en la consulta: " + err.message;
-        cardsContainer.innerHTML = `<div style="color: #dc3545; font-size: 13px; padding: 20px;">Fallo al conectar con el servidor: ${err.message}</div>`;
+        cardsContainer.innerHTML = `<div style="color: #dc2626; font-size: 13px; padding: 20px;">Error al conectar con la API: ${err.message}</div>`;
         rawOutput.textContent = JSON.stringify({ error: err.message }, null, 2);
       } finally {
         btn.disabled = false;
-        btn.textContent = "Buscar";
+        btn.innerHTML = '<span>Buscar Patentes</span>';
       }
+    }
+
+    // Refinar o segunda búsqueda por clasificación CPC
+    function refinarConCPC(cpcCode) {
+      const currentQ = document.getElementById('query-input').value.trim();
+      const newQ = `${currentQ} CPC:${cpcCode}`;
+      buscar(newQ);
     }
 
     function renderizarPatentes(patents) {
       const container = document.getElementById('view-cards');
       if (!patents || patents.length === 0) {
-        container.innerHTML = `<div style="color: #6c757d; font-size: 13px; padding: 30px; text-align: center;">No se encontraron patentes para esta búsqueda. Intente con otros términos o combinaciones en inglés.</div>`;
+        container.innerHTML = `<div style="color: #64748b; font-size: 13px; padding: 40px; text-align: center;">No se encontraron patentes con estos términos. Intente con términos en inglés o una clasificación tecnológica.</div>`;
         return;
       }
 
-      container.innerHTML = patents.map(p => {
-        // Extraer número de publicación limpio (ej: US12278746B2)
-        let pubNum = p.publication_number;
-        if (!pubNum && p.patent_id) {
-          const parts = p.patent_id.split('/');
-          pubNum = parts.length >= 2 ? parts[1] : p.patent_id;
-        }
-        pubNum = pubNum || 'N/A';
-
+      container.innerHTML = patents.map((p, idx) => {
+        const pubNum = p.publication_number || 'N/A';
         const title = p.title || 'Sin título registrado';
         const assignee = p.assignee || 'No especificado / Persona natural';
         const inventor = p.inventor || 'No especificado';
-        const pubDate = p.publication_date || p.grant_date || 'No registrada';
-        const filingDate = p.filing_date || p.priority_date || null;
+        const pubDate = p.publication_date || 'N/A';
+        const filingDate = p.filing_date || null;
         const snippet = p.snippet || '';
-        const patentLink = p.patent_link || null;
-        const pdfLink = p.pdf || null;
+        const sourceBadge = p.source_badge || 'google';
+        const sourceName = p.source || 'Google Patents';
 
-        // Estado legal si está disponible
-        let statusBadge = '';
-        if (p.country_status) {
-          const firstCountry = Object.keys(p.country_status)[0];
-          const st = p.country_status[firstCountry];
-          if (st) {
-            statusBadge = `<span class="patent-status">${st}</span>`;
-          }
+        // Estado legal pill
+        let statusClass = 'badge-ok';
+        let statusText = p.legal_status || 'Registrada';
+        const lowerSt = statusText.toLowerCase();
+        if (lowerSt.includes('discontinued') || lowerSt.includes('expired') || lowerSt.includes('abandoned')) {
+          statusClass = 'badge-pending';
+        }
+
+        // Thumbnail o figura
+        let thumbHtml = '';
+        if (p.thumbnail) {
+          thumbHtml = `
+            <div class="patent-thumbnail-col">
+              <img src="${p.thumbnail}" alt="Fig. Patente" class="patent-thumb-img" onclick="abrirModal('${p.thumbnail}', '${pubNum}')" title="Ver figura en grande">
+              <span style="font-size: 10.5px; color: #64748b; font-weight: 500;">📐 Fig. Técnica</span>
+            </div>
+          `;
+        } else {
+          thumbHtml = `
+            <div class="patent-thumbnail-col">
+              <div class="no-thumb-box">
+                <span style="font-size: 18px; margin-bottom: 2px;">📄</span>
+                <span>Sin lámina en vista previa</span>
+              </div>
+            </div>
+          `;
+        }
+
+        // CPC/IPC Pills
+        let classifHtml = '';
+        if (p.classifications_cpc && p.classifications_cpc.length > 0) {
+          classifHtml += p.classifications_cpc.slice(0, 3).map(c => `<span class="classif-pill cpc-pill">CPC: ${c}</span>`).join(' ');
+        }
+        if (p.classifications_ipc && p.classifications_ipc.length > 0) {
+          classifHtml += p.classifications_ipc.slice(0, 3).map(c => `<span class="classif-pill ipc-pill">IPC: ${c}</span>`).join(' ');
         }
 
         return `
           <div class="patent-card">
-            <div class="patent-header-line">
-              <div class="patent-meta-left">
-                <span class="patent-number">${pubNum}</span>
-                ${statusBadge}
+            <div class="patent-card-layout">
+              <div class="patent-main-content">
+                <!-- Header line -->
+                <div class="patent-header">
+                  <div class="patent-header-left">
+                    <span class="source-tag source-${sourceBadge}">[${sourceName}]</span>
+                    <span class="patent-id-badge">${pubNum}</span>
+                    <span class="patent-status-badge ${statusClass}">${statusText}</span>
+                  </div>
+                  <div class="patent-dates-text">
+                    ${filingDate ? `Solicitud: ${filingDate} &bull; ` : ''}Publicación: ${pubDate}
+                  </div>
+                </div>
+
+                <!-- Title -->
+                <div class="patent-title-text">${title}</div>
+
+                <!-- Meta Details -->
+                <div class="patent-meta-grid">
+                  <span class="meta-lbl">Titular / Solicitante:</span>
+                  <span class="meta-val assignee-val">${assignee}</span>
+
+                  <span class="meta-lbl">Inventor(es):</span>
+                  <span class="meta-val">${inventor}</span>
+                </div>
+
+                <!-- Classifications if available -->
+                ${classifHtml ? `<div class="classif-row">${classifHtml}</div>` : ''}
+
+                <!-- Abstract snippet with instant translation -->
+                ${snippet ? `
+                  <div class="abstract-box">
+                    <div class="abstract-header">
+                      <span class="abstract-label">Resumen / Abstract</span>
+                      <button class="btn-translate" id="trans-btn-${idx}" onclick="toggleTraduccion(${idx}, '${escapeHtml(snippet)}')">
+                        <span>🌐 Traducir al Español</span>
+                      </button>
+                    </div>
+                    <div id="abstract-text-${idx}">${snippet}</div>
+                  </div>
+                ` : ''}
+
+                <!-- Direct Links & Actions -->
+                <div class="patent-links">
+                  ${p.patent_link ? `<a href="${p.patent_link}" target="_blank" rel="noopener">Google Patents &rarr;</a>` : ''}
+                  ${p.espacenet_link ? `<a href="${p.espacenet_link}" target="_blank" rel="noopener">Espacenet (EPO) &rarr;</a>` : ''}
+                  ${p.lens_link ? `<a href="${p.lens_link}" target="_blank" rel="noopener">The Lens &rarr;</a>` : ''}
+                  ${p.pdf ? `<a href="${p.pdf}" target="_blank" rel="noopener" class="pdf-link">Descargar PDF Oficial &rarr;</a>` : ''}
+                </div>
               </div>
-              <div class="patent-dates">
-                ${filingDate ? `Solicitud: ${filingDate} | ` : ''}Publicación: ${pubDate}
-              </div>
-            </div>
 
-            <div class="patent-title">${title}</div>
-
-            <div class="patent-details-grid">
-              <span class="detail-label">Titular / Solicitante:</span>
-              <span class="detail-value assignee">${assignee}</span>
-
-              <span class="detail-label">Inventor(es):</span>
-              <span class="detail-value">${inventor}</span>
-            </div>
-
-            ${snippet ? `<div class="patent-snippet">${snippet}</div>` : ''}
-
-            <div class="patent-actions">
-              ${patentLink ? `<a href="${patentLink}" target="_blank" rel="noopener">Ver ficha en Google Patents &rarr;</a>` : ''}
-              ${pdfLink ? `<a href="${pdfLink}" target="_blank" rel="noopener">Descargar Documento Oficial (PDF) &rarr;</a>` : ''}
+              <!-- Technical Figure Column -->
+              ${thumbHtml}
             </div>
           </div>
         `;
       }).join('');
+    }
+
+    // Traducir / Alternar Abstract
+    async function toggleTraduccion(idx, originalText) {
+      const btn = document.getElementById(`trans-btn-${idx}`);
+      const textElem = document.getElementById(`abstract-text-${idx}`);
+      
+      if (btn.dataset.translated === "true") {
+        // Restaurar original
+        textElem.textContent = originalText;
+        btn.dataset.translated = "false";
+        btn.innerHTML = `<span>🌐 Traducir al Español</span>`;
+        return;
+      }
+
+      // Si está en caché
+      if (translationCache[originalText]) {
+        textElem.textContent = translationCache[originalText];
+        btn.dataset.translated = "true";
+        btn.innerHTML = `<span>↺ Ver Original en Inglés</span>`;
+        return;
+      }
+
+      btn.innerHTML = `<span>Traduciendo...</span>`;
+      try {
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: originalText })
+        });
+        const data = await res.json();
+        if (data.translated) {
+          translationCache[originalText] = data.translated;
+          textElem.textContent = data.translated;
+          btn.dataset.translated = "true";
+          btn.innerHTML = `<span>↺ Ver Original en Inglés</span>`;
+        }
+      } catch (e) {
+        btn.innerHTML = `<span>Error de traducción</span>`;
+      }
+    }
+
+    // Modal de figuras
+    function abrirModal(imgUrl, pubNum) {
+      document.getElementById('modal-img-src').src = imgUrl;
+      document.getElementById('modal-patent-title').textContent = `Lámina Técnica &bull; ${pubNum}`;
+      document.getElementById('image-modal').style.display = 'flex';
+    }
+
+    function cerrarModal() {
+      document.getElementById('image-modal').style.display = 'none';
+      document.getElementById('modal-img-src').src = '';
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '&quot;')
+        .replace(/\n/g, ' ');
     }
 
     function copiarJson() {
@@ -458,15 +1131,12 @@
       setTimeout(() => btn.textContent = "Copiar JSON", 1500);
     }
 
-    // Permitir buscar presionando la tecla Enter
     document.getElementById('query-input').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        buscar();
-      }
+      if (e.key === 'Enter') buscar();
     });
 
-    // Ejecutar búsqueda inicial al cargar la página
     window.addEventListener('DOMContentLoaded', () => {
+      cargarConsumo();
       buscar();
     });
   </script>

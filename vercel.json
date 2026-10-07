@@ -4,6 +4,14 @@
     {
       "source": "/api/patents",
       "destination": "/api/patents.js"
+    },
+    {
+      "source": "/api/usage",
+      "destination": "/api/usage.js"
+    },
+    {
+      "source": "/api/translate",
+      "destination": "/api/translate.js"
     }
   ]
 }

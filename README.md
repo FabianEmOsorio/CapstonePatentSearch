@@ -2,21 +2,21 @@
 
 Sistema de Vigilancia Tecnológica y Búsqueda de Patentes desarrollado para el proyecto Capstone (Universidad del Rosario & Awake).
 
-Este módulo permite formular ecuaciones de búsqueda y consultar en vivo bases de datos de patentes a nivel mundial, extrayendo metadatos oficiales, números de publicación, titulares, resúmenes y documentos PDF.
+Este módulo permite formular ecuaciones de búsqueda, consultar en vivo bases de datos de patentes a nivel mundial (Google Patents, The Lens API y EPO OPS), explorar clasificaciones CPC/IPC para refinamiento metodológico, visualizar láminas técnicas e inspeccionar el consumo de APIs en tiempo real.
 
 ---
 
-## 1. Análisis de Viabilidad de APIs de Patentes
+## 1. Características Principales
 
-A continuación se presenta el dictamen técnico de viabilidad sobre las fuentes de patentes identificadas:
-
-| Fuente / API | Cobertura | Viabilidad Técnica | Observaciones y Requisitos |
-| :--- | :--- | :--- | :--- |
-| **Google Patents (vía SerpApi)** | **Global (100+ países)** | **100% Inmediata (Implementada)** | Absorbe el corpus completo de Google Patents (USPTO, EPO, WIPO, China, Japón, Colombia). Resuelve el bypass de captchas perimetrales y entrega un JSON estructurado listo para producción. |
-| **EPO OPS (Open Patent Services)** | Global (Oficina Europea) | **Media (Sprint 3)** | Es el estándar oficial más riguroso a nivel legal. Requiere registro en el portal de desarrolladores de la EPO y autenticación OAuth 2.0 con rotación de tokens cada 20 minutos. |
-| **Lens.org API** | Global (140M+ patentes) | **Media** | Excelente agregador normalizado. Aunque ofrece acceso de investigación gratuito, la solicitud manual de API token toma entre 3 a 7 días hábiles de aprobación. |
-| **USPTO Open Data Portal** | Estados Unidos | **Media** | Exclusivo de patentes estadounidenses. Requiere registro y generación de API Key en `data.uspto.gov`. |
-| **Google Patents en BigQuery** | Global | **Baja para consultas ágiles** | Almacén masivo SQL. Requiere proyecto en Google Cloud (GCP) con tarjeta de crédito vinculada y consultas analíticas en SQL, no apto para búsquedas interactivas en tiempo real. |
+* **Consulta Multi-fuente:**
+  * **Google Patents (SerpApi):** Cobertura mundial completa con extracción de figuras técnicas y resumen de CPCs.
+  * **The Lens API:** Agregador normalizado con token institucional configurado (`ProyectoCapstone`).
+  * **EPO OPS:** Estándar oficial de la Oficina Europea de Patentes (en proceso de validación administrativa).
+* **Medidor de Consumo de APIs en Vivo:** Visualización del porcentaje de cuota y valores numéricos consumidos/restantes por cada proveedor (`/api/usage`).
+* **Inteligencia de Vigilancia Tecnológica (CPC/IPC):** Detección automática de las clasificaciones más frecuentes en cada búsqueda con refinamiento en 1 clic (segunda búsqueda por similitud de clase).
+* **Previsualización de Láminas Técnicas (Fig. 1):** Extracción de dibujos y diagramas con visor ampliado (lightbox) para agilizar la revisión visual rápida.
+* **Traducción Instantánea de Abstract:** Botón de traducción al español con alternador para ver el texto original en inglés al instante (`/api/translate`).
+* **100% Responsivo para Celular:** Optimizado para smartphones y tablets sin necesidad de instalar aplicaciones nativas.
 
 ---
 
@@ -37,16 +37,16 @@ Abra su navegador en: **`http://localhost:8080`**
 
 ---
 
-## 3. Despliegue Rápido en la Nube (Vercel)
+## 3. Despliegue en la Nube (Vercel)
 
-El repositorio incluye la configuración de servidor serverless (`api/patents.js` y `vercel.json`).
+El repositorio incluye la configuración de endpoints serverless (`api/patents.js`, `api/usage.js`, `api/translate.js` y `vercel.json`).
 
-Para tener el sistema disponible en una URL pública (accesible desde cualquier computador, tablet o celular sin descargar archivos ni activar alertas de Windows Defender):
+Para tener el sistema disponible en una URL pública (accesible desde cualquier computador, tablet o celular):
 
 1. Ingrese a [vercel.com](https://vercel.com) e inicie sesión con su cuenta de GitHub.
 2. Haga clic en **"Add New..."** &rarr; **"Project"**.
 3. Seleccione el repositorio **`CapstonePatentSearch`** y haga clic en **"Deploy"**.
-4. En 20 segundos obtendrá una URL pública segura (ej: `https://capstone-patent-search.vercel.app`) lista para presentar en vivo.
+4. En 20 segundos obtendrá una URL pública segura lista para presentar en clase y a los directivos de Awake.
 
 ---
 
@@ -54,11 +54,13 @@ Para tener el sistema disponible en una URL pública (accesible desde cualquier 
 
 ```
 CapstonePatentSearch/
-├── index.html         # Interfaz web responsiva (Listado de tarjetas y Raw JSON)
-├── server.py          # Servidor HTTP local en Python estándar
-├── vercel.json        # Configuración de despliegue serverless
+├── index.html         # Interfaz web responsiva estilo Lens.org + medidor de consumo
+├── server.py          # Servidor HTTP local en Python estándar con APIs
+├── vercel.json        # Rutas y configuración de despliegue en Vercel
 ├── api/
-│   └── patents.js     # Endpoint serverless para Vercel
+│   ├── patents.js     # Endpoint unificado de búsqueda multi-fuente
+│   ├── usage.js       # Medidor de cuota de APIs en vivo
+│   └── translate.js   # Traductor instantáneo de abstracts
 ├── LICENSE            # Licencia del proyecto
 └── README.md          # Documentación técnica
 ```
