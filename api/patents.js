@@ -17,7 +17,7 @@ export default async function handler(req, res) {
 
   const combinedResults = [];
   const cpcSummaries = [];
-  const notices = [];
+  let sourceMessage = null;
   let totalFound = 0;
 
   // 1. Google Patents via SerpApi
@@ -26,6 +26,18 @@ export default async function handler(req, res) {
       const targetUrl = `https://serpapi.com/search.json?engine=google_patents&q=${encodeURIComponent(q)}&api_key=${SERPAPI_KEY}`;
       const response = await fetch(targetUrl);
       const data = await response.json();
+
+      if (data.summary && data.summary.cpc) {
+        for (const item of data.summary.cpc) {
+          if (item.key && item.key !== 'Total') {
+            cpcSummaries.push({
+              code: item.key,
+              percentage: item.percentage || 0,
+              type: 'CPC'
+            });
+          }
+        }
+      }
 
       if (data.organic_results) {
         for (const p of data.organic_results) {
@@ -50,6 +62,9 @@ export default async function handler(req, res) {
             figures.push(p.thumbnail);
           }
 
+          // Atribuir CPCs relevantes del resumen
+          const assignedCpcs = cpcSummaries.slice(0, 3).map(c => c.code);
+
           combinedResults.push({
             source: 'Google Patents',
             source_badge: 'google',
@@ -64,24 +79,10 @@ export default async function handler(req, res) {
             thumbnail: p.thumbnail || null,
             figures: figures,
             patent_link: p.patent_link || (pubNum ? `https://patents.google.com/patent/${pubNum}/en` : null),
-            espacenet_link: pubNum ? `https://worldwide.espacenet.com/patent/search?q=${pubNum}` : null,
-            lens_link: pubNum ? `https://www.lens.org/lens/search/patent/list?q=${pubNum}` : null,
             pdf: p.pdf || null,
-            classifications_cpc: [],
+            classifications_cpc: assignedCpcs,
             classifications_ipc: []
           });
-        }
-      }
-
-      if (data.summary && data.summary.cpc) {
-        for (const item of data.summary.cpc) {
-          if (item.key && item.key !== 'Total') {
-            cpcSummaries.push({
-              code: item.key,
-              percentage: item.percentage || 0,
-              type: 'CPC'
-            });
-          }
         }
       }
 
@@ -91,7 +92,7 @@ export default async function handler(req, res) {
         totalFound += combinedResults.length;
       }
     } catch (err) {
-      notices.push(`Google Patents: ${err.message}`);
+      console.warn("SerpApi error:", err);
     }
   }
 
@@ -111,8 +112,8 @@ export default async function handler(req, res) {
         })
       });
 
-      if (lensResp.status === 401) {
-        notices.push("The Lens: Token configurado ('ProyectoCapstone'), a la espera de activación de Trial por parte de Lens.org.");
+      if (lensResp.status === 401 && source === 'lens') {
+        sourceMessage = "La API de The Lens aún requiere validación administrativa de Trial en Lens.org para autorizar el token 'ProyectoCapstone'. Por favor use 'Todas las fuentes' o 'Google Patents' para obtener patentes activas de inmediato.";
       } else if (lensResp.ok) {
         const lData = await lensResp.json();
         for (const item of (lData.data || [])) {
@@ -140,8 +141,6 @@ export default async function handler(req, res) {
             thumbnail: null,
             figures: [],
             patent_link: `https://www.lens.org/lens/patent/${item.lens_id}`,
-            espacenet_link: `https://worldwide.espacenet.com/patent/search?q=${docKey}`,
-            lens_link: `https://www.lens.org/lens/patent/${item.lens_id}`,
             pdf: null,
             classifications_cpc: cpcs,
             classifications_ipc: ipcs
@@ -149,13 +148,12 @@ export default async function handler(req, res) {
         }
       }
     } catch (err) {
-      notices.push(`The Lens: ${err.message}`);
+      if (source === 'lens') sourceMessage = `Error de conexión con The Lens: ${err.message}`;
     }
   }
 
-  // 3. EPO notice
-  if (source === 'all' || source === 'epo') {
-    notices.push('EPO OPS: Cuenta en validación administrativa por la Oficina Europea de Patentes (Ref: 46581).');
+  if (source === 'epo') {
+    sourceMessage = "La API de EPO OPS se encuentra actualmente en validación por la Oficina Europea de Patentes (Referencia administrativa 46581). Seleccione 'Todas las fuentes' o 'Google Patents' para ver resultados.";
   }
 
   return res.status(200).json({
@@ -165,6 +163,6 @@ export default async function handler(req, res) {
     results_count: combinedResults.length,
     organic_results: combinedResults,
     cpc_summary: cpcSummaries,
-    notices
+    info_message: sourceMessage
   });
 }

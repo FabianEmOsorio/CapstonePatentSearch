@@ -3,22 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0d6efd">
+  <meta name="theme-color" content="#18181b">
   <title>Buscador de Patentes | Capstone Awake - Céntrika</title>
   <style>
     :root {
       --primary: #0d6efd;
       --primary-hover: #0b5ed7;
-      --lens-color: #0284c7;
-      --cpc-color: #7c3aed;
-      --bg-gray: #f8fafc;
       --border-color: #e2e8f0;
-      --text-dark: #1e293b;
+      --text-dark: #0f172a;
       --text-muted: #64748b;
-      --success-bg: #dcfce7;
-      --success-text: #166534;
-      --warn-bg: #fef9c3;
-      --warn-text: #854d0e;
+      --cpc-color: #7c3aed;
+      --cpc-bg: #f3e8ff;
+      --ipc-color: #0369a1;
+      --ipc-bg: #e0f2fe;
     }
 
     * {
@@ -50,7 +47,7 @@
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
     .header-title h1 {
       font-size: 19px;
@@ -63,90 +60,134 @@
       color: var(--text-muted);
       margin-top: 2px;
     }
-    .header-badge {
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Antigravity Style "View Usage" Trigger Button */
+    .btn-view-usage {
+      background-color: #18181b;
+      color: #f4f4f5;
+      border: 1px solid #27272a;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      background-color: #f1f5f9;
-      padding: 5px 10px;
-      border-radius: 6px;
-      font-size: 11.5px;
-      color: #334155;
-      font-weight: 500;
+      gap: 7px;
+      transition: all 0.2s;
     }
-    .header-badge span.dot {
-      width: 7px;
-      height: 7px;
+    .btn-view-usage:hover {
+      background-color: #27272a;
+      color: #ffffff;
+    }
+    .usage-pill-circle {
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background-color: #22c55e;
       display: inline-block;
     }
 
-    /* Usage Quota Bar */
-    .quota-container {
-      background-color: var(--bg-gray);
-      border: 1px solid var(--border-color);
+    /* Antigravity Usage Panel (Dark Sleek Popover / Accordion) */
+    .antigravity-usage-panel {
+      background-color: #18181b;
+      color: #f4f4f5;
+      border: 1px solid #27272a;
       border-radius: 8px;
-      padding: 12px 14px;
+      padding: 14px 16px;
       margin-bottom: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      transition: all 0.25s ease;
     }
-    .quota-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      font-size: 12px;
-      font-weight: 600;
-      color: #334155;
+    .ag-usage-title {
+      font-size: 11px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .quota-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 10px;
-    }
-    .quota-card {
-      background-color: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 9px 12px;
-      font-size: 12px;
-    }
-    .quota-card-title {
-      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: #a1a1aa;
+      margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 4px;
     }
-    .quota-numbers {
-      font-size: 11.5px;
-      color: var(--text-muted);
+    .ag-usage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .ag-provider-card {
+      background-color: #27272a;
+      border: 1px solid #3f3f46;
+      border-radius: 6px;
+      padding: 10px 14px;
+    }
+    .ag-provider-header {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 8px;
       display: flex;
       justify-content: space-between;
-      margin-bottom: 5px;
+      align-items: center;
     }
-    .progress-bar-bg {
-      background-color: #e2e8f0;
-      height: 6px;
-      border-radius: 3px;
-      overflow: hidden;
+    .ag-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
     }
-    .progress-bar-fill {
-      height: 100%;
-      background-color: var(--primary);
-      border-radius: 3px;
-      transition: width 0.4s ease;
+    .ag-stat-info {
+      display: flex;
+      flex-direction: column;
     }
-    .status-badge {
-      font-size: 10px;
-      padding: 1px 6px;
-      border-radius: 4px;
-      font-weight: 600;
+    .ag-stat-label {
+      font-size: 12px;
+      color: #e4e4e7;
+      font-weight: 500;
     }
-    .badge-ok { background-color: var(--success-bg); color: var(--success-text); }
-    .badge-pending { background-color: var(--warn-bg); color: var(--warn-text); }
+    .ag-stat-sub {
+      font-size: 11px;
+      color: #a1a1aa;
+    }
+    .ag-stat-value {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ag-pct {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      font-family: monospace;
+    }
+    /* Circular Progress Ring (Antigravity Style) */
+    .circular-ring {
+      width: 22px;
+      height: 22px;
+      transform: rotate(-90deg);
+    }
+    .circular-ring-bg {
+      fill: none;
+      stroke: #3f3f46;
+      stroke-width: 3.5;
+    }
+    .circular-ring-fill {
+      fill: none;
+      stroke: #22c55e;
+      stroke-width: 3.5;
+      stroke-linecap: round;
+      stroke-dasharray: 100, 100;
+      stroke-dashoffset: 8;
+      transition: stroke-dashoffset 0.6s ease;
+    }
+    .ring-amber {
+      stroke: #eab308;
+    }
 
     /* Search Section */
     .search-card {
@@ -154,7 +195,7 @@
       border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 14px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
     .search-row {
@@ -216,23 +257,60 @@
       cursor: not-allowed;
     }
 
-    /* Surveillance Intelligence Panel (CPC/IPC) */
-    .intel-panel {
+    /* Surveillance Intelligence Dropdown (Desplegable y no abrumador) */
+    .intel-dropdown {
       background-color: #faf5ff;
       border: 1px solid #e9d5ff;
       border-radius: 8px;
-      padding: 12px 14px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
+      overflow: hidden;
       display: none;
     }
-    .intel-header {
-      font-size: 12.5px;
-      font-weight: 700;
-      color: #6b21a8;
+    .intel-header-btn {
+      width: 100%;
+      padding: 10px 14px;
+      background: none;
+      border: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      text-align: left;
+    }
+    .intel-header-btn:hover {
+      background-color: #f5f3ff;
+    }
+    .intel-title-left {
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 8px;
+      gap: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #6b21a8;
+    }
+    .intel-badge-count {
+      background-color: #f3e8ff;
+      color: #7e22ce;
+      border: 1px solid #d8b4fe;
+      padding: 1px 7px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .intel-arrow {
+      color: #7e22ce;
+      font-size: 12px;
+      transition: transform 0.2s;
+    }
+    .intel-arrow.open {
+      transform: rotate(180deg);
+    }
+    .intel-body {
+      padding: 0 14px 14px 14px;
+      display: none;
+      border-top: 1px dashed #e9d5ff;
+      margin-top: 2px;
+      padding-top: 10px;
     }
     .intel-desc {
       font-size: 12px;
@@ -274,22 +352,7 @@
       font-weight: 600;
     }
 
-    /* Notices / Status Info */
-    .notices-box {
-      margin-bottom: 14px;
-      display: none;
-    }
-    .notice-item {
-      background-color: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: #1e40af;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      margin-bottom: 6px;
-    }
-
-    /* View Switcher Tabs */
+    /* Tabs & Bar */
     .tabs-bar {
       display: flex;
       justify-content: space-between;
@@ -443,6 +506,8 @@
       border-radius: 4px;
       font-weight: 600;
     }
+    .badge-ok { background-color: #dcfce7; color: #166534; }
+    .badge-pending { background-color: #fef9c3; color: #854d0e; }
 
     .patent-dates-text {
       font-size: 11.5px;
@@ -465,7 +530,7 @@
       grid-template-columns: auto 1fr;
       gap: 3px 10px;
       font-size: 12.5px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       color: #334155;
     }
     .meta-lbl {
@@ -482,26 +547,45 @@
       font-weight: 600;
     }
 
-    /* Classifications pills */
+    /* Classifications pills directly inside card (CPC / IPC) */
     .classif-row {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
       margin-bottom: 10px;
     }
-    .classif-pill {
+    .classif-label {
       font-size: 11px;
-      font-family: monospace;
-      padding: 2px 6px;
-      border-radius: 3px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-right: 2px;
+    }
+    .classif-pill {
+      font-size: 11.5px;
+      font-family: SFMono-Regular, Consolas, monospace;
+      padding: 2px 7px;
+      border-radius: 4px;
       font-weight: 600;
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      cursor: pointer;
+      transition: opacity 0.15s;
     }
-    .cpc-pill { background-color: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
-    .ipc-pill { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .classif-pill:hover {
+      opacity: 0.85;
+    }
+    .cpc-pill { 
+      background-color: var(--cpc-bg); 
+      color: var(--cpc-color); 
+      border: 1px solid #e9d5ff; 
+    }
+    .ipc-pill { 
+      background-color: var(--ipc-bg); 
+      color: var(--ipc-color); 
+      border: 1px solid #bfdbfe; 
+    }
 
     /* Abstract snippet & Translation */
     .abstract-box {
@@ -547,12 +631,12 @@
       border-color: #93c5fd;
     }
 
-    /* Actions line */
+    /* Actions line (100% DINÁMICO SEGÚN LA FUENTE) */
     .patent-links {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
-      font-size: 12px;
+      font-size: 12.5px;
       padding-top: 8px;
       border-top: 1px solid #f1f5f9;
     }
@@ -570,6 +654,33 @@
     .patent-links a.pdf-link {
       color: #dc2626;
       font-weight: 600;
+    }
+
+    /* Informational Notice Card (para Lens o EPO cuando están pendientes) */
+    .info-card {
+      background-color: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 24px 20px;
+      text-align: center;
+      margin: 20px 0;
+    }
+    .info-card-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    .info-card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+    .info-card-desc {
+      font-size: 13px;
+      color: #475569;
+      max-width: 580px;
+      margin: 0 auto 16px auto;
+      line-height: 1.5;
     }
 
     /* Modal for Image Preview */
@@ -622,7 +733,7 @@
 
     /* Raw JSON view */
     pre {
-      background-color: var(--bg-gray);
+      background-color: #f8fafc;
       border: 1px solid var(--border-color);
       border-radius: 6px;
       padding: 12px;
@@ -650,9 +761,6 @@
       }
       .header-title h1 {
         font-size: 17px;
-      }
-      .quota-grid {
-        grid-template-columns: 1fr;
       }
       .search-row {
         flex-direction: column;
@@ -687,61 +795,84 @@
         <h1>Sistema de Vigilancia y Búsqueda de Patentes</h1>
         <div class="subtitle">Proyecto Capstone Grupo 6 &bull; Céntrika &bull; Awake</div>
       </div>
-      <div class="header-badge">
-        <span class="dot"></span>
-        <span id="header-engine-status">Multi-fuente Conectado</span>
+      <div class="header-actions">
+        <!-- Antigravity-style View Usage Trigger Button -->
+        <button class="btn-view-usage" onclick="toggleUsagePanel()" title="Ver cuota y consumo de APIs">
+          <span class="usage-pill-circle"></span>
+          <span>View Usage</span>
+          <span id="header-usage-pill" style="color: #22c55e; font-weight: 700; font-family: monospace;">91%</span>
+          <span id="ag-arrow-icon" style="font-size: 10px;">▾</span>
+        </button>
       </div>
     </header>
 
-    <!-- Quota & Consumption Meter (Medidor en Vivo) -->
-    <div class="quota-container">
-      <div class="quota-header">
-        <span>Medidor de Consumo y Estado de APIs</span>
-        <button class="btn-ghost" onclick="cargarConsumo()" style="padding: 2px 8px; font-size: 11px;">Actualizar Métricas</button>
+    <!-- Antigravity-style Usage Panel (Replica exacta de la captura de Antigravity) -->
+    <div id="antigravity-usage-panel" class="antigravity-usage-panel">
+      <div class="ag-usage-title">
+        <span>Model &amp; API Usage Limits</span>
+        <button onclick="cargarConsumo()" style="background: none; border: none; color: #38bdf8; cursor: pointer; font-size: 11px;">Actualizar</button>
       </div>
-      <div class="quota-grid" id="quota-cards-grid">
-        <!-- Google Patents Card -->
-        <div class="quota-card" id="quota-serpapi">
-          <div class="quota-card-title">
+      <div class="ag-usage-grid">
+        <!-- Google Patents (SerpApi) Provider -->
+        <div class="ag-provider-card">
+          <div class="ag-provider-header">
             <span>Google Patents (SerpApi)</span>
-            <span class="status-badge badge-ok" id="serpapi-status-badge">Activa</span>
+            <span style="font-size: 10px; color: #22c55e; background: rgba(34, 197, 94, 0.15); padding: 2px 6px; border-radius: 4px;">Active</span>
           </div>
-          <div class="quota-numbers">
-            <span id="serpapi-usage-text">Cargando métricas...</span>
-            <span id="serpapi-pct-text">-%</span>
-          </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" id="serpapi-progress" style="width: 0%;"></div>
+          <div class="ag-row">
+            <div class="ag-stat-info">
+              <span class="ag-stat-label">Monthly Limit Remaining</span>
+              <span class="ag-stat-sub" id="ag-renewal-text">Resets in 21d (30 Oct) &bull; <span id="ag-left-count">228</span> / 250 left</span>
+            </div>
+            <div class="ag-stat-value">
+              <span class="ag-pct" id="ag-serpapi-pct">91%</span>
+              <svg class="circular-ring" viewBox="0 0 36 36">
+                <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                <path class="circular-ring-fill" id="ring-serpapi" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              </svg>
+            </div>
           </div>
         </div>
 
-        <!-- The Lens API Card -->
-        <div class="quota-card" id="quota-lens">
-          <div class="quota-card-title">
+        <!-- The Lens API Provider -->
+        <div class="ag-provider-card">
+          <div class="ag-provider-header">
             <span>The Lens API</span>
-            <span class="status-badge badge-ok" id="lens-status-badge">Token Configurado</span>
+            <span style="font-size: 10px; color: #38bdf8; background: rgba(56, 189, 248, 0.15); padding: 2px 6px; border-radius: 4px;">Trial Access</span>
           </div>
-          <div class="quota-numbers">
-            <span id="lens-usage-text">Plan: Trial Access (14 días)</span>
-            <span>1,000 reqs</span>
-          </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" style="width: 2%; background-color: #0284c7;"></div>
+          <div class="ag-row">
+            <div class="ag-stat-info">
+              <span class="ag-stat-label">Evaluation Limit Remaining</span>
+              <span class="ag-stat-sub">1,000 queries &bull; Token ProyectoCapstone</span>
+            </div>
+            <div class="ag-stat-value">
+              <span class="ag-pct">100%</span>
+              <svg class="circular-ring" viewBox="0 0 36 36">
+                <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                <path class="circular-ring-fill" stroke-dashoffset="0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              </svg>
+            </div>
           </div>
         </div>
 
-        <!-- EPO OPS Card -->
-        <div class="quota-card" id="quota-epo">
-          <div class="quota-card-title">
-            <span>EPO OPS (Oficina Europea)</span>
-            <span class="status-badge badge-pending">Validación EPO (Ref: 46581)</span>
+        <!-- EPO OPS Provider -->
+        <div class="ag-provider-card">
+          <div class="ag-provider-header">
+            <span>EPO OPS (European Patent Office)</span>
+            <span style="font-size: 10px; color: #fbbf24; background: rgba(251, 191, 36, 0.15); padding: 2px 6px; border-radius: 4px;">Pending Ref #46581</span>
           </div>
-          <div class="quota-numbers">
-            <span>Cuota académica gratuita</span>
-            <span>2.5 GB / sem</span>
-          </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" style="width: 0%; background-color: #d97706;"></div>
+          <div class="ag-row">
+            <div class="ag-stat-info">
+              <span class="ag-stat-label">Weekly Academic Quota</span>
+              <span class="ag-stat-sub">2.5 GB / week &bull; Validación administrativa</span>
+            </div>
+            <div class="ag-stat-value">
+              <span class="ag-pct" style="color: #fbbf24;">100%</span>
+              <svg class="circular-ring" viewBox="0 0 36 36">
+                <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                <path class="circular-ring-fill ring-amber" stroke-dashoffset="0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              </svg>
+            </div>
           </div>
         </div>
       </div>
@@ -759,11 +890,11 @@
           >
         </div>
         <div class="source-select-wrap">
-          <select id="source-select">
+          <select id="source-select" onchange="onSourceChange()">
             <option value="all">Todas las fuentes</option>
-            <option value="google">Google Patents (SerpApi)</option>
+            <option value="google" selected>Google Patents (SerpApi)</option>
             <option value="lens">The Lens API</option>
-            <option value="epo">EPO OPS (En aprobación)</option>
+            <option value="epo">EPO OPS (En validación)</option>
           </select>
         </div>
         <button id="search-btn" class="btn-primary" onclick="buscar()">
@@ -772,23 +903,26 @@
       </div>
     </div>
 
-    <!-- Surveillance Intelligence (CPC / IPC Refinement Panel) -->
-    <div id="intel-panel" class="intel-panel">
-      <div class="intel-header">
-        <span>🔬 Inteligencia de Clasificaciones Tecnológicas (CPC / IPC)</span>
-      </div>
-      <div class="intel-desc">
-        Clasificaciones más frecuentes detectadas en estos resultados. Haz clic en cualquiera para <strong>refinar la ecuación</strong> o realizar una <strong>segunda búsqueda por similitud de clase</strong>:
-      </div>
-      <div class="cpc-chips" id="cpc-chips-container">
-        <!-- Injected via JS -->
+    <!-- Surveillance Intelligence Dropdown (DESPLEGABLE Y COMPACTO) -->
+    <div id="intel-dropdown" class="intel-dropdown">
+      <button class="intel-header-btn" onclick="toggleIntelBody()">
+        <div class="intel-title-left">
+          <span>🔬 Inteligencia de Clasificaciones Tecnológicas (CPC / IPC)</span>
+          <span class="intel-badge-count" id="intel-badge-count">0 detectadas</span>
+        </div>
+        <span class="intel-arrow" id="intel-arrow">▼</span>
+      </button>
+      <div class="intel-body" id="intel-body">
+        <div class="intel-desc">
+          Clasificaciones más frecuentes detectadas en estos resultados. Haz clic en cualquiera para <strong>refinar la ecuación</strong> o realizar una <strong>segunda búsqueda por similitud de clase</strong>:
+        </div>
+        <div class="cpc-chips" id="cpc-chips-container">
+          <!-- Injected via JS -->
+        </div>
       </div>
     </div>
 
-    <!-- System Notices -->
-    <div id="notices-box" class="notices-box"></div>
-
-    <!-- Tabs & Metrics bar -->
+    <!-- Tabs & View Switcher -->
     <div class="tabs-bar">
       <div class="tabs-left">
         <button id="tab-cards" class="tab-btn active" onclick="cambiarVista('cards')">
@@ -836,34 +970,62 @@
   <script>
     let rawJsonData = null;
     let currentTab = 'cards';
+    let isUsageOpen = true;
+    let isIntelOpen = false;
     const translationCache = {};
 
-    // Cargar métricas de uso de API
+    function toggleUsagePanel() {
+      const panel = document.getElementById('antigravity-usage-panel');
+      const arrow = document.getElementById('ag-arrow-icon');
+      isUsageOpen = !isUsageOpen;
+      panel.style.display = isUsageOpen ? 'block' : 'none';
+      arrow.textContent = isUsageOpen ? '▾' : '▸';
+    }
+
+    function toggleIntelBody() {
+      const body = document.getElementById('intel-body');
+      const arrow = document.getElementById('intel-arrow');
+      isIntelOpen = !isIntelOpen;
+      body.style.display = isIntelOpen ? 'block' : 'none';
+      arrow.className = isIntelOpen ? 'intel-arrow open' : 'intel-arrow';
+    }
+
+    function onSourceChange() {
+      buscar();
+    }
+
+    // Cargar métricas de uso de API estilo Antigravity
     async function cargarConsumo() {
       try {
         const res = await fetch('/api/usage');
         if (!res.ok) return;
         const data = await res.json();
         
-        // SerpApi
+        // SerpApi (Google Patents)
         if (data.serpapi) {
           const s = data.serpapi;
-          const used = s.used_this_month ?? 0;
-          const total = s.total_monthly ?? 250;
+          const total = s.total_monthly || 250;
+          const used = s.used_this_month || 0;
           const left = s.remaining ?? (total - used);
-          const pct = s.percentage_used ?? ((used / total) * 100).toFixed(1);
+          const pctRem = s.percentage_remaining ?? Math.round((left / total) * 100);
 
-          document.getElementById('serpapi-usage-text').textContent = `${used} usadas / ${left} restantes`;
-          document.getElementById('serpapi-pct-text').textContent = `${pct}% consumido`;
-          document.getElementById('serpapi-progress').style.width = `${Math.min(pct, 100)}%`;
-        }
+          document.getElementById('header-usage-pill').textContent = `${pctRem}%`;
+          document.getElementById('ag-serpapi-pct').textContent = `${pctRem}%`;
+          document.getElementById('ag-left-count').textContent = left;
+          if (s.renewal_date) {
+            document.getElementById('ag-renewal-text').textContent = `Renueva: ${s.renewal_date} • ${left} / ${total} disponibles`;
+          }
 
-        // Lens
-        if (data.lens) {
-          document.getElementById('lens-usage-text').textContent = `${data.lens.plan} &bull; ${data.lens.limit_total} reqs`;
+          // Ajustar SVG circular ring progress
+          // Circunferencia = 100. Offset = 100 - pctRem
+          const ring = document.getElementById('ring-serpapi');
+          if (ring) {
+            const offset = Math.max(0, 100 - pctRem);
+            ring.style.strokeDashoffset = offset;
+          }
         }
       } catch (e) {
-        console.warn("No se pudo obtener métricas de consumo:", e);
+        console.warn("Error cargando métricas:", e);
       }
     }
 
@@ -887,8 +1049,7 @@
       const btn = document.getElementById('search-btn');
       const cardsContainer = document.getElementById('view-cards');
       const rawOutput = document.getElementById('raw-output');
-      const noticesBox = document.getElementById('notices-box');
-      const intelPanel = document.getElementById('intel-panel');
+      const intelDropdown = document.getElementById('intel-dropdown');
       const countBadge = document.getElementById('results-count-badge');
 
       btn.disabled = true;
@@ -902,17 +1063,10 @@
         rawJsonData = data;
         rawOutput.textContent = JSON.stringify(data, null, 2);
 
-        // Desplegar avisos si existen
-        if (data.notices && data.notices.length > 0) {
-          noticesBox.style.display = 'block';
-          noticesBox.innerHTML = data.notices.map(n => `<div class="notice-item">&bull; ${n}</div>`).join('');
-        } else {
-          noticesBox.style.display = 'none';
-        }
-
-        // Panel de Inteligencia CPC / IPC
+        // Desplegable de Inteligencia CPC/IPC (colapsado por defecto)
         if (data.cpc_summary && data.cpc_summary.length > 0) {
-          intelPanel.style.display = 'block';
+          intelDropdown.style.display = 'block';
+          document.getElementById('intel-badge-count').textContent = `${data.cpc_summary.length} clases detectadas`;
           const chipsContainer = document.getElementById('cpc-chips-container');
           chipsContainer.innerHTML = data.cpc_summary.map(item => `
             <div class="cpc-chip" onclick="refinarConCPC('${item.code}')" title="Hacer clic para refinar con ${item.code}">
@@ -922,12 +1076,27 @@
             </div>
           `).join('');
         } else {
-          intelPanel.style.display = 'none';
+          intelDropdown.style.display = 'none';
         }
 
         const results = data.organic_results || [];
         countBadge.textContent = results.length;
-        renderizarPatentes(results);
+
+        // Si la fuente específica (Lens o EPO) no tiene resultados por estar en validación
+        if (results.length === 0 && data.info_message) {
+          cardsContainer.innerHTML = `
+            <div class="info-card">
+              <div class="info-card-icon">🔒</div>
+              <div class="info-card-title">${source === 'lens' ? 'The Lens API en proceso de activación' : 'EPO OPS en validación'}</div>
+              <div class="info-card-desc">${data.info_message}</div>
+              <button class="btn-primary" onclick="cambiarAGoogle()" style="font-size: 13px; padding: 8px 16px;">
+                Consultar con Google Patents &rarr;
+              </button>
+            </div>
+          `;
+        } else {
+          renderizarPatentes(results);
+        }
 
         // Actualizar consumo en tiempo real
         cargarConsumo();
@@ -941,7 +1110,11 @@
       }
     }
 
-    // Refinar o segunda búsqueda por clasificación CPC
+    function cambiarAGoogle() {
+      document.getElementById('source-select').value = 'google';
+      buscar();
+    }
+
     function refinarConCPC(cpcCode) {
       const currentQ = document.getElementById('query-input').value.trim();
       const newQ = `${currentQ} CPC:${cpcCode}`;
@@ -951,7 +1124,7 @@
     function renderizarPatentes(patents) {
       const container = document.getElementById('view-cards');
       if (!patents || patents.length === 0) {
-        container.innerHTML = `<div style="color: #64748b; font-size: 13px; padding: 40px; text-align: center;">No se encontraron patentes con estos términos. Intente con términos en inglés o una clasificación tecnológica.</div>`;
+        container.innerHTML = `<div style="color: #64748b; font-size: 13px; padding: 40px; text-align: center;">No se encontraron patentes con estos términos. Intente con términos en inglés o seleccione "Google Patents".</div>`;
         return;
       }
 
@@ -970,11 +1143,11 @@
         let statusClass = 'badge-ok';
         let statusText = p.legal_status || 'Registrada';
         const lowerSt = statusText.toLowerCase();
-        if (lowerSt.includes('discontinued') || lowerSt.includes('expired') || lowerSt.includes('abandoned')) {
+        if (lowerSt.includes('discontinued') || lowerSt.includes('expired') || lowerSt.includes('abandoned') || lowerSt.includes('not_active')) {
           statusClass = 'badge-pending';
         }
 
-        // Thumbnail o figura
+        // Thumbnail o figura técnica
         let thumbHtml = '';
         if (p.thumbnail) {
           thumbHtml = `
@@ -988,19 +1161,45 @@
             <div class="patent-thumbnail-col">
               <div class="no-thumb-box">
                 <span style="font-size: 18px; margin-bottom: 2px;">📄</span>
-                <span>Sin lámina en vista previa</span>
+                <span>Sin lámina en registro</span>
               </div>
             </div>
           `;
         }
 
-        // CPC/IPC Pills
+        // Clasificaciones explícitas (CPC / IPC) dentro de la tarjeta
         let classifHtml = '';
-        if (p.classifications_cpc && p.classifications_cpc.length > 0) {
-          classifHtml += p.classifications_cpc.slice(0, 3).map(c => `<span class="classif-pill cpc-pill">CPC: ${c}</span>`).join(' ');
+        const cpcs = p.classifications_cpc || [];
+        const ipcs = p.classifications_ipc || [];
+
+        if (cpcs.length > 0 || ipcs.length > 0) {
+          classifHtml = '<div class="classif-row"><span class="classif-label">Clasificaciones:</span>';
+          cpcs.forEach(c => {
+            classifHtml += `<span class="classif-pill cpc-pill" onclick="refinarConCPC('${c}')" title="Filtrar por esta clase">CPC: ${c}</span>`;
+          });
+          ipcs.forEach(i => {
+            classifHtml += `<span class="classif-pill ipc-pill" onclick="refinarConCPC('${i}')" title="Filtrar por esta clase">IPC: ${i}</span>`;
+          });
+          classifHtml += '</div>';
         }
-        if (p.classifications_ipc && p.classifications_ipc.length > 0) {
-          classifHtml += p.classifications_ipc.slice(0, 3).map(c => `<span class="classif-pill ipc-pill">IPC: ${c}</span>`).join(' ');
+
+        // Enlace DINÁMICO ÚNICAMENTE A LA FUENTE ACTIVA
+        let dynamicLinkHtml = '';
+        if (sourceBadge === 'google') {
+          if (p.patent_link) {
+            dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Ver en Google Patents &rarr;</a>`;
+          }
+        } else if (sourceBadge === 'lens') {
+          if (p.patent_link) {
+            dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Ver en The Lens &rarr;</a>`;
+          }
+        } else if (sourceBadge === 'epo') {
+          if (p.patent_link) {
+            dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Ver en Espacenet (EPO) &rarr;</a>`;
+          }
+        }
+        if (p.pdf) {
+          dynamicLinkHtml += `<a href="${p.pdf}" target="_blank" rel="noopener" class="pdf-link">Descargar PDF Oficial &rarr;</a>`;
         }
 
         return `
@@ -1031,8 +1230,8 @@
                   <span class="meta-val">${inventor}</span>
                 </div>
 
-                <!-- Classifications if available -->
-                ${classifHtml ? `<div class="classif-row">${classifHtml}</div>` : ''}
+                <!-- CPC / IPC Classifications -->
+                ${classifHtml}
 
                 <!-- Abstract snippet with instant translation -->
                 ${snippet ? `
@@ -1047,12 +1246,9 @@
                   </div>
                 ` : ''}
 
-                <!-- Direct Links & Actions -->
+                <!-- Dynamic Links Line (SOLO LA FUENTE QUE LO PROVEYÓ) -->
                 <div class="patent-links">
-                  ${p.patent_link ? `<a href="${p.patent_link}" target="_blank" rel="noopener">Google Patents &rarr;</a>` : ''}
-                  ${p.espacenet_link ? `<a href="${p.espacenet_link}" target="_blank" rel="noopener">Espacenet (EPO) &rarr;</a>` : ''}
-                  ${p.lens_link ? `<a href="${p.lens_link}" target="_blank" rel="noopener">The Lens &rarr;</a>` : ''}
-                  ${p.pdf ? `<a href="${p.pdf}" target="_blank" rel="noopener" class="pdf-link">Descargar PDF Oficial &rarr;</a>` : ''}
+                  ${dynamicLinkHtml}
                 </div>
               </div>
 
@@ -1070,14 +1266,12 @@
       const textElem = document.getElementById(`abstract-text-${idx}`);
       
       if (btn.dataset.translated === "true") {
-        // Restaurar original
         textElem.textContent = originalText;
         btn.dataset.translated = "false";
         btn.innerHTML = `<span>🌐 Traducir al Español</span>`;
         return;
       }
 
-      // Si está en caché
       if (translationCache[originalText]) {
         textElem.textContent = translationCache[originalText];
         btn.dataset.translated = "true";
