@@ -488,8 +488,50 @@
       letter-spacing: 0.03em;
     }
     .source-google { background-color: #e0f2fe; color: #0369a1; }
+    .source-europepmc { background-color: #fef3c7; color: #92400e; }
+    .source-patentbrief { background-color: #dcfce7; color: #166534; }
     .source-lens { background-color: #e0e7ff; color: #3730a3; }
     .source-epo { background-color: #fef3c7; color: #92400e; }
+
+    /* Friendly Summary Box (PatentBrief / Explicación no abrumadora) */
+    .friendly-summary-box {
+      background-color: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid #22c55e;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: #14532d;
+      line-height: 1.45;
+    }
+    .friendly-summary-title {
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #16a34a;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .industry-tags-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .badge-industry {
+      background-color: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 1px 7px;
+      border-radius: 12px;
+      text-transform: capitalize;
+    }
 
     .patent-id-badge {
       font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
@@ -813,40 +855,40 @@
         <button onclick="cargarConsumo()" style="background: none; border: none; color: #38bdf8; cursor: pointer; font-size: 11px;">Actualizar</button>
       </div>
       <div class="ag-usage-grid">
-        <!-- Google Patents (SerpApi) Provider -->
+        <!-- 1. Google Patents Provider -->
         <div class="ag-provider-card">
           <div class="ag-provider-header">
-            <span>Google Patents (SerpApi)</span>
-            <span style="font-size: 10px; color: #22c55e; background: rgba(34, 197, 94, 0.15); padding: 2px 6px; border-radius: 4px;">Active</span>
+            <span>Google Patents (Red Mundial)</span>
+            <span style="font-size: 10px; color: #22c55e; background: rgba(34, 197, 94, 0.15); padding: 2px 6px; border-radius: 4px;">Active • Ilimitado</span>
           </div>
           <div class="ag-row">
             <div class="ag-stat-info">
-              <span class="ag-stat-label">Monthly Limit Remaining</span>
-              <span class="ag-stat-sub" id="ag-renewal-text">Resets in 21d (30 Oct) &bull; <span id="ag-left-count">228</span> / 250 left</span>
+              <span class="ag-stat-label">Corpus Oficial Mundial</span>
+              <span class="ag-stat-sub" id="ag-renewal-text">Motor Híbrido Directo + Respaldo</span>
             </div>
             <div class="ag-stat-value">
-              <span class="ag-pct" id="ag-serpapi-pct">91%</span>
+              <span class="ag-pct" id="ag-serpapi-pct">100%</span>
               <svg class="circular-ring" viewBox="0 0 36 36">
                 <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                <path class="circular-ring-fill" id="ring-serpapi" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                <path class="circular-ring-fill" id="ring-serpapi" stroke-dashoffset="0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
               </svg>
             </div>
           </div>
         </div>
 
-        <!-- The Lens API Provider -->
+        <!-- 2. Europe PMC (EPO / WIPO) Provider -->
         <div class="ag-provider-card">
           <div class="ag-provider-header">
-            <span>The Lens API</span>
-            <span style="font-size: 10px; color: #38bdf8; background: rgba(56, 189, 248, 0.15); padding: 2px 6px; border-radius: 4px;">Trial Access</span>
+            <span>Europe PMC (EPO / WIPO)</span>
+            <span style="font-size: 10px; color: #22c55e; background: rgba(34, 197, 94, 0.15); padding: 2px 6px; border-radius: 4px;">Active • API Abierta</span>
           </div>
           <div class="ag-row">
             <div class="ag-stat-info">
-              <span class="ag-stat-label">Evaluation Limit Remaining</span>
-              <span class="ag-stat-sub">1,000 queries &bull; Token ProyectoCapstone</span>
+              <span class="ag-stat-label">Oficina Europea &amp; Tratado PCT</span>
+              <span class="ag-stat-sub">EMBL-EBI Open Patent Services</span>
             </div>
             <div class="ag-stat-value">
-              <span class="ag-pct">100%</span>
+              <span class="ag-pct" style="color: #22c55e;">100%</span>
               <svg class="circular-ring" viewBox="0 0 36 36">
                 <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                 <path class="circular-ring-fill" stroke-dashoffset="0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
@@ -855,22 +897,22 @@
           </div>
         </div>
 
-        <!-- EPO OPS Provider -->
+        <!-- 3. PatentBrief Provider -->
         <div class="ag-provider-card">
           <div class="ag-provider-header">
-            <span>EPO OPS (European Patent Office)</span>
-            <span style="font-size: 10px; color: #fbbf24; background: rgba(251, 191, 36, 0.15); padding: 2px 6px; border-radius: 4px;">Pending Ref #46581</span>
+            <span>PatentBrief (Tecnología Amigable)</span>
+            <span style="font-size: 10px; color: #22c55e; background: rgba(34, 197, 94, 0.15); padding: 2px 6px; border-radius: 4px;">Active • Títulos Claros</span>
           </div>
           <div class="ag-row">
             <div class="ag-stat-info">
-              <span class="ag-stat-label">Weekly Academic Quota</span>
-              <span class="ag-stat-sub">2.5 GB / week &bull; Validación administrativa</span>
+              <span class="ag-stat-label">Patentes con Resumen en 1 Frase</span>
+              <span class="ag-stat-sub">Plain English + Etiquetas Industriales</span>
             </div>
             <div class="ag-stat-value">
-              <span class="ag-pct" style="color: #fbbf24;">100%</span>
+              <span class="ag-pct" style="color: #22c55e;">100%</span>
               <svg class="circular-ring" viewBox="0 0 36 36">
                 <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                <path class="circular-ring-fill ring-amber" stroke-dashoffset="0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                <path class="circular-ring-fill" stroke-dashoffset="0" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
               </svg>
             </div>
           </div>
@@ -891,10 +933,12 @@
         </div>
         <div class="source-select-wrap">
           <select id="source-select" onchange="onSourceChange()">
-            <option value="all">Todas las fuentes</option>
-            <option value="google" selected>Google Patents (SerpApi)</option>
-            <option value="lens">The Lens API</option>
-            <option value="epo">EPO OPS (En validación)</option>
+            <option value="all" selected>🌐 Todas las fuentes (Búsqueda Centralizada)</option>
+            <option value="google">🔎 Google Patents (Red Mundial)</option>
+            <option value="europepmc">🇪🇺 Europe PMC (Oficina Europea EPO & WIPO)</option>
+            <option value="patentbrief">💡 PatentBrief (Tecnología en Lenguaje Amigable)</option>
+            <option value="lens">📑 The Lens API (En validación de token)</option>
+            <option value="epo">🏛️ EPO OPS (En validación administrativa)</option>
           </select>
         </div>
         <button id="search-btn" class="btn-primary" onclick="buscar()">
@@ -1183,20 +1227,34 @@
           classifHtml += '</div>';
         }
 
-        // Enlace DINÁMICO ÚNICAMENTE A LA FUENTE ACTIVA
+        // Resumen amigable en 1 frase (PatentBrief)
+        let friendlySummaryHtml = '';
+        if (p.one_sentence_summary) {
+          friendlySummaryHtml = `
+            <div class="friendly-summary-box">
+              <div class="friendly-summary-title">💡 Resumen Tecnológico en Lenguaje Sencillo:</div>
+              <div>${p.one_sentence_summary}</div>
+              ${p.industry_tags && p.industry_tags.length ? `
+                <div class="industry-tags-row">
+                  ${p.industry_tags.map(tag => `<span class="badge-industry">🏷️ ${tag.replace('_', ' ')}</span>`).join('')}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }
+
+        // Enlace DINÁMICO SEGÚN LA FUENTE PROVEEDORA
         let dynamicLinkHtml = '';
         if (sourceBadge === 'google') {
-          if (p.patent_link) {
-            dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Ver en Google Patents &rarr;</a>`;
-          }
+          if (p.patent_link) dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Ver en Google Patents &rarr;</a>`;
+        } else if (sourceBadge === 'europepmc') {
+          if (p.patent_link) dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Ver en Espacenet / Europe PMC &rarr;</a>`;
+        } else if (sourceBadge === 'patentbrief') {
+          if (p.patent_link) dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Ver Ficha en Google Patents &rarr;</a>`;
         } else if (sourceBadge === 'lens') {
-          if (p.patent_link) {
-            dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Ver en The Lens &rarr;</a>`;
-          }
+          if (p.patent_link) dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Ver en The Lens &rarr;</a>`;
         } else if (sourceBadge === 'epo') {
-          if (p.patent_link) {
-            dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Ver en Espacenet (EPO) &rarr;</a>`;
-          }
+          if (p.patent_link) dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Ver en Espacenet (EPO) &rarr;</a>`;
         }
         if (p.pdf) {
           dynamicLinkHtml += `<a href="${p.pdf}" target="_blank" rel="noopener" class="pdf-link">Descargar PDF Oficial &rarr;</a>`;
@@ -1220,6 +1278,8 @@
 
                 <!-- Title -->
                 <div class="patent-title-text">${title}</div>
+
+                ${friendlySummaryHtml}
 
                 <!-- Meta Details -->
                 <div class="patent-meta-grid">

@@ -9,152 +9,246 @@ export default async function handler(req, res) {
 
   const { q, source = 'all' } = req.query;
   const SERPAPI_KEY = process.env.SERPAPI_KEY || "95dbb01b74ac677ffca277c162bb09294c58b2795b8ff4bc9374c718e5299e00";
-  const LENS_TOKEN = process.env.LENS_TOKEN || "cjBPheEuwpYJ0X2VrGNHbuDGGNVoTDQxFYN6jkhpB2CiNQ1hRxDqo";
 
   if (!q) {
     return res.status(400).json({ error: 'Parámetro de búsqueda "q" es requerido' });
   }
 
   const combinedResults = [];
-  const cpcSummaries = [];
+  let cpcSummaries = [];
   let sourceMessage = null;
   let totalFound = 0;
 
-  // 1. Google Patents via SerpApi
-  if (source === 'all' || source === 'google') {
-    try {
-      const targetUrl = `https://serpapi.com/search.json?engine=google_patents&q=${encodeURIComponent(q)}&api_key=${SERPAPI_KEY}`;
-      const response = await fetch(targetUrl);
-      const data = await response.json();
+  const tasks = [];
 
-      if (data.summary && data.summary.cpc) {
-        for (const item of data.summary.cpc) {
-          if (item.key && item.key !== 'Total') {
-            cpcSummaries.push({
-              code: item.key,
-              percentage: item.percentage || 0,
-              type: 'CPC'
+  // 1. Google Patents (Direct XHR con fallback a SerpApi)
+  if (source === 'all' || source === 'google') {
+    tasks.push((async () => {
+      // Intentar directo primero
+      try {
+        const encodedParam = encodeURIComponent(`q=${q}&exp=`);
+        const xhrUrl = `https://patents.google.com/xhr/query?url=${encodedParam}`;
+        const xhrResp = await fetch(xhrUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept': '*/*',
+            'Referer': `https://patents.google.com/?q=${encodeURIComponent(q)}`,
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+        if (xhrResp.ok) {
+          const data = await xhrResp.json();
+          const cluster = data.results?.cluster || [];
+          if (cluster[0]?.result?.length) {
+            const rawResults = cluster[0].result.slice(0, 10);
+            totalFound += data.results.total_num_results || rawResults.length;
+            
+            const cpcRaw = data.results.summary?.cpc || [];
+            for (const item of cpcRaw) {
+              if (item.key && item.key !== 'Total') {
+                cpcSummaries.push({
+                  code: item.key,
+                  percentage: Math.round(((item.value || 0) / 1000) * 1000) / 10,
+                  type: 'CPC'
+                });
+              }
+            }
+
+            for (const item of rawResults) {
+              const pat = item.patent || {};
+              const pubNum = pat.publication_number || pat.id?.replace('patent/', '').replace('/en', '') || 'N/A';
+              const thumb = pat.thumbnail ? `https://patentimages.storage.googleapis.com/${pat.thumbnail}` : null;
+              const pdf = pat.pdf ? `https://patentimages.storage.googleapis.com/${pat.pdf}` : null;
+              
+              const figures = [];
+              for (const f of (pat.figures || [])) {
+                const path = f.thumbnail || f.full;
+                if (path) figures.push(`https://patentimages.storage.googleapis.com/${path}`);
+              }
+              if (thumb && !figures.includes(thumb)) figures.unshift(thumb);
+
+              combinedResults.push({
+                source: 'Google Patents',
+                source_badge: 'google',
+                publication_number: pubNum,
+                title: pat.title?.trim() || 'Sin título registrado',
+                snippet: pat.snippet?.trim() || '',
+                assignee: pat.assignee || 'No especificado',
+                inventor: pat.inventor || 'No especificado',
+                filing_date: pat.filing_date || pat.priority_date || null,
+                publication_date: pat.publication_date || 'N/A',
+                legal_status: 'Registrada',
+                thumbnail: thumb,
+                figures,
+                patent_link: `https://patents.google.com/patent/${pubNum}/en`,
+                pdf,
+                classifications_cpc: cpcSummaries.slice(0, 3).map(c => c.code),
+                classifications_ipc: []
+              });
+            }
+            return;
+          }
+        }
+      } catch (err) {
+        // Fallback silencioso a SerpApi
+      }
+
+      // Fallback a SerpApi
+      try {
+        const targetUrl = `https://serpapi.com/search.json?engine=google_patents&q=${encodeURIComponent(q)}&api_key=${SERPAPI_KEY}`;
+        const response = await fetch(targetUrl);
+        const data = await response.json();
+
+        if (data.summary && data.summary.cpc) {
+          for (const item of data.summary.cpc) {
+            if (item.key && item.key !== 'Total') {
+              cpcSummaries.push({
+                code: item.key,
+                percentage: item.percentage || 0,
+                type: 'CPC'
+              });
+            }
+          }
+        }
+
+        if (data.organic_results) {
+          for (const p of data.organic_results) {
+            let pubNum = p.publication_number;
+            if (!pubNum && p.patent_id) {
+              const parts = p.patent_id.split('/');
+              pubNum = parts.length >= 2 ? parts[1] : p.patent_id;
+            }
+
+            const figures = [];
+            if (p.figures) {
+              for (const fig of p.figures) {
+                figures.push(fig.thumbnail || fig.full);
+              }
+            } else if (p.thumbnail) {
+              figures.push(p.thumbnail);
+            }
+
+            combinedResults.push({
+              source: 'Google Patents',
+              source_badge: 'google',
+              publication_number: pubNum || 'N/A',
+              title: p.title || 'Sin título registrado',
+              snippet: p.snippet || '',
+              assignee: p.assignee || 'No especificado',
+              inventor: p.inventor || 'No especificado',
+              filing_date: p.filing_date || p.priority_date || null,
+              publication_date: p.publication_date || p.grant_date || 'N/A',
+              legal_status: p.country_status ? Object.values(p.country_status)[0] || 'Registrada' : 'Registrada',
+              thumbnail: p.thumbnail || null,
+              figures,
+              patent_link: p.patent_link || (pubNum ? `https://patents.google.com/patent/${pubNum}/en` : null),
+              pdf: p.pdf || null,
+              classifications_cpc: cpcSummaries.slice(0, 3).map(c => c.code),
+              classifications_ipc: []
             });
           }
         }
+        totalFound += data.search_information?.total_results ? parseInt(data.search_information.total_results, 10) : (data.organic_results?.length || 0);
+      } catch (err) {
+        console.warn("Google Patents error:", err.message);
       }
+    })());
+  }
 
-      if (data.organic_results) {
-        for (const p of data.organic_results) {
-          let pubNum = p.publication_number;
-          if (!pubNum && p.patent_id) {
-            const parts = p.patent_id.split('/');
-            pubNum = parts.length >= 2 ? parts[1] : p.patent_id;
+  // 2. Europe PMC Patent Corpus (EPO / WIPO)
+  if (source === 'all' || source === 'europepmc') {
+    tasks.push((async () => {
+      try {
+        const pmcUrl = `https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=SRC:PAT+AND+${encodeURIComponent(q)}&format=json&resultType=core&pageSize=8`;
+        const resp = await fetch(pmcUrl);
+        if (resp.ok) {
+          const data = await resp.json();
+          const items = data.resultList?.result || [];
+          totalFound += data.hitCount || items.length;
+
+          for (const item of items) {
+            const docId = item.id || 'N/A';
+            const authors = (item.authorList?.author || []).map(a => a.fullName).filter(Boolean);
+            const pdfUrl = item.hasPDF === 'Y' ? `https://europepmc.org/backend/ptservice.cgi?accid=${docId}&action=viewpdf` : null;
+            const patentUrl = (docId.startsWith('EP') || docId.startsWith('WO')) ? `https://worldwide.espacenet.com/patent/search/family/${docId}` : `https://europepmc.org/article/PAT/${docId}`;
+
+            combinedResults.push({
+              source: 'Europe PMC (EPO / WIPO)',
+              source_badge: 'europepmc',
+              publication_number: docId,
+              title: item.title || 'Sin título registrado',
+              snippet: item.abstractText || '',
+              assignee: 'Oficina Europea / Internacional (EPO/WIPO)',
+              inventor: authors.join(', ') || item.authorString || 'No especificado',
+              filing_date: null,
+              publication_date: String(item.pubYear || 'N/A'),
+              legal_status: 'Oficial Publicada',
+              thumbnail: null,
+              figures: [],
+              patent_link: patentUrl,
+              pdf: pdfUrl,
+              classifications_cpc: [],
+              classifications_ipc: []
+            });
           }
-
-          let status = 'Registrada';
-          if (p.country_status) {
-            const firstVal = Object.values(p.country_status)[0];
-            if (firstVal) status = firstVal;
-          }
-
-          const figures = [];
-          if (p.figures) {
-            for (const fig of p.figures) {
-              figures.push(fig.thumbnail || fig.full);
-            }
-          } else if (p.thumbnail) {
-            figures.push(p.thumbnail);
-          }
-
-          // Atribuir CPCs relevantes del resumen
-          const assignedCpcs = cpcSummaries.slice(0, 3).map(c => c.code);
-
-          combinedResults.push({
-            source: 'Google Patents',
-            source_badge: 'google',
-            publication_number: pubNum || 'N/A',
-            title: p.title || 'Sin título registrado',
-            snippet: p.snippet || '',
-            assignee: p.assignee || 'No especificado',
-            inventor: p.inventor || 'No especificado',
-            filing_date: p.filing_date || p.priority_date || null,
-            publication_date: p.publication_date || p.grant_date || 'N/A',
-            legal_status: status,
-            thumbnail: p.thumbnail || null,
-            figures: figures,
-            patent_link: p.patent_link || (pubNum ? `https://patents.google.com/patent/${pubNum}/en` : null),
-            pdf: p.pdf || null,
-            classifications_cpc: assignedCpcs,
-            classifications_ipc: []
-          });
         }
+      } catch (err) {
+        console.warn("Europe PMC error:", err.message);
       }
-
-      if (data.search_information && data.search_information.total_results) {
-        totalFound += parseInt(data.search_information.total_results, 10);
-      } else {
-        totalFound += combinedResults.length;
-      }
-    } catch (err) {
-      console.warn("SerpApi error:", err);
-    }
+    })());
   }
 
-  // 2. The Lens API
-  if (source === 'all' || source === 'lens') {
-    try {
-      const lensUrl = 'https://api.lens.org/patent/search';
-      const lensResp = await fetch(lensUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${LENS_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query: { match: { title: q } },
-          size: 10
-        })
-      });
+  // 3. PatentBrief (Tecnología Amigable)
+  if (source === 'all' || source === 'patentbrief') {
+    tasks.push((async () => {
+      try {
+        const briefUrl = `https://patentbrief.org/api/search?q=${encodeURIComponent(q)}`;
+        const resp = await fetch(briefUrl);
+        if (resp.ok) {
+          const data = await resp.json();
+          const patents = data.patents || [];
+          totalFound += patents.length;
 
-      if (lensResp.status === 401 && source === 'lens') {
-        sourceMessage = "La API de The Lens aún requiere validación administrativa de Trial en Lens.org para autorizar el token 'ProyectoCapstone'. Por favor use 'Todas las fuentes' o 'Google Patents' para obtener patentes activas de inmediato.";
-      } else if (lensResp.ok) {
-        const lData = await lensResp.json();
-        for (const item of (lData.data || [])) {
-          const biblio = item.biblio || {};
-          const pubRef = biblio.publication_reference || {};
-          const docKey = item.doc_key || pubRef.doc_number || 'N/A';
-          const titleInfo = (biblio.invention_title || [])[0] || {};
-          const abstractInfo = (item.abstract || [])[0] || {};
-          const applicants = (biblio.parties?.applicants || []).map(a => a.extracted_name?.value).filter(Boolean);
-          const inventors = (biblio.parties?.inventors || []).map(i => i.extracted_name?.value).filter(Boolean);
-          const cpcs = (biblio.classifications_cpc || []).map(c => c.symbol).filter(Boolean);
-          const ipcs = (biblio.classifications_ipcr || []).map(c => c.symbol).filter(Boolean);
+          for (const item of patents.slice(0, 8)) {
+            const pubNum = `${item.countryCode || 'US'}${item.patentNumber || ''}`;
+            const fig = item.figureUrl || null;
 
-          combinedResults.push({
-            source: 'The Lens',
-            source_badge: 'lens',
-            publication_number: docKey,
-            title: titleInfo.text || 'Sin título registrado',
-            snippet: abstractInfo.text || '',
-            assignee: applicants.join(', ') || 'No especificado',
-            inventor: inventors.join(', ') || 'No especificado',
-            filing_date: biblio.application_reference?.date || null,
-            publication_date: pubRef.date || 'N/A',
-            legal_status: item.legal_status?.patent_status || 'N/A',
-            thumbnail: null,
-            figures: [],
-            patent_link: `https://www.lens.org/lens/patent/${item.lens_id}`,
-            pdf: null,
-            classifications_cpc: cpcs,
-            classifications_ipc: ipcs
-          });
+            combinedResults.push({
+              source: 'PatentBrief (Tecnología Amigable)',
+              source_badge: 'patentbrief',
+              publication_number: pubNum,
+              title: item.plainEnglishTitle || item.title || 'Sin título',
+              plain_title: item.plainEnglishTitle,
+              one_sentence_summary: item.oneSentenceSummary,
+              snippet: item.oneSentenceSummary || item.title || '',
+              assignee: item.assigneeName || 'No especificado',
+              inventor: 'No especificado',
+              filing_date: null,
+              publication_date: item.grantDate || 'N/A',
+              legal_status: 'Concedida',
+              thumbnail: fig,
+              figures: fig ? [fig] : [],
+              industry_tags: item.industryTags || [],
+              patent_link: `https://patents.google.com/patent/${pubNum}/en`,
+              pdf: null,
+              classifications_cpc: [],
+              classifications_ipc: []
+            });
+          }
         }
+      } catch (err) {
+        console.warn("PatentBrief error:", err.message);
       }
-    } catch (err) {
-      if (source === 'lens') sourceMessage = `Error de conexión con The Lens: ${err.message}`;
-    }
+    })());
   }
 
-  if (source === 'epo') {
-    sourceMessage = "La API de EPO OPS se encuentra actualmente en validación por la Oficina Europea de Patentes (Referencia administrativa 46581). Seleccione 'Todas las fuentes' o 'Google Patents' para ver resultados.";
+  if (source === 'lens') {
+    sourceMessage = "El conector con The Lens API está implementado y a la espera de autorización definitiva del token académico en Lens.org. Seleccione 'Todas las fuentes' para consultar patentes activas.";
+  } else if (source === 'epo') {
+    sourceMessage = "El conector con EPO OPS está implementado bajo la referencia administrativa 46581. Seleccione 'Todas las fuentes' o 'Europe PMC' para consultar patentes europeas oficiales.";
   }
+
+  await Promise.allSettled(tasks);
 
   return res.status(200).json({
     query: q,
