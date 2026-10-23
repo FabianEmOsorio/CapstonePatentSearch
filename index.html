@@ -973,6 +973,123 @@
       font-weight: 600;
     }
 
+    
+    /* =========================================================
+       SIDEBAR DRAWER (FICHA TÉCNICA LATERAL DESLIZABLE)
+       ========================================================= */
+    .patent-sidebar {
+      position: fixed;
+      top: 0;
+      right: -620px;
+      width: 600px;
+      max-width: 94vw;
+      height: 100vh;
+      background-color: var(--bg-surface);
+      border-left: 1px solid var(--border-color);
+      box-shadow: -12px 0 36px rgba(0, 0, 0, 0.6);
+      z-index: 10000;
+      transition: right 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+    .patent-sidebar.open {
+      right: 0;
+    }
+    .sidebar-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 9999;
+      display: none;
+    }
+    .sidebar-backdrop.open {
+      display: block;
+    }
+    .sidebar-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--bg-canvas);
+      gap: 12px;
+    }
+    .sidebar-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-close-sidebar {
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--text-muted);
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .btn-close-sidebar:hover {
+      color: var(--text-high);
+      background-color: var(--bg-subtle);
+    }
+    .sidebar-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .sidebar-body::-webkit-scrollbar {
+      width: 6px;
+    }
+    .sidebar-body::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    /* Barra de Filtros Activos */
+    .active-filters-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background-color: var(--bg-subtle);
+      border: 1px dashed var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 14px;
+      font-size: 12px;
+    }
+    .active-filter-chip {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 2px 8px;
+      font-size: 11px;
+      color: var(--text-high);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .active-filter-chip span.remove {
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .active-filter-chip span.remove:hover {
+      color: var(--status-danger);
+    }
+    .btn-clear-all-filters {
+      background: none;
+      border: none;
+      color: var(--brand-primary);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: auto;
+      text-decoration: underline;
+    }
+
     /* Modal Lightbox */
     .modal-overlay {
       position: fixed;
@@ -1275,10 +1392,16 @@
 
         <!-- Derecha: Botón Shuffle + Selector de Filtros/Orden + Botón de Búsqueda -->
         <div class="ag-toolbar-right">
-          <!-- Botón de Shuffle / Intercalado Equilibrado (1 de cada API) -->
+          <!-- Botón de Shuffle APIs -->
           <div class="ag-pill-btn" onclick="toggleShuffle()" id="shuffle-pill-btn" title="Intercalado equilibrado: muestra 1 patente de cada API alternadamente (Google, Europe PMC, PatentBrief)">
             <span>🔀</span>
-            <span id="shuffle-label">Shuffle Fuentes</span>
+            <span id="shuffle-label">Shuffle APIs</span>
+          </div>
+
+          <!-- Botón de Shuffle Países -->
+          <div class="ag-pill-btn" onclick="toggleCountryShuffle()" id="country-shuffle-pill-btn" title="Intercalado por países: muestra 1 patente de cada territorio alternadamente (EE.UU., Europa, PCT, etc.)">
+            <span>🌍</span>
+            <span id="country-shuffle-label">Shuffle Países</span>
           </div>
 
           <div class="ag-pill-btn" onclick="toggleFilterMenu(event)" id="filter-pill-btn">
@@ -1417,6 +1540,13 @@
       </div>
     </div>
 
+    <!-- Barra de Filtros Activos con botón de Limpiar -->
+    <div id="active-filters-container" style="display: none;" class="active-filters-bar">
+      <span style="font-weight: 600; color: var(--text-muted);">Filtros activos:</span>
+      <div id="active-filters-chips" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
+      <button class="btn-clear-all-filters" onclick="resetearTodosLosFiltros()">Limpiar todos</button>
+    </div>
+
     <!-- 1. Structured Cards List -->
     <div id="view-cards" class="patents-list">
       <div style="color: var(--text-muted); font-size: 13px; padding: 25px 0; text-align: center;">
@@ -1447,6 +1577,25 @@
     </div>
   </div>
 
+  <!-- Slide-over Sidebar Drawer para Inspección Rápida de Patente -->
+  <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="cerrarSidebar()"></div>
+  <div id="patent-sidebar" class="patent-sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-header-left" id="sidebar-header-left">
+        <!-- Injected via JS -->
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <a id="sidebar-ext-btn" href="#" target="_blank" rel="noopener" class="btn-ghost" style="text-decoration: none; font-size: 11px;">
+          🔗 Abrir en pestaña nueva &nearr;
+        </a>
+        <button class="btn-close-sidebar" onclick="cerrarSidebar()" title="Cerrar barra lateral (Esc)">&times;</button>
+      </div>
+    </div>
+    <div class="sidebar-body" id="sidebar-body">
+      <!-- Injected via JS -->
+    </div>
+  </div>
+
   <script>
     let rawJsonData = null;
     let allRetrievedPatents = [];
@@ -1456,7 +1605,8 @@
     let currentStatusFilter = 'all'; // 'all' | 'active' | 'inactive'
     let currentJurisdictionFilter = 'ALL'; // 'ALL' | 'US' | 'EP' | 'WO' | 'OTHER'
     let isIntelOpen = false;
-    let isShuffleActive = true; // Shuffle activo por defecto para garantizar diversidad inmediata
+    let isShuffleActive = true; // Shuffle APIs activo
+    let isCountryShuffleActive = false; // Shuffle Países
     const translationCache = {};
 
     // GESTIÓN DE TEMA Y PALETA (PERSISTENTE EN LOCALSTORAGE)
@@ -1743,6 +1893,136 @@
       }
     }
 
+    
+    // GESTIÓN DE SHUFFLE POR PAÍSES / JURISDICCIÓN
+    function toggleCountryShuffle(e) {
+      if (e) e.stopPropagation();
+      isCountryShuffleActive = !isCountryShuffleActive;
+      actualizarEstadoCountryShuffle();
+      try {
+        localStorage.setItem('capstone-country-shuffle', isCountryShuffleActive ? '1' : '0');
+      } catch (err) {}
+      applyFiltersAndRender();
+    }
+
+    function actualizarEstadoCountryShuffle() {
+      const btn = document.getElementById('country-shuffle-pill-btn');
+      const label = document.getElementById('country-shuffle-label');
+      if (isCountryShuffleActive) {
+        if (btn) btn.classList.add('active-shuffle');
+        if (label) label.textContent = 'Países: 1 de c/Región (On)';
+      } else {
+        if (btn) btn.classList.remove('active-shuffle');
+        if (label) label.textContent = 'Shuffle Países';
+      }
+    }
+
+    function interleaveCountries(patents) {
+      const groups = {
+        US: [],
+        EP: [],
+        WO: [],
+        OTHER: []
+      };
+
+      patents.forEach(p => {
+        const j = getPatentJurisdiction(p);
+        if (groups[j]) {
+          groups[j].push(p);
+        } else {
+          groups.OTHER.push(p);
+        }
+      });
+
+      const interleaved = [];
+      const keys = ['US', 'EP', 'WO', 'OTHER'].filter(k => groups[k].length > 0);
+      if (keys.length === 0) return patents;
+
+      const maxLen = Math.max(...keys.map(k => groups[k].length));
+      for (let i = 0; i < maxLen; i++) {
+        for (const key of keys) {
+          if (i < groups[key].length) {
+            interleaved.push(groups[key][i]);
+          }
+        }
+      }
+      return interleaved;
+    }
+
+    function renderActiveFiltersBar() {
+      const bar = document.getElementById('active-filters-container');
+      const chips = document.getElementById('active-filters-chips');
+      const chkHasPdf = document.getElementById('chk-has-pdf')?.checked;
+      const chkFriendly = document.getElementById('chk-friendly')?.checked;
+      const chkCorporate = document.getElementById('chk-corporate')?.checked;
+      const chkDrawings = document.getElementById('chk-drawings')?.checked;
+      const chkRecent = document.getElementById('chk-recent')?.checked;
+
+      const activeList = [];
+
+      if (currentSource !== 'all') {
+        activeList.push({ label: `Fuente: ${currentSource}`, reset: () => seleccionarFuente('all', '🌐 Todas las fuentes') });
+      }
+      if (currentJurisdictionFilter !== 'ALL') {
+        activeList.push({ label: `Región: ${currentJurisdictionFilter}`, reset: () => setJurisdictionFilter('ALL', 'Todas las regiones') });
+      }
+      if (currentStatusFilter !== 'all') {
+        activeList.push({ label: `Estado: ${currentStatusFilter === 'active' ? 'Solo Activas' : 'Solo Inactivas'}`, reset: () => setStatusFilter('all', 'Todos los estados') });
+      }
+      if (chkFriendly) {
+        activeList.push({ label: '💡 Solo Resumen Amigable', reset: () => { document.getElementById('chk-friendly').checked = false; applyFiltersAndRender(); } });
+      }
+      if (chkCorporate) {
+        activeList.push({ label: '🏢 Solo Corporaciones', reset: () => { document.getElementById('chk-corporate').checked = false; applyFiltersAndRender(); } });
+      }
+      if (chkHasPdf) {
+        activeList.push({ label: '📄 Solo con PDF', reset: () => { document.getElementById('chk-has-pdf').checked = false; applyFiltersAndRender(); } });
+      }
+      if (chkDrawings) {
+        activeList.push({ label: '📐 Solo con Figuras', reset: () => { document.getElementById('chk-drawings').checked = false; applyFiltersAndRender(); } });
+      }
+      if (chkRecent) {
+        activeList.push({ label: '📅 Recientes 2021+', reset: () => { document.getElementById('chk-recent').checked = false; applyFiltersAndRender(); } });
+      }
+
+      if (activeList.length > 0) {
+        bar.style.display = 'flex';
+        chips.innerHTML = activeList.map((item, idx) => `
+          <div class="active-filter-chip">
+            <span>${item.label}</span>
+            <span class="remove" onclick="activeListReset(${idx})" title="Quitar filtro">&times;</span>
+          </div>
+        `).join('');
+        window._activeFiltersResetFns = activeList.map(a => a.reset);
+      } else {
+        bar.style.display = 'none';
+        chips.innerHTML = '';
+        window._activeFiltersResetFns = [];
+      }
+    }
+
+    function activeListReset(idx) {
+      if (window._activeFiltersResetFns && window._activeFiltersResetFns[idx]) {
+        window._activeFiltersResetFns[idx]();
+      }
+    }
+
+    function resetearTodosLosFiltros() {
+      currentSource = 'all';
+      document.getElementById('current-source-label').textContent = '🌐 Todas las fuentes';
+      currentJurisdictionFilter = 'ALL';
+      currentStatusFilter = 'all';
+      
+      ['chk-friendly', 'chk-corporate', 'chk-has-pdf', 'chk-drawings', 'chk-recent'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.checked = false;
+      });
+
+      setJurisdictionFilter('ALL', 'Todas las regiones');
+      setStatusFilter('all', 'Todos los estados');
+      applyFiltersAndRender();
+    }
+
     function interleaveSources(patents) {
       const groups = {
         google: [],
@@ -1913,16 +2193,22 @@
         });
       }
 
-      // 3. Si Shuffle está activo y estamos en "Todas las fuentes", intercalar 1 de cada API (Round-Robin)
+      // 3. Shuffles: Intercalado por APIs o por Países
       if (isShuffleActive && currentSource === 'all') {
         filtered = interleaveSources(filtered);
       }
+      if (isCountryShuffleActive) {
+        filtered = interleaveCountries(filtered);
+      }
+
+      renderActiveFiltersBar();
 
       const countBadge = document.getElementById('results-count-badge');
       if (countBadge) {
-        countBadge.textContent = isShuffleActive && currentSource === 'all' 
-          ? `${filtered.length} (🔀 Shuffle)` 
-          : `${filtered.length}`;
+        let tag = '';
+        if (isShuffleActive && currentSource === 'all') tag += ' 🔀 APIs';
+        if (isCountryShuffleActive) tag += ' 🌍 Países';
+        countBadge.textContent = tag ? `${filtered.length} (${tag.trim()})` : `${filtered.length}`;
       }
       renderizarPatentes(filtered);
     }
@@ -1940,10 +2226,269 @@
       return '📄 INT';
     }
 
+    
+    // GESTIÓN DE FICHA EN SIDEBAR
+    let currentRenderedPatents = [];
+
+    function abrirSidebarPatente(idx) {
+      const p = currentRenderedPatents[idx];
+      if (!p) return;
+
+      const pubNum = p.publication_number || 'N/A';
+      const title = p.title || 'Sin título registrado';
+      const assignee = p.assignee || 'No especificado / Persona natural';
+      const inventor = p.inventor || 'No especificado';
+      const pubDate = p.publication_date || 'N/A';
+      const filingDate = p.filing_date || null;
+      const snippet = p.snippet || '';
+      const sourceBadge = p.source_badge || 'google';
+      const sourceName = p.source || 'Google Patents';
+      const active = isPatentActive(p);
+      const cits = p.forwardCitationCount || 0;
+      const patentLink = p.patent_link || `https://patents.google.com/patent/${pubNum}/en`;
+
+      // Header
+      document.getElementById('sidebar-header-left').innerHTML = `
+        <span class="source-tag source-${sourceBadge}">[${sourceName}]</span>
+        <span class="jurisdiction-badge">${getJurisdictionFlag(pubNum)}</span>
+        <span style="font-family: monospace; font-size: 14px; font-weight: 700; color: var(--text-high);">${pubNum}</span>
+        <span class="patent-status-badge ${active ? 'badge-ok' : 'badge-inactive'}">${p.legal_status || (active ? 'Activa' : 'NOT_ACTIVE')}</span>
+        ${cits > 0 ? `<span class="patent-citations-badge">⭐ ${cits} citas</span>` : ''}
+      `;
+
+      document.getElementById('sidebar-ext-btn').href = patentLink;
+
+      // Body con dossier completo
+      let figsHtml = '';
+      if (p.figures && p.figures.length > 0) {
+        figsHtml = `
+          <div style="margin-bottom: 18px;">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">
+              📐 Galería Técnica de Figuras (${p.figures.length})
+            </div>
+            <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px;">
+              ${p.figures.map(f => `
+                <img src="${f}" style="height: 160px; border: 1px solid var(--border-color); border-radius: 6px; background: #fff; cursor: pointer; padding: 4px;" onclick="abrirModal('${f}', '${pubNum}')" title="Ver en grande">
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else if (p.thumbnail) {
+        figsHtml = `
+          <div style="margin-bottom: 18px;">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">
+              📐 Lámina Técnica
+            </div>
+            <img src="${p.thumbnail}" style="max-height: 180px; border: 1px solid var(--border-color); border-radius: 6px; background: #fff; cursor: pointer; padding: 4px;" onclick="abrirModal('${p.thumbnail}', '${pubNum}')" title="Ver en grande">
+          </div>
+        `;
+      }
+
+      let friendlyHtml = '';
+      if (p.one_sentence_summary) {
+        friendlyHtml = `
+          <div class="friendly-summary-box" style="margin-bottom: 16px;">
+            <div class="friendly-summary-title" style="justify-content: space-between;">
+              <span>💡 Resumen Tecnológico en Lenguaje Sencillo:</span>
+              <button class="btn-translate" id="sidebar-trans-friendly-btn" onclick="toggleTraduccionSidebarFriendly('${escapeHtml(p.one_sentence_summary)}')">
+                <span>🌐 Traducir</span>
+              </button>
+            </div>
+            <div id="sidebar-friendly-text" style="font-size: 13.5px; line-height: 1.5;">${p.one_sentence_summary}</div>
+            ${p.industry_tags && p.industry_tags.length ? `
+              <div class="industry-tags-row">
+                ${p.industry_tags.map(tag => `<span class="badge-industry">🏷️ ${tag.replace('_', ' ')}</span>`).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
+
+      let cpcHtml = '';
+      if (p.classifications_cpc && p.classifications_cpc.length > 0) {
+        cpcHtml = `
+          <div style="margin-bottom: 14px;">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Clasificaciones Tecnológicas (CPC)</div>
+            <div class="classif-row">
+              ${p.classifications_cpc.map(c => `<span class="classif-pill" onclick="cerrarSidebar(); refinarConCPC('${c}')" title="Refinar búsqueda con esta clase">CPC: ${c}</span>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      document.getElementById('sidebar-body').innerHTML = `
+        <h2 style="font-size: 17px; font-weight: 700; color: var(--text-high); line-height: 1.35; margin-bottom: 14px;">
+          ${title}
+        </h2>
+
+        ${friendlyHtml}
+
+        <div style="background-color: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+          <div class="patent-meta-grid" style="margin-bottom: 0;">
+            <span class="meta-lbl">Titular:</span>
+            <span class="meta-val assignee-val">${assignee}</span>
+
+            <span class="meta-lbl">Inventor(es):</span>
+            <span class="meta-val">${inventor}</span>
+
+            ${filingDate ? `<span class="meta-lbl">Solicitud:</span><span class="meta-val">${filingDate}</span>` : ''}
+            <span class="meta-lbl">Publicación:</span>
+            <span class="meta-val">${pubDate}</span>
+
+            <span class="meta-lbl">Fuente API:</span>
+            <span class="meta-val">${sourceName}</span>
+          </div>
+        </div>
+
+        ${figsHtml}
+
+        ${cpcHtml}
+
+        <div class="abstract-box" style="margin-bottom: 18px;">
+          <div class="abstract-header">
+            <span class="abstract-label">Resumen / Abstract Oficial</span>
+            <button class="btn-translate" id="sidebar-trans-abstract-btn" onclick="toggleTraduccionSidebarAbstract('${escapeHtml(snippet)}')">
+              <span>🌐 Traducir al Español</span>
+            </button>
+          </div>
+          <div id="sidebar-abstract-text">${snippet || 'Sin resumen registrado'}</div>
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--border-color);">
+          ${p.pdf ? `<a href="${p.pdf}" target="_blank" class="btn-ghost" style="color: var(--status-danger); font-weight: 600; text-decoration: none;">📥 Descargar PDF Oficial</a>` : ''}
+          <a href="${patentLink}" target="_blank" class="btn-ghost" style="color: var(--brand-primary); font-weight: 600; text-decoration: none;">🌐 Ver en Ficha Web Externa &nearr;</a>
+        </div>
+      `;
+
+      document.getElementById('patent-sidebar').classList.add('open');
+      document.getElementById('sidebar-backdrop').classList.add('open');
+    }
+
+    function cerrarSidebar() {
+      const sb = document.getElementById('patent-sidebar');
+      const bd = document.getElementById('sidebar-backdrop');
+      if (sb) sb.classList.remove('open');
+      if (bd) bd.classList.remove('open');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        cerrarSidebar();
+        cerrarModal();
+      }
+    });
+
+    // Traducción para el resumen de PatentBrief (en tarjetas y sidebar)
+    async function toggleTraduccionFriendly(idx, originalText) {
+      const btn = document.getElementById(`friendly-trans-btn-${idx}`);
+      const textElem = document.getElementById(`friendly-text-${idx}`);
+      
+      if (btn.dataset.translated === "true") {
+        textElem.textContent = originalText;
+        btn.dataset.translated = "false";
+        btn.innerHTML = `<span>🌐 Traducir</span>`;
+        return;
+      }
+
+      if (translationCache[originalText]) {
+        textElem.textContent = translationCache[originalText];
+        btn.dataset.translated = "true";
+        btn.innerHTML = `<span>↺ Original</span>`;
+        return;
+      }
+
+      btn.innerHTML = `<span>Traduciendo...</span>`;
+      try {
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: originalText })
+        });
+        const data = await res.json();
+        if (data.translated) {
+          translationCache[originalText] = data.translated;
+          textElem.textContent = data.translated;
+          btn.dataset.translated = "true";
+          btn.innerHTML = `<span>↺ Original</span>`;
+        }
+      } catch (e) {
+        btn.innerHTML = `<span>Error</span>`;
+      }
+    }
+
+    async function toggleTraduccionSidebarFriendly(originalText) {
+      const btn = document.getElementById('sidebar-trans-friendly-btn');
+      const textElem = document.getElementById('sidebar-friendly-text');
+      if (btn.dataset.translated === "true") {
+        textElem.textContent = originalText;
+        btn.dataset.translated = "false";
+        btn.innerHTML = `<span>🌐 Traducir</span>`;
+        return;
+      }
+      if (translationCache[originalText]) {
+        textElem.textContent = translationCache[originalText];
+        btn.dataset.translated = "true";
+        btn.innerHTML = `<span>↺ Original</span>`;
+        return;
+      }
+      btn.innerHTML = `<span>Traduciendo...</span>`;
+      try {
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: originalText })
+        });
+        const data = await res.json();
+        if (data.translated) {
+          translationCache[originalText] = data.translated;
+          textElem.textContent = data.translated;
+          btn.dataset.translated = "true";
+          btn.innerHTML = `<span>↺ Original</span>`;
+        }
+      } catch (e) {
+        btn.innerHTML = `<span>Error</span>`;
+      }
+    }
+
+    async function toggleTraduccionSidebarAbstract(originalText) {
+      const btn = document.getElementById('sidebar-trans-abstract-btn');
+      const textElem = document.getElementById('sidebar-abstract-text');
+      if (btn.dataset.translated === "true") {
+        textElem.textContent = originalText;
+        btn.dataset.translated = "false";
+        btn.innerHTML = `<span>🌐 Traducir al Español</span>`;
+        return;
+      }
+      if (translationCache[originalText]) {
+        textElem.textContent = translationCache[originalText];
+        btn.dataset.translated = "true";
+        btn.innerHTML = `<span>↺ Ver Original en Inglés</span>`;
+        return;
+      }
+      btn.innerHTML = `<span>Traduciendo...</span>`;
+      try {
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: originalText })
+        });
+        const data = await res.json();
+        if (data.translated) {
+          translationCache[originalText] = data.translated;
+          textElem.textContent = data.translated;
+          btn.dataset.translated = "true";
+          btn.innerHTML = `<span>↺ Ver Original en Inglés</span>`;
+        }
+      } catch (e) {
+        btn.innerHTML = `<span>Error</span>`;
+      }
+    }
+
     function renderizarPatentes(patents) {
+      currentRenderedPatents = patents || [];
       const container = document.getElementById('view-cards');
       if (!patents || patents.length === 0) {
-        container.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; padding: 40px; text-align: center;">No se encontraron patentes con estos criterios o filtros. Intente ampliando los términos.</div>`;
+        container.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; padding: 40px; text-align: center;">No se encontraron patentes con estos criterios o filtros. Intente ampliando los términos o haciendo clic en "Limpiar todos".</div>`;
         return;
       }
 
@@ -1994,13 +2539,18 @@
           classifHtml += '</div>';
         }
 
-        // Resumen amigable PatentBrief
+        // Resumen amigable PatentBrief con Botón de Traducción
         let friendlySummaryHtml = '';
         if (p.one_sentence_summary) {
           friendlySummaryHtml = `
             <div class="friendly-summary-box">
-              <div class="friendly-summary-title">💡 Resumen Tecnológico en Lenguaje Sencillo:</div>
-              <div>${p.one_sentence_summary}</div>
+              <div class="friendly-summary-title" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>💡 Resumen Tecnológico en Lenguaje Sencillo:</span>
+                <button class="btn-translate" id="friendly-trans-btn-${idx}" onclick="toggleTraduccionFriendly(${idx}, '${escapeHtml(p.one_sentence_summary)}')">
+                  <span>🌐 Traducir</span>
+                </button>
+              </div>
+              <div id="friendly-text-${idx}">${p.one_sentence_summary}</div>
               ${p.industry_tags && p.industry_tags.length ? `
                 <div class="industry-tags-row">
                   ${p.industry_tags.map(tag => `<span class="badge-industry">🏷️ ${tag.replace('_', ' ')}</span>`).join('')}
@@ -2010,14 +2560,16 @@
           `;
         }
 
-        // Enlace DINÁMICO SEGÚN LA FUENTE
-        let dynamicLinkHtml = '';
+        // Enlace que abre la Ficha Lateral (Sidebar Drawer) sin salir de la página
+        let dynamicLinkHtml = `
+          <a href="javascript:void(0)" onclick="abrirSidebarPatente(${idx})" style="font-weight: 600; color: var(--brand-primary);">
+            📖 Ver Ficha en Panel Lateral &rarr;
+          </a>
+        `;
         if (sourceBadge === 'google') {
-          if (p.patent_link) dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Ver en Google Patents &rarr;</a>`;
+          if (p.patent_link) dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Google Patents &nearr;</a>`;
         } else if (sourceBadge === 'europepmc') {
-          if (p.patent_link) dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Ver en Espacenet / Europe PMC &rarr;</a>`;
-        } else if (sourceBadge === 'patentbrief') {
-          if (p.patent_link) dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Ver Ficha de Patente &rarr;</a>`;
+          if (p.patent_link) dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Espacenet / EPO &nearr;</a>`;
         }
         if (p.pdf) {
           dynamicLinkHtml += `<a href="${p.pdf}" target="_blank" rel="noopener" class="pdf-link">Descargar PDF Oficial &rarr;</a>`;
@@ -2040,7 +2592,7 @@
                   </div>
                 </div>
 
-                <div class="patent-title-text">${title}</div>
+                <div class="patent-title-text" style="cursor: pointer;" onclick="abrirSidebarPatente(${idx})" title="Hacer clic para ver ficha técnica en el panel lateral">${title}</div>
 
                 ${friendlySummaryHtml}
 
@@ -2148,8 +2700,13 @@
         if (savedShuffle !== null) {
           isShuffleActive = savedShuffle === '1';
         }
+        const savedCountry = localStorage.getItem('capstone-country-shuffle');
+        if (savedCountry !== null) {
+          isCountryShuffleActive = savedCountry === '1';
+        }
       } catch (e) {}
       actualizarEstadoShuffle();
+      actualizarEstadoCountryShuffle();
       buscar();
     });
   </script>
