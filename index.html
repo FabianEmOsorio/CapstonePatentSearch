@@ -266,9 +266,13 @@
       border-color: #484f58;
     }
     .ag-pill-caret {
-      font-size: 9px;
+      font-size: 8px;
       color: #8b949e;
-      transition: transform 0.2s;
+      display: inline-block;
+      transition: transform 0.2s ease;
+    }
+    .ag-pill-btn.open .ag-pill-caret {
+      transform: rotate(180deg);
     }
 
     /* Botón Circular de Búsqueda (Azul cuando activo) */
@@ -307,7 +311,8 @@
     /* Menús Flotantes Antigravity */
     .ag-popup-menu {
       position: absolute;
-      bottom: calc(100% + 8px);
+      top: calc(100% + 8px);
+      bottom: auto;
       background-color: var(--bg-elevated);
       border: 1px solid var(--border-color);
       border-radius: 10px;
@@ -322,7 +327,7 @@
       display: block;
     }
     @keyframes agFadeIn {
-      from { opacity: 0; transform: translateY(4px); }
+      from { opacity: 0; transform: translateY(-4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -374,7 +379,8 @@
     .ag-health-submenu {
       position: absolute;
       left: calc(100% + 6px);
-      bottom: 0;
+      top: 0;
+      bottom: auto;
       background-color: var(--bg-elevated);
       border: 1px solid var(--border-color);
       border-radius: 10px;
@@ -383,6 +389,14 @@
       box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
       display: none;
       z-index: 1001;
+    }
+    @media (max-width: 768px) {
+      .ag-health-submenu {
+        left: 0;
+        top: calc(100% + 6px);
+        width: 100%;
+        max-width: 290px;
+      }
     }
     .ag-health-row {
       display: flex;
@@ -1009,19 +1023,80 @@
         </h1>
         <div class="subtitle">Proyecto Capstone Grupo 6 &bull; Céntrika &bull; Awake</div>
       </div>
-      <div class="header-actions">
+      <div class="header-actions" style="position: relative;">
         <!-- Switcher de Tema Antigravity -->
         <button class="btn-theme-pill" onclick="toggleTheme()" id="theme-btn" title="Alternar entre modo oscuro Antigravity y modo claro">
           <span id="theme-icon">🌙</span>
           <span id="theme-text">Modo Oscuro</span>
         </button>
 
-        <!-- Píldora de Estado 100% Online -->
-        <button class="btn-health-pill" onclick="toggleHealthSubmenu()" title="Ver estado de infraestructura de patentes">
-          <span class="pulse-green-dot"></span>
-          <span>Fuentes 100% Online</span>
-          <span style="font-size: 9px; color: var(--text-muted);">▾</span>
-        </button>
+        <!-- Píldora de Estado 100% Online con Dropdown propio -->
+        <div style="position: relative;">
+          <button class="btn-health-pill" onclick="toggleHeaderHealth(event)" id="header-health-btn" title="Ver estado de infraestructura de patentes">
+            <span class="pulse-green-dot"></span>
+            <span>Fuentes 100% Online</span>
+            <span style="font-size: 8px; color: var(--text-muted); display: inline-block; transition: transform 0.2s;" id="header-health-caret">▼</span>
+          </button>
+
+          <!-- Menú flotante del Header hacia abajo -->
+          <div class="ag-popup-menu" id="header-health-dropdown" style="right: 0; left: auto; top: calc(100% + 8px); width: 290px; padding: 12px 14px;">
+            <div class="ag-menu-header" style="padding: 0 0 8px 0; color: var(--text-muted); border-bottom: 1px solid var(--border-color); margin-bottom: 8px;">
+              <span>Disponibilidad y Conectividad</span>
+            </div>
+
+            <div class="ag-health-row">
+              <div class="ag-health-info">
+                <span class="ag-health-name">Google Patents</span>
+                <span class="ag-health-desc">Motor Híbrido Directo</span>
+              </div>
+              <div class="ag-health-val">
+                <span class="ag-health-pct">100%</span>
+                <svg class="circular-ring" viewBox="0 0 36 36">
+                  <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  <path class="circular-ring-fill" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="ag-health-row">
+              <div class="ag-health-info">
+                <span class="ag-health-name">Europe PMC (EPO/WIPO)</span>
+                <span class="ag-health-desc">API Abierta EMBL-EBI</span>
+              </div>
+              <div class="ag-health-val">
+                <span class="ag-health-pct">100%</span>
+                <svg class="circular-ring" viewBox="0 0 36 36">
+                  <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  <path class="circular-ring-fill" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="ag-health-row">
+              <div class="ag-health-info">
+                <span class="ag-health-name">PatentBrief</span>
+                <span class="ag-health-desc">API Tecnológica Amigable</span>
+              </div>
+              <div class="ag-health-val">
+                <span class="ag-health-pct">100%</span>
+                <svg class="circular-ring" viewBox="0 0 36 36">
+                  <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  <path class="circular-ring-fill" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="ag-health-row" style="opacity: 0.6;">
+              <div class="ag-health-info">
+                <span class="ag-health-name">EPO OPS Oficial</span>
+                <span class="ag-health-desc">En validación Ref: 46581</span>
+              </div>
+              <div class="ag-health-val">
+                <span style="font-size: 11px; color: var(--status-warning); font-family: monospace;">Pendiente</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -1042,7 +1117,7 @@
           <div class="ag-pill-btn" onclick="toggleSourceMenu(event)" id="source-pill-btn">
             <span style="font-weight: 700; color: #8b949e;">+</span>
             <span id="current-source-label">🌐 Todas las fuentes</span>
-            <span class="ag-pill-caret" id="source-caret">▲</span>
+            <span class="ag-pill-caret" id="source-caret">▼</span>
           </div>
 
           <!-- Menú Flotante de Fuentes (Hacia arriba) -->
@@ -1155,11 +1230,11 @@
           <div class="ag-pill-btn" onclick="toggleFilterMenu(event)" id="filter-pill-btn">
             <span>⚙️</span>
             <span id="current-sort-label">Relevancia</span>
-            <span class="ag-pill-caret" id="filter-caret">▲</span>
+            <span class="ag-pill-caret" id="filter-caret">▼</span>
           </div>
 
           <!-- Menú Flotante de Filtros (Hacia arriba) -->
-          <div class="ag-popup-menu" id="filter-popup-menu" style="right: 44px; min-width: 250px;">
+          <div class="ag-popup-menu" id="filter-popup-menu" style="right: 0; min-width: 250px;">
             <div class="ag-menu-header">Criterio de Ordenamiento</div>
             <div class="ag-menu-item selected" id="opt-sort-rel" onclick="setSort('relevance', 'Relevancia')">
               <span>Relevancia Tecnológica</span>
@@ -1322,28 +1397,75 @@
       }
     });
 
-    // Menús flotantes
+    // GESTIÓN DE MENÚS FLOTANTES (APERTURA HACIA ABAJO ANTI-DESBORDAMIENTO)
     function toggleSourceMenu(e) {
       if (e) e.stopPropagation();
       cerrarMenuFiltros();
+      cerrarHeaderHealth();
       const menu = document.getElementById('source-popup-menu');
-      menu.classList.toggle('show');
+      const btn = document.getElementById('source-pill-btn');
+      const isOpen = menu.classList.contains('show');
+      
+      if (isOpen) {
+        cerrarMenuFuentes();
+      } else {
+        menu.classList.add('show');
+        btn.classList.add('open');
+      }
     }
 
     function toggleFilterMenu(e) {
       if (e) e.stopPropagation();
       cerrarMenuFuentes();
+      cerrarHeaderHealth();
       const menu = document.getElementById('filter-popup-menu');
-      menu.classList.toggle('show');
+      const btn = document.getElementById('filter-pill-btn');
+      const isOpen = menu.classList.contains('show');
+      
+      if (isOpen) {
+        cerrarMenuFiltros();
+      } else {
+        menu.classList.add('show');
+        btn.classList.add('open');
+      }
+    }
+
+    function toggleHeaderHealth(e) {
+      if (e) e.stopPropagation();
+      cerrarMenuFuentes();
+      cerrarMenuFiltros();
+      const menu = document.getElementById('header-health-dropdown');
+      const caret = document.getElementById('header-health-caret');
+      const isOpen = menu.classList.contains('show');
+      if (isOpen) {
+        cerrarHeaderHealth();
+      } else {
+        menu.classList.add('show');
+        if (caret) caret.style.transform = 'rotate(180deg)';
+      }
+    }
+
+    function cerrarHeaderHealth() {
+      const menu = document.getElementById('header-health-dropdown');
+      const caret = document.getElementById('header-health-caret');
+      if (menu) menu.classList.remove('show');
+      if (caret) caret.style.transform = 'rotate(0deg)';
     }
 
     function cerrarMenuFuentes() {
-      document.getElementById('source-popup-menu').classList.remove('show');
-      document.getElementById('health-submenu').style.display = 'none';
+      const menu = document.getElementById('source-popup-menu');
+      const btn = document.getElementById('source-pill-btn');
+      const sub = document.getElementById('health-submenu');
+      if (menu) menu.classList.remove('show');
+      if (btn) btn.classList.remove('open');
+      if (sub) sub.style.display = 'none';
     }
 
     function cerrarMenuFiltros() {
-      document.getElementById('filter-popup-menu').classList.remove('show');
+      const menu = document.getElementById('filter-popup-menu');
+      const btn = document.getElementById('filter-pill-btn');
+      if (menu) menu.classList.remove('show');
+      if (btn) btn.classList.remove('open');
     }
 
     function toggleHealthSubmenu(e) {
@@ -1363,6 +1485,9 @@
       }
       if (!e.target.closest('#filter-pill-btn') && !e.target.closest('#filter-popup-menu')) {
         cerrarMenuFiltros();
+      }
+      if (!e.target.closest('#header-health-btn') && !e.target.closest('#header-health-dropdown')) {
+        cerrarHeaderHealth();
       }
     });
 
