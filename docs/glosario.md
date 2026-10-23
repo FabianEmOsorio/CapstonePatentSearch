@@ -14,6 +14,8 @@ Este diccionario técnico explica de forma sencilla y didáctica los términos c
 - **IPC (International Patent Classification)**: Sistema global estándar administrado por la OMPI (WIPO) para categorizar patentes en 8 secciones de la A a la H.
 - **Abstract**: Resumen técnico oficial que describe la novedad y utilidad técnica de la invención.
 - **Reivindicaciones (Claims)**: La sección legal más importante de la patente, donde se delimitan los límites exactos de la exclusividad protegida.
+- **Principio de Territorialidad de Patentes**: Una patente únicamente tiene vigor legal y exclusividad dentro de las fronteras del país u oficina que la otorgó (ej. una patente `US` solo protege en territorio estadounidense).
+- **Tratado de Cooperación en materia de Patentes (PCT / WO)**: Tratado internacional administrado por la OMPI (WIPO) que permite unificar una solicitud preliminar única válida para más de 150 países antes de entrar a fases nacionales.
 - **Titular (Assignee)**: La empresa o institución que ostenta los derechos patrimoniales sobre la patente (ej. Nike, Apple, Universidad del Rosario).
 - **Inventor**: La persona o grupo humano que concibió la invención técnica.
 - **Citas hacia adelante (Forward Citations)**: Cuántas patentes posteriores han citado esta patente. Es el principal indicador de **impacto tecnológico y popularidad** en el ecosistema.

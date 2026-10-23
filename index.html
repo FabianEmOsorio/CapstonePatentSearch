@@ -329,9 +329,30 @@
       padding: 6px;
       box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
       z-index: 1000;
-      min-width: 270px;
+      min-width: 285px;
+      max-height: 540px;
+      overflow-y: auto;
       display: none;
       animation: agFadeIn 0.15s ease-out;
+    }
+    .ag-popup-menu::-webkit-scrollbar {
+      width: 5px;
+    }
+    .ag-popup-menu::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+    .jurisdiction-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-medium);
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
     }
     .ag-popup-menu.show {
       display: block;
@@ -1284,6 +1305,30 @@
 
             <div class="ag-menu-divider"></div>
 
+            <div class="ag-menu-header">Territorio / Jurisdicción</div>
+            <div class="ag-menu-item selected" id="opt-juris-all" onclick="setJurisdictionFilter('ALL', 'Todas las regiones')">
+              <span>🌐 Todas las regiones / mundiales</span>
+              <span class="ag-item-check" id="check-juris-all">✓</span>
+            </div>
+            <div class="ag-menu-item" id="opt-juris-us" onclick="setJurisdictionFilter('US', '🇺🇸 Estados Unidos (US)')">
+              <span>🇺🇸 Estados Unidos (USPTO)</span>
+              <span class="ag-item-check" id="check-juris-us" style="display:none;">✓</span>
+            </div>
+            <div class="ag-menu-item" id="opt-juris-ep" onclick="setJurisdictionFilter('EP', '🇪🇺 Europa (EP)')">
+              <span>🇪🇺 Oficina Europea (EPO)</span>
+              <span class="ag-item-check" id="check-juris-ep" style="display:none;">✓</span>
+            </div>
+            <div class="ag-menu-item" id="opt-juris-wo" onclick="setJurisdictionFilter('WO', '🌐 Mundial PCT (WO)')">
+              <span>🌐 Tratado Internacional (PCT / WIPO)</span>
+              <span class="ag-item-check" id="check-juris-wo" style="display:none;">✓</span>
+            </div>
+            <div class="ag-menu-item" id="opt-juris-other" onclick="setJurisdictionFilter('OTHER', '🇯🇵/🇨🇳 Otras Regiones')">
+              <span>🇯🇵/🇨🇳 Otras Oficinas (JP, CN, DE, KR...)</span>
+              <span class="ag-item-check" id="check-juris-other" style="display:none;">✓</span>
+            </div>
+
+            <div class="ag-menu-divider"></div>
+
             <div class="ag-menu-header">Estado Legal (Vigencia)</div>
             <div class="ag-menu-item selected" id="opt-status-all" onclick="setStatusFilter('all', 'Todos los estados')">
               <span>⚪+🟢 Todos los estados</span>
@@ -1302,12 +1347,16 @@
 
             <div class="ag-menu-header">Filtros Rápidos</div>
             <label class="ag-filter-checkbox-row">
+              <span>💡 Solo con resumen amigable (PatentBrief)</span>
+              <input type="checkbox" id="chk-friendly" onchange="applyFiltersAndRender()">
+            </label>
+            <label class="ag-filter-checkbox-row">
               <span>📄 Solo con PDF oficial descargable</span>
               <input type="checkbox" id="chk-has-pdf" onchange="applyFiltersAndRender()">
             </label>
             <label class="ag-filter-checkbox-row">
-              <span>🔀 Intercalado 1x1 (Shuffle Fuentes)</span>
-              <input type="checkbox" id="chk-shuffle-menu" onchange="toggleShuffle(event)">
+              <span>🏢 Solo empresas / corporaciones</span>
+              <input type="checkbox" id="chk-corporate" onchange="applyFiltersAndRender()">
             </label>
             <label class="ag-filter-checkbox-row">
               <span>📐 Solo con lámina técnica (Fig. 1)</span>
@@ -1316,6 +1365,10 @@
             <label class="ag-filter-checkbox-row">
               <span>📅 Solo últimos 5 años (2021+)</span>
               <input type="checkbox" id="chk-recent" onchange="applyFiltersAndRender()">
+            </label>
+            <label class="ag-filter-checkbox-row">
+              <span>🔀 Intercalado 1x1 (Shuffle Fuentes)</span>
+              <input type="checkbox" id="chk-shuffle-menu" onchange="toggleShuffle(event)">
             </label>
           </div>
 
@@ -1401,6 +1454,7 @@
     let currentSource = 'all';
     let currentSort = 'relevance';
     let currentStatusFilter = 'all'; // 'all' | 'active' | 'inactive'
+    let currentJurisdictionFilter = 'ALL'; // 'ALL' | 'US' | 'EP' | 'WO' | 'OTHER'
     let isIntelOpen = false;
     let isShuffleActive = true; // Shuffle activo por defecto para garantizar diversidad inmediata
     const translationCache = {};
@@ -1723,6 +1777,43 @@
 
     
     // GESTIÓN DE FILTRO POR ESTADO LEGAL (ACTIVAS VS INACTIVAS)
+    
+    // GESTIÓN DE FILTRO POR TERRITORIO / JURISDICCIÓN
+    function setJurisdictionFilter(jurisKey, label) {
+      currentJurisdictionFilter = jurisKey;
+      ['all', 'us', 'ep', 'wo', 'other'].forEach(key => {
+        const item = document.getElementById(`opt-juris-${key}`);
+        const check = document.getElementById(`check-juris-${key}`);
+        const match = key.toUpperCase() === jurisKey.toUpperCase();
+        if (check) check.style.display = match ? 'inline' : 'none';
+        if (item) {
+          if (match) item.classList.add('selected');
+          else item.classList.remove('selected');
+        }
+      });
+      applyFiltersAndRender();
+    }
+
+    function getPatentJurisdiction(p) {
+      const num = (p.publication_number || '').toUpperCase().trim();
+      if (num.startsWith('US')) return 'US';
+      if (num.startsWith('EP')) return 'EP';
+      if (num.startsWith('WO')) return 'WO';
+      if (num.startsWith('JP')) return 'JP';
+      if (num.startsWith('CN')) return 'CN';
+      if (num.startsWith('DE')) return 'DE';
+      if (num.startsWith('KR')) return 'KR';
+      return 'OTHER';
+    }
+
+    function isCorporateAssignee(p) {
+      const ass = (p.assignee || '').toLowerCase();
+      if (!ass || ass === 'no especificado' || ass.includes('persona natural') || ass.includes('no especificado')) {
+        return false;
+      }
+      return true;
+    }
+
     function setStatusFilter(filterKey, filterLabel) {
       currentStatusFilter = filterKey;
       
@@ -1755,13 +1846,35 @@
 
       // 1. Filtrar
       const chkHasPdf = document.getElementById('chk-has-pdf')?.checked;
+      const chkFriendly = document.getElementById('chk-friendly')?.checked;
+      const chkCorporate = document.getElementById('chk-corporate')?.checked;
 
       let filtered = allRetrievedPatents.filter(p => {
+        // Filtro por Territorio / Jurisdicción
+        if (currentJurisdictionFilter !== 'ALL') {
+          const juris = getPatentJurisdiction(p);
+          if (currentJurisdictionFilter === 'OTHER') {
+            if (juris === 'US' || juris === 'EP' || juris === 'WO') return false;
+          } else if (juris !== currentJurisdictionFilter) {
+            return false;
+          }
+        }
+
         // Filtro por Estado Legal (Activas vs Inactivas)
         if (currentStatusFilter === 'active' && !isPatentActive(p)) {
           return false;
         }
         if (currentStatusFilter === 'inactive' && isPatentActive(p)) {
+          return false;
+        }
+
+        // Filtro por Solo con Resumen Amigable
+        if (chkFriendly && !p.one_sentence_summary) {
+          return false;
+        }
+
+        // Filtro por Corporaciones / Empresas
+        if (chkCorporate && !isCorporateAssignee(p)) {
           return false;
         }
 
@@ -1812,6 +1925,19 @@
           : `${filtered.length}`;
       }
       renderizarPatentes(filtered);
+    }
+
+    
+    function getJurisdictionFlag(pubNum) {
+      const p = (pubNum || '').toUpperCase();
+      if (p.startsWith('US')) return '🇺🇸 US';
+      if (p.startsWith('EP')) return '🇪🇺 EP';
+      if (p.startsWith('WO')) return '🌐 WO';
+      if (p.startsWith('JP')) return '🇯🇵 JP';
+      if (p.startsWith('CN')) return '🇨🇳 CN';
+      if (p.startsWith('DE')) return '🇩🇪 DE';
+      if (p.startsWith('KR')) return '🇰🇷 KR';
+      return '📄 INT';
     }
 
     function renderizarPatentes(patents) {
@@ -1904,6 +2030,7 @@
                 <div class="patent-header">
                   <div class="patent-header-left">
                     <span class="source-tag source-${sourceBadge}">[${sourceName}]</span>
+                    <span class="jurisdiction-badge">${getJurisdictionFlag(pubNum)}</span>
                     <span class="patent-id-badge">${pubNum}</span>
                     <span class="patent-status-badge ${statusClass}">${statusText}</span>
                     ${cits > 0 ? `<span class="patent-citations-badge" title="${cits} patentes posteriores citan esta invención">⭐ ${cits} citas</span>` : ''}
