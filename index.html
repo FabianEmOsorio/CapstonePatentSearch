@@ -265,6 +265,16 @@
       color: #ffffff;
       border-color: #484f58;
     }
+    .ag-pill-btn.active-shuffle {
+      background-color: rgba(168, 85, 247, 0.22);
+      border-color: var(--intel-purple);
+      color: #f0f6fc;
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.35);
+    }
+    .ag-pill-btn.active-shuffle:hover {
+      background-color: rgba(168, 85, 247, 0.32);
+      border-color: #c084fc;
+    }
     .ag-pill-caret {
       font-size: 8px;
       color: #8b949e;
@@ -1225,8 +1235,14 @@
           </div>
         </div>
 
-        <!-- Derecha: Selector de Filtros/Orden estilo Turbo y Botón de Búsqueda -->
+        <!-- Derecha: Botón Shuffle + Selector de Filtros/Orden + Botón de Búsqueda -->
         <div class="ag-toolbar-right">
+          <!-- Botón de Shuffle / Intercalado Equilibrado (1 de cada API) -->
+          <div class="ag-pill-btn" onclick="toggleShuffle()" id="shuffle-pill-btn" title="Intercalado equilibrado: muestra 1 patente de cada API alternadamente (Google, Europe PMC, PatentBrief)">
+            <span>🔀</span>
+            <span id="shuffle-label">Shuffle Fuentes</span>
+          </div>
+
           <div class="ag-pill-btn" onclick="toggleFilterMenu(event)" id="filter-pill-btn">
             <span>⚙️</span>
             <span id="current-sort-label">Relevancia</span>
@@ -1252,6 +1268,10 @@
             <div class="ag-menu-divider"></div>
 
             <div class="ag-menu-header">Filtros Rápidos</div>
+            <label class="ag-filter-checkbox-row">
+              <span>🔀 Intercalado 1x1 (Shuffle Fuentes)</span>
+              <input type="checkbox" id="chk-shuffle-menu" onchange="toggleShuffle(event)">
+            </label>
             <label class="ag-filter-checkbox-row">
               <span>📐 Solo con lámina técnica (Fig. 1)</span>
               <input type="checkbox" id="chk-drawings" onchange="applyFiltersAndRender()">
@@ -1344,6 +1364,7 @@
     let currentSource = 'all';
     let currentSort = 'relevance';
     let isIntelOpen = false;
+    let isShuffleActive = true; // Shuffle activo por defecto para garantizar diversidad inmediata
     const translationCache = {};
 
     // GESTIÓN DE TEMA Y PALETA (PERSISTENTE EN LOCALSTORAGE)
@@ -1602,6 +1623,66 @@
       buscar(newQ);
     }
 
+    
+    // GESTIÓN DE SHUFFLE / INTERCALADO EQUILIBRADO MULTI-FUENTE
+    function toggleShuffle(e) {
+      if (e) e.stopPropagation();
+      isShuffleActive = !isShuffleActive;
+      actualizarEstadoShuffle();
+      try {
+        localStorage.setItem('capstone-shuffle', isShuffleActive ? '1' : '0');
+      } catch (err) {}
+      applyFiltersAndRender();
+    }
+
+    function actualizarEstadoShuffle() {
+      const btn = document.getElementById('shuffle-pill-btn');
+      const label = document.getElementById('shuffle-label');
+      const chk = document.getElementById('chk-shuffle-menu');
+      
+      if (isShuffleActive) {
+        if (btn) btn.classList.add('active-shuffle');
+        if (label) label.textContent = 'Shuffle: 1 de c/API (On)';
+        if (chk) chk.checked = true;
+      } else {
+        if (btn) btn.classList.remove('active-shuffle');
+        if (label) label.textContent = 'Shuffle: Off';
+        if (chk) chk.checked = false;
+      }
+    }
+
+    function interleaveSources(patents) {
+      const groups = {
+        google: [],
+        europepmc: [],
+        patentbrief: [],
+        other: []
+      };
+
+      patents.forEach(p => {
+        const badge = (p.source_badge || '').toLowerCase();
+        if (groups[badge]) {
+          groups[badge].push(p);
+        } else {
+          groups.other.push(p);
+        }
+      });
+
+      const interleaved = [];
+      const keys = ['google', 'europepmc', 'patentbrief', 'other'].filter(k => groups[k].length > 0);
+      if (keys.length === 0) return patents;
+
+      const maxLen = Math.max(...keys.map(k => groups[k].length));
+      for (let i = 0; i < maxLen; i++) {
+        for (const key of keys) {
+          if (i < groups[key].length) {
+            interleaved.push(groups[key][i]);
+          }
+        }
+      }
+      return interleaved;
+    }
+
     function applyFiltersAndRender() {
       if (!allRetrievedPatents) return;
 
@@ -1621,7 +1702,7 @@
         return true;
       });
 
-      // 2. Ordenar
+      // 2. Ordenar según criterio seleccionado
       if (currentSort === 'date_desc') {
         filtered.sort((a, b) => {
           const dateA = a.publication_date || '0000';
@@ -1636,7 +1717,17 @@
         });
       }
 
-      document.getElementById('results-count-badge').textContent = filtered.length;
+      // 3. Si Shuffle está activo y estamos en "Todas las fuentes", intercalar 1 de cada API (Round-Robin)
+      if (isShuffleActive && currentSource === 'all') {
+        filtered = interleaveSources(filtered);
+      }
+
+      const countBadge = document.getElementById('results-count-badge');
+      if (countBadge) {
+        countBadge.textContent = isShuffleActive && currentSource === 'all' 
+          ? `${filtered.length} (🔀 Shuffle)` 
+          : `${filtered.length}`;
+      }
       renderizarPatentes(filtered);
     }
 
@@ -1843,6 +1934,13 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      try {
+        const savedShuffle = localStorage.getItem('capstone-shuffle');
+        if (savedShuffle !== null) {
+          isShuffleActive = savedShuffle === '1';
+        }
+      } catch (e) {}
+      actualizarEstadoShuffle();
       buscar();
     });
   </script>
