@@ -23,7 +23,7 @@ Resolver la dispersión y complejidad en la búsqueda de patentes tecnológicas,
    - Al presionar `Enter` o hacer clic en el botón circular, se dispara la consulta multihilo.
 3. **Selección de Fuente y Filtros**:
    - Píldora `+ Fuente`: Permite alternar entre *Todas las fuentes*, *Google Patents*, *Europe PMC* o *PatentBrief*.
-   - Píldora `⚙️ Orden / Filtros`: Permite ordenar por *Relevancia*, *Más Recientes* o *Más Citadas / Impacto*, y filtrar por *Solo con Lámina Técnica* o *Últimos 5 años*.
+   - Píldora `⚙️ Orden / Filtros`: Permite ordenar por *Relevancia*, *Más Recientes* o *Más Citadas / Impacto*, filtrar por estado legal (*Activas vs Inactivas*), *Solo con Lámina Técnica*, *Solo con PDF Oficial* o *Últimos 5 años*.
    - Botón `🔀 Shuffle Fuentes`: Modo de **intercalado equilibrado (Round-Robin 1x1)** que alterna una patente de cada API (1 de Google Patents, 1 de Europe PMC, 1 de PatentBrief) para evitar el monopolio visual de una sola fuente al inicio.
 4. **Presentación de Resultados**:
    - Cada tarjeta muestra la insignia de la fuente con su color distintivo (Cyan, Ámbar o Verde Esmeralda).

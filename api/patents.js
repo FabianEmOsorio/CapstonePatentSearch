@@ -78,6 +78,7 @@ export default async function handler(req, res) {
                 filing_date: pat.filing_date || pat.priority_date || null,
                 publication_date: pat.publication_date || 'N/A',
                 legal_status: 'Registrada',
+                forwardCitationCount: pat.cited_by || 0,
                 thumbnail: thumb,
                 figures,
                 patent_link: `https://patents.google.com/patent/${pubNum}/en`,
@@ -139,6 +140,7 @@ export default async function handler(req, res) {
               filing_date: p.filing_date || p.priority_date || null,
               publication_date: p.publication_date || p.grant_date || 'N/A',
               legal_status: p.country_status ? Object.values(p.country_status)[0] || 'Registrada' : 'Registrada',
+              forwardCitationCount: p.cited_by || p.citations || 0,
               thumbnail: p.thumbnail || null,
               figures,
               patent_link: p.patent_link || (pubNum ? `https://patents.google.com/patent/${pubNum}/en` : null),
@@ -171,6 +173,8 @@ export default async function handler(req, res) {
             const authors = (item.authorList?.author || []).map(a => a.fullName).filter(Boolean);
             const pdfUrl = item.hasPDF === 'Y' ? `https://europepmc.org/backend/ptservice.cgi?accid=${docId}&action=viewpdf` : null;
             const patentUrl = (docId.startsWith('EP') || docId.startsWith('WO')) ? `https://worldwide.espacenet.com/patent/search/family/${docId}` : `https://europepmc.org/article/PAT/${docId}`;
+            const cits = parseInt(item.citedByCount || 0, 10) || 0;
+            const appDate = item.application?.applicationDate || null;
 
             combinedResults.push({
               source: 'Europe PMC (EPO / WIPO)',
@@ -178,11 +182,12 @@ export default async function handler(req, res) {
               publication_number: docId,
               title: item.title || 'Sin título registrado',
               snippet: item.abstractText || '',
-              assignee: 'Oficina Europea / Internacional (EPO/WIPO)',
+              assignee: item.affiliation || 'Oficina Europea / Internacional (EPO/WIPO)',
               inventor: authors.join(', ') || item.authorString || 'No especificado',
-              filing_date: null,
+              filing_date: appDate,
               publication_date: String(item.pubYear || 'N/A'),
               legal_status: 'Oficial Publicada',
+              forwardCitationCount: cits,
               thumbnail: null,
               figures: [],
               patent_link: patentUrl,

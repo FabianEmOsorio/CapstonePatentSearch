@@ -97,6 +97,7 @@ def query_google_patents(q):
                         "filing_date": pat.get('filing_date') or pat.get('priority_date'),
                         "publication_date": pat.get('publication_date') or 'N/A',
                         "legal_status": "Registrada",
+                        "forwardCitationCount": pat.get('cited_by') or 0,
                         "thumbnail": thumb_url,
                         "figures": figures,
                         "patent_link": f"https://patents.google.com/patent/{pub_num}/en" if pub_num else None,
@@ -180,6 +181,7 @@ def query_google_patents(q):
                     "filing_date": p.get('filing_date') or p.get('priority_date'),
                     "publication_date": p.get('publication_date') or p.get('grant_date') or 'N/A',
                     "legal_status": status,
+                    "forwardCitationCount": p.get('cited_by') or p.get('citations') or 0,
                     "thumbnail": p.get('thumbnail'),
                     "figures": figures,
                     "patent_link": p.get('patent_link') or (f"https://patents.google.com/patent/{pub_num}/en" if pub_num else None),
@@ -213,6 +215,16 @@ def query_europe_pmc(q):
                 # PDF directo si está disponible en Europe PMC
                 pdf_url = f"https://europepmc.org/backend/ptservice.cgi?accid={doc_id}&action=viewpdf" if item.get('hasPDF') == 'Y' else None
                 patent_url = f"https://worldwide.espacenet.com/patent/search/family/{doc_id}" if doc_id.startswith('EP') or doc_id.startswith('WO') else f"https://europepmc.org/article/PAT/{doc_id}"
+                
+                cits = item.get('citedByCount', 0)
+                try:
+                    cits = int(cits) if cits else 0
+                except Exception:
+                    cits = 0
+
+                app_date = None
+                if isinstance(item.get('application'), dict):
+                    app_date = item.get('application', {}).get('applicationDate')
 
                 results.append({
                     "source": "Europe PMC (EPO / WIPO)",
@@ -220,11 +232,12 @@ def query_europe_pmc(q):
                     "publication_number": doc_id,
                     "title": item.get('title', 'Sin título registrado'),
                     "snippet": item.get('abstractText', ''),
-                    "assignee": "Oficina Europea / Internacional (EPO/WIPO)",
+                    "assignee": item.get('affiliation') or "Oficina Europea / Internacional (EPO/WIPO)",
                     "inventor": ', '.join(authors) or item.get('authorString') or 'No especificado',
-                    "filing_date": None,
+                    "filing_date": app_date,
                     "publication_date": str(item.get('pubYear', 'N/A')),
                     "legal_status": "Oficial Publicada",
+                    "forwardCitationCount": cits,
                     "thumbnail": None,
                     "figures": [],
                     "patent_link": patent_url,
@@ -265,6 +278,7 @@ def query_patent_brief(q):
                     "filing_date": None,
                     "publication_date": item.get('grantDate') or 'N/A',
                     "legal_status": "Concedida",
+                    "forwardCitationCount": item.get('forwardCitations') or 0,
                     "thumbnail": fig,
                     "figures": figures,
                     "industry_tags": item.get('industryTags', []),

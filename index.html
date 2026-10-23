@@ -743,6 +743,23 @@
       padding: 2px 8px;
       border-radius: 4px;
     }
+    .patent-citations-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background-color: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .badge-inactive {
+      background-color: rgba(148, 163, 184, 0.15);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
     .patent-status-badge {
       font-size: 11px;
       padding: 2px 6px;
@@ -1267,7 +1284,27 @@
 
             <div class="ag-menu-divider"></div>
 
+            <div class="ag-menu-header">Estado Legal (Vigencia)</div>
+            <div class="ag-menu-item selected" id="opt-status-all" onclick="setStatusFilter('all', 'Todos los estados')">
+              <span>⚪+🟢 Todos los estados</span>
+              <span class="ag-item-check" id="check-status-all">✓</span>
+            </div>
+            <div class="ag-menu-item" id="opt-status-active" onclick="setStatusFilter('active', 'Solo Activas / Vigentes')">
+              <span>🟢 Solo Activas (ACTIVE, Concedida, Publicada)</span>
+              <span class="ag-item-check" id="check-status-active" style="display:none;">✓</span>
+            </div>
+            <div class="ag-menu-item" id="opt-status-inactive" onclick="setStatusFilter('inactive', 'Solo Inactivas / Dominio Público')">
+              <span>⚪ Solo Inactivas (NOT_ACTIVE, Expiradas)</span>
+              <span class="ag-item-check" id="check-status-inactive" style="display:none;">✓</span>
+            </div>
+
+            <div class="ag-menu-divider"></div>
+
             <div class="ag-menu-header">Filtros Rápidos</div>
+            <label class="ag-filter-checkbox-row">
+              <span>📄 Solo con PDF oficial descargable</span>
+              <input type="checkbox" id="chk-has-pdf" onchange="applyFiltersAndRender()">
+            </label>
             <label class="ag-filter-checkbox-row">
               <span>🔀 Intercalado 1x1 (Shuffle Fuentes)</span>
               <input type="checkbox" id="chk-shuffle-menu" onchange="toggleShuffle(event)">
@@ -1363,6 +1400,7 @@
     let currentTab = 'cards';
     let currentSource = 'all';
     let currentSort = 'relevance';
+    let currentStatusFilter = 'all'; // 'all' | 'active' | 'inactive'
     let isIntelOpen = false;
     let isShuffleActive = true; // Shuffle activo por defecto para garantizar diversidad inmediata
     const translationCache = {};
@@ -1683,6 +1721,32 @@
       return interleaved;
     }
 
+    
+    // GESTIÓN DE FILTRO POR ESTADO LEGAL (ACTIVAS VS INACTIVAS)
+    function setStatusFilter(filterKey, filterLabel) {
+      currentStatusFilter = filterKey;
+      
+      ['all', 'active', 'inactive'].forEach(key => {
+        const item = document.getElementById(`opt-status-${key}`);
+        const check = document.getElementById(`check-status-${key}`);
+        if (check) check.style.display = key === filterKey ? 'inline' : 'none';
+        if (item) {
+          if (key === filterKey) item.classList.add('selected');
+          else item.classList.remove('selected');
+        }
+      });
+
+      applyFiltersAndRender();
+    }
+
+    function isPatentActive(p) {
+      const st = (p.legal_status || '').toUpperCase();
+      if (st.includes('NOT_ACTIVE') || st.includes('EXPIRED') || st.includes('ABANDONED') || st.includes('DISCONTINUED') || st.includes('LAPSED') || st.includes('REVOKED')) {
+        return false;
+      }
+      return true;
+    }
+
     function applyFiltersAndRender() {
       if (!allRetrievedPatents) return;
 
@@ -1690,15 +1754,34 @@
       const chkRecent = document.getElementById('chk-recent').checked;
 
       // 1. Filtrar
+      const chkHasPdf = document.getElementById('chk-has-pdf')?.checked;
+
       let filtered = allRetrievedPatents.filter(p => {
+        // Filtro por Estado Legal (Activas vs Inactivas)
+        if (currentStatusFilter === 'active' && !isPatentActive(p)) {
+          return false;
+        }
+        if (currentStatusFilter === 'inactive' && isPatentActive(p)) {
+          return false;
+        }
+
+        // Filtro por Lámina Técnica
         if (chkDrawings) {
           const hasFig = p.thumbnail || (p.figures && p.figures.length > 0);
           if (!hasFig) return false;
         }
+
+        // Filtro por Últimos 5 años (2021+)
         if (chkRecent) {
           const pubYear = parseInt((p.publication_date || '').substring(0, 4), 10);
           if (!isNaN(pubYear) && pubYear < 2021) return false;
         }
+
+        // Filtro por Solo con PDF
+        if (chkHasPdf && !p.pdf) {
+          return false;
+        }
+
         return true;
       });
 
@@ -1749,12 +1832,10 @@
         const sourceBadge = p.source_badge || 'google';
         const sourceName = p.source || 'Google Patents';
 
-        let statusClass = 'badge-ok';
-        let statusText = p.legal_status || 'Registrada';
-        const lowerSt = statusText.toLowerCase();
-        if (lowerSt.includes('discontinued') || lowerSt.includes('expired') || lowerSt.includes('abandoned')) {
-          statusClass = 'badge-pending';
-        }
+        const active = isPatentActive(p);
+        let statusClass = active ? 'badge-ok' : 'badge-inactive';
+        let statusText = p.legal_status || (active ? 'Activa' : 'NOT_ACTIVE');
+        const cits = p.forwardCitationCount || 0;
 
         // Thumbnail o figura técnica
         let thumbHtml = '';
@@ -1825,6 +1906,7 @@
                     <span class="source-tag source-${sourceBadge}">[${sourceName}]</span>
                     <span class="patent-id-badge">${pubNum}</span>
                     <span class="patent-status-badge ${statusClass}">${statusText}</span>
+                    ${cits > 0 ? `<span class="patent-citations-badge" title="${cits} patentes posteriores citan esta invención">⭐ ${cits} citas</span>` : ''}
                   </div>
                   <div class="patent-dates-text">
                     ${filingDate ? `Solicitud: ${filingDate} &bull; ` : ''}Publicación: ${pubDate}
