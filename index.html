@@ -974,6 +974,160 @@
     }
 
     
+    
+    /* =========================================================
+       SIDEBAR TABS (FICHA VS PDF EMBEBIDO)
+       ========================================================= */
+    .sidebar-tabs-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--bg-canvas);
+      padding: 0 16px;
+      gap: 6px;
+    }
+    .sb-tab-btn {
+      background: none;
+      border: 1px solid transparent;
+      padding: 9px 14px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+    }
+    .sb-tab-btn:hover {
+      color: var(--text-high);
+    }
+    .sb-tab-btn.active {
+      color: var(--brand-primary);
+      border-color: var(--border-color) var(--border-color) var(--bg-surface);
+      background-color: var(--bg-surface);
+      border-bottom: 2px solid var(--brand-primary);
+      font-weight: 600;
+      margin-bottom: -1px;
+    }
+
+    /* =========================================================
+       BOTÓN FLOTANTE GLOSARIO Y CENTRO DE CONOCIMIENTO (FAB)
+       ========================================================= */
+    .fab-glossary-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9990;
+      background: var(--bg-surface);
+      color: var(--text-high);
+      border: 1px solid var(--border-color);
+      border-radius: 30px;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .fab-glossary-btn:hover {
+      transform: translateY(-2px);
+      border-color: var(--brand-primary);
+      box-shadow: 0 10px 28px rgba(0, 145, 255, 0.35);
+      color: #ffffff;
+    }
+    .fab-icon {
+      font-size: 16px;
+    }
+    .fab-text {
+      letter-spacing: -0.01em;
+    }
+
+    /* Modal del Glosario */
+    .glossary-modal-content {
+      width: 760px;
+      max-width: 92vw;
+      max-height: 85vh;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+    }
+    .glossary-modal-body {
+      padding: 0;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .glossary-tabs-nav {
+      display: flex;
+      background-color: var(--bg-canvas);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 16px;
+      gap: 4px;
+      overflow-x: auto;
+    }
+    .glossary-tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 14px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+    }
+    .glossary-tab-btn:hover {
+      color: var(--text-high);
+    }
+    .glossary-tab-btn.active {
+      color: var(--brand-primary);
+      border-bottom-color: var(--brand-primary);
+      font-weight: 600;
+    }
+    .glossary-tab-pane {
+      padding: 20px;
+      display: none;
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: var(--text-medium);
+    }
+    .glossary-tab-pane.active {
+      display: block;
+    }
+    .glossary-card {
+      background-color: var(--bg-canvas);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+    .glossary-card-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text-high);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cpc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      margin-top: 10px;
+    }
+    .cpc-table th, .cpc-table td {
+      border: 1px solid var(--border-color);
+      padding: 8px 10px;
+      text-align: left;
+    }
+    .cpc-table th {
+      background-color: var(--bg-subtle);
+      color: var(--text-high);
+      font-weight: 600;
+    }
+
     /* =========================================================
        SIDEBAR DRAWER (FICHA TÉCNICA LATERAL DESLIZABLE)
        ========================================================= */
@@ -1591,8 +1745,150 @@
         <button class="btn-close-sidebar" onclick="cerrarSidebar()" title="Cerrar barra lateral (Esc)">&times;</button>
       </div>
     </div>
-    <div class="sidebar-body" id="sidebar-body">
+
+    <!-- Pestañas del Sidebar: Ficha Nativa vs PDF Oficial Embebido -->
+    <div class="sidebar-tabs-bar">
+      <button id="sb-tab-dossier" class="sb-tab-btn active" onclick="cambiarSidebarTab('dossier')">
+        📋 Ficha Técnica Nativa
+      </button>
+      <button id="sb-tab-pdf" class="sb-tab-btn" onclick="cambiarSidebarTab('pdf')">
+        📄 Documento PDF Oficial
+      </button>
+    </div>
+
+    <div class="sidebar-body" id="sidebar-body-dossier">
       <!-- Injected via JS -->
+    </div>
+
+    <div class="sidebar-body" id="sidebar-body-pdf" style="display: none; padding: 0; height: calc(100vh - 110px);">
+      <!-- Injected via JS (iframe o fallback) -->
+    </div>
+  </div>
+
+  <!-- Botón Flotante (FAB) de Guía, Glosario y Fuentes -->
+  <button class="fab-glossary-btn" onclick="abrirGlosarioModal()" title="Abrir Guía y Glosario Tecnológico de Patentes">
+    <span class="fab-icon">📖</span>
+    <span class="fab-text">Glosario y Fuentes</span>
+  </button>
+
+  <!-- Modal del Glosario y Centro de Conocimiento -->
+  <div id="glossary-modal" class="modal-overlay" onclick="cerrarGlosarioModal(event)">
+    <div class="modal-content glossary-modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 18px;">📖</span>
+          <span style="font-weight: 700; font-size: 15px; color: var(--text-high);">Centro de Conocimiento y Glosario de Patentes</span>
+        </div>
+        <button class="btn-close-modal" onclick="cerrarGlosarioModal()">&times;</button>
+      </div>
+
+      <div class="glossary-tabs-nav">
+        <button id="gl-nav-fuentes" class="glossary-tab-btn active" onclick="cambiarGlosarioTab('fuentes')">
+          🌐 Fuentes de Patentes
+        </button>
+        <button id="gl-nav-cpc" class="glossary-tab-btn" onclick="cambiarGlosarioTab('cpc')">
+          🔬 Códigos CPC / IPC
+        </button>
+        <button id="gl-nav-estados" class="glossary-tab-btn" onclick="cambiarGlosarioTab('estados')">
+          ⚖️ Estados Jurídicos
+        </button>
+        <button id="gl-nav-territorio" class="glossary-tab-btn" onclick="cambiarGlosarioTab('territorio')">
+          🌍 Territorialidad y Citas
+        </button>
+      </div>
+
+      <div class="glossary-modal-body">
+        <!-- 1. Pestaña Fuentes -->
+        <div id="gl-pane-fuentes" class="glossary-tab-pane active">
+          <div class="glossary-card">
+            <div class="glossary-card-title">
+              <span class="source-tag source-google">[Google Patents]</span>
+              <span>Google Patents Engine (Red Mundial Oficial)</span>
+            </div>
+            <p><strong>¿De dónde sale?</strong> Indexa más de 120 millones de documentos de más de 100 oficinas de patentes del mundo (USPTO, EPO, WIPO, JPO Japón, KIPO Corea, etc.). Nuestro motor consulta en paralelo su endpoint nativo directo y provee figuras técnicas y PDFs desde Google Cloud Storage sin requerir API keys de pago.</p>
+          </div>
+
+          <div class="glossary-card">
+            <div class="glossary-card-title">
+              <span class="source-tag source-europepmc">[Europe PMC (EPO / WIPO)]</span>
+              <span>Europe PMC Patent Corpus (EMBL-EBI)</span>
+            </div>
+            <p><strong>¿De dónde sale?</strong> Administrado por el prestigioso Instituto Europeo de Bioinformática (EMBL-EBI) con sede en Hinxton, Reino Unido. Provee acceso REST en tiempo real a solicitudes de la Oficina Europea de Patentes (EPO, códigos <code>EP...</code>) y del tratado internacional de patentes (WIPO, códigos <code>WO...</code>), incluyendo citas hacia adelante.</p>
+          </div>
+
+          <div class="glossary-card">
+            <div class="glossary-card-title">
+              <span class="source-tag source-patentbrief">[PatentBrief (Tecnología Amigable)]</span>
+              <span>PatentBrief Open Technology API</span>
+            </div>
+            <p><strong>¿De dónde sale?</strong> Es un proyecto de indexación independiente que descarga semanalmente los datos masivos abiertos (Open Data / Bulk Data) de la <strong>USPTO (Oficina de Patentes de EE.UU.)</strong> y la <strong>OMPI/WIPO</strong>. <em>No depende de Google</em>; procesa los expedientes con modelos de lenguaje estructurados para generar títulos simplificados (<code>plainEnglishTitle</code>), resúmenes en una frase y etiquetas industriales para facilitar la comprensión sin abrumar con lenguaje legal.</p>
+          </div>
+        </div>
+
+        <!-- 2. Pestaña CPC / IPC -->
+        <div id="gl-pane-cpc" class="glossary-tab-pane">
+          <p style="margin-bottom: 12px;">Los sistemas <strong>CPC</strong> (Cooperative Patent Classification) e <strong>IPC</strong> (International Patent Classification) son taxonomías jerárquicas universales para categorizar qué problema técnico resuelve una patente.</p>
+
+          <div class="glossary-card">
+            <div class="glossary-card-title">Anatomía de un Código CPC (Ej. A43B 13/18)</div>
+            <ul style="padding-left: 20px; margin-top: 6px;">
+              <li><strong>Sección A</strong>: Necesidades Humanas (Agricultura, Salud, Calzado).</li>
+              <li><strong>Clase 43</strong>: Industria del Calzado.</li>
+              <li><strong>Subclase B</strong>: Partes constitutivas características de calzado.</li>
+              <li><strong>Grupo 13/18</strong>: Suelas con mecanismos de amortiguación o elementos piezoeléctricos.</li>
+            </ul>
+          </div>
+
+          <div class="glossary-card-title" style="margin-top: 14px;">Las 8 Secciones Oficiales Internacionales:</div>
+          <table class="cpc-table">
+            <thead>
+              <tr><th>Sección</th><th>Nombre del Área Tecnológica</th><th>Ejemplos Comunes</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>A</strong></td><td>Necesidades Humanas</td><td>Calzado, Medicina, Prótesis, Alimentos.</td></tr>
+              <tr><td><strong>B</strong></td><td>Operaciones de Fabricación y Transporte</td><td>Robótica, Impresión 3D, Vehículos.</td></tr>
+              <tr><td><strong>C</strong></td><td>Química y Metalurgia</td><td>Polímeros, Nanomateriales, Baterías químicas.</td></tr>
+              <tr><td><strong>D</strong></td><td>Textiles y Papel</td><td>Telas inteligentes, Fibras conductoras.</td></tr>
+              <tr><td><strong>E</strong></td><td>Construcciones Fijas</td><td>Edificaciones, Sensores de infraestructura.</td></tr>
+              <tr><td><strong>F</strong></td><td>Mecánica, Motores y Armamento</td><td>Turbinas, Actuadores, Válvulas hidráulicas.</td></tr>
+              <tr><td><strong>G</strong></td><td>Física e Instrumentos</td><td>Sensores ópticos, Algoritmos, Computación.</td></tr>
+              <tr><td><strong>H</strong></td><td>Electricidad y Circuitos</td><td>Piezoeléctricos, Semiconductores, Baterías.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 3. Pestaña Estados Jurídicos -->
+        <div id="gl-pane-estados" class="glossary-tab-pane">
+          <div class="glossary-card">
+            <div class="glossary-card-title">
+              <span class="patent-status-badge badge-ok">ACTIVE / Concedida / Oficial Publicada</span>
+              <span>Patente Vigente (Monopolio Comercial Protegido)</span>
+            </div>
+            <p>La patente cuenta con derechos de exclusividad otorgados por el estado. Ningún competidor puede comercializar o fabricar el producto en ese país sin una licencia formal o acuerdo de transferencia tecnológica con el titular.</p>
+          </div>
+
+          <div class="glossary-card">
+            <div class="glossary-card-title">
+              <span class="patent-status-badge badge-inactive">NOT_ACTIVE / Expirada / Abandonada</span>
+              <span>Patente en Dominio Público (¡Oportunidad Comercial!)</span>
+            </div>
+            <p>Los derechos de la patente se extinguieron (por cumplir los 20 años reglamentarios o por falta de pago de las anualidades de mantenimiento). <strong>Cualquier empresa, universidad o emprendedor puede usar, adaptar y comercializar la tecnología libremente sin pagar regalías.</strong></p>
+          </div>
+        </div>
+
+        <!-- 4. Pestaña Territorialidad y Citas -->
+        <div id="gl-pane-territorio" class="glossary-tab-pane">
+          <div class="glossary-card">
+            <div class="glossary-card-title">🌍 Principio de Territorialidad</div>
+            <p>Las patentes <strong>solo tienen validez legal en el país donde fueron concedidas</strong>. Por ejemplo, una patente con prefijo <code>US</code> (EE.UU.) no protege en Colombia a menos que la empresa haya radicado una extensión nacional ante la Superintendencia de Industria y Comercio (SIC). El tratado <code>WO</code> (PCT) otorga una ventana de tiempo para reclamar prioridad en más de 150 naciones.</p>
+          </div>
+
+          <div class="glossary-card">
+            <div class="glossary-card-title">⭐ Citas hacia adelante (Forward Citations)</div>
+            <p>Mide cuántas patentes posteriores tuvieron que citar este documento como antecedente obligado. En el ecosistema de vigilancia e inversión tecnológica, un alto número de citas indica que la invención es una <strong>tecnología pionera o estándar fundamental</strong> de la industria.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2230,9 +2526,97 @@
     // GESTIÓN DE FICHA EN SIDEBAR
     let currentRenderedPatents = [];
 
+    
+    // GESTIÓN DE PESTAÑAS DENTRO DEL SIDEBAR (FICHA VS PDF)
+    let currentSidebarTab = 'dossier';
+    let currentActivePatentData = null;
+
+    function cambiarSidebarTab(tab) {
+      currentSidebarTab = tab;
+      const tabDossier = document.getElementById('sb-tab-dossier');
+      const tabPdf = document.getElementById('sb-tab-pdf');
+      const viewDossier = document.getElementById('sidebar-body-dossier');
+      const viewPdf = document.getElementById('sidebar-body-pdf');
+
+      if (tab === 'dossier') {
+        tabDossier.classList.add('active');
+        tabPdf.classList.remove('active');
+        viewDossier.style.display = 'block';
+        viewPdf.style.display = 'none';
+      } else {
+        tabDossier.classList.remove('active');
+        tabPdf.classList.add('active');
+        viewDossier.style.display = 'none';
+        viewPdf.style.display = 'block';
+        renderSidebarPdfView();
+      }
+    }
+
+    function renderSidebarPdfView() {
+      const viewPdf = document.getElementById('sidebar-body-pdf');
+      const p = currentActivePatentData;
+      if (!p) return;
+
+      if (p.pdf) {
+        viewPdf.innerHTML = `
+          <div style="height: 100%; display: flex; flex-direction: column;">
+            <div style="padding: 8px 16px; background-color: var(--bg-canvas); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+              <span>Documento Oficial Escaneado (PDF Gaceta)</span>
+              <a href="${p.pdf}" target="_blank" rel="noopener" class="btn-ghost" style="text-decoration: none; font-size: 11px;">
+                📥 Descargar archivo PDF
+              </a>
+            </div>
+            <iframe src="${p.pdf}#view=FitH" style="width: 100%; height: 100%; border: none; background: #fff;" title="Visor PDF Oficial"></iframe>
+          </div>
+        `;
+      } else {
+        viewPdf.innerHTML = `
+          <div style="padding: 40px 24px; text-align: center; color: var(--text-medium);">
+            <div style="font-size: 32px; margin-bottom: 10px;">📄</div>
+            <h3 style="font-size: 16px; color: var(--text-high); margin-bottom: 8px;">Documento PDF no indexado en caché directo</h3>
+            <p style="font-size: 13px; line-height: 1.5; max-width: 420px; margin: 0 auto 16px auto; color: var(--text-muted);">
+              Esta patente está registrada en la oficina de origen pero el enlace directo al archivo binario no está disponible en este momento. Puedes consultar la gaceta oficial en la web externa:
+            </p>
+            <a href="${p.patent_link || '#'}" target="_blank" rel="noopener" class="btn-ghost" style="color: var(--brand-primary); font-weight: 600; text-decoration: none; padding: 8px 16px;">
+              🌐 Ver Registro en la Oficina de Origen &nearr;
+            </a>
+          </div>
+        `;
+      }
+    }
+
+    // GESTIÓN DEL MODAL DE GLOSARIO Y CENTRO DE CONOCIMIENTO (FAB)
+    function abrirGlosarioModal() {
+      document.getElementById('glossary-modal').style.display = 'flex';
+    }
+
+    function cerrarGlosarioModal(e) {
+      if (e && e.target && e.target.id !== 'glossary-modal' && !e.target.classList.contains('btn-close-modal')) {
+        return;
+      }
+      document.getElementById('glossary-modal').style.display = 'none';
+    }
+
+    function cambiarGlosarioTab(tabName) {
+      const tabs = ['fuentes', 'cpc', 'estados', 'territorio'];
+      tabs.forEach(t => {
+        const nav = document.getElementById(`gl-nav-${t}`);
+        const pane = document.getElementById(`gl-pane-${t}`);
+        if (t === tabName) {
+          if (nav) nav.classList.add('active');
+          if (pane) pane.classList.add('active');
+        } else {
+          if (nav) nav.classList.remove('active');
+          if (pane) pane.classList.remove('active');
+        }
+      });
+    }
+
     function abrirSidebarPatente(idx) {
       const p = currentRenderedPatents[idx];
       if (!p) return;
+      currentActivePatentData = p;
+      cambiarSidebarTab('dossier');
 
       const pubNum = p.publication_number || 'N/A';
       const title = p.title || 'Sin título registrado';
@@ -2316,7 +2700,7 @@
         `;
       }
 
-      document.getElementById('sidebar-body').innerHTML = `
+      document.getElementById('sidebar-body-dossier').innerHTML = `
         <h2 style="font-size: 17px; font-weight: 700; color: var(--text-high); line-height: 1.35; margin-bottom: 14px;">
           ${title}
         </h2>
@@ -2375,6 +2759,7 @@
       if (e.key === 'Escape') {
         cerrarSidebar();
         cerrarModal();
+        cerrarGlosarioModal();
       }
     });
 
