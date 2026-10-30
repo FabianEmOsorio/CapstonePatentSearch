@@ -6,6 +6,10 @@
       "destination": "/api/patents.js"
     },
     {
+      "source": "/api/literature",
+      "destination": "/api/literature.js"
+    },
+    {
       "source": "/api/usage",
       "destination": "/api/usage.js"
     },

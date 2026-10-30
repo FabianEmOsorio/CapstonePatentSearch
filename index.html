@@ -33,6 +33,11 @@
       --src-patentbrief-bg: rgba(52, 211, 153, 0.14);
       --src-patentbrief-border: rgba(52, 211, 153, 0.3);
 
+      --src-openalex: #10b981;          /* OpenAlex Academic */
+      --src-openalex-bg: rgba(16, 185, 129, 0.14);
+      --src-openalex-border: rgba(16, 185, 129, 0.3);
+
+
       /* Estados del Sistema */
       --status-success: #22c55e;        /* Verde 100% Online */
       --status-warning: #f59e0b;        /* Ámbar Pendiente */
@@ -78,6 +83,11 @@
       --src-patentbrief: #047857;
       --src-patentbrief-bg: #d1fae5;
       --src-patentbrief-border: #a7f3d0;
+
+      --src-openalex: #059669;
+      --src-openalex-bg: #ecfdf5;
+      --src-openalex-border: #a7f3d0;
+
 
       --bg-canvas: #f8fafc;
       --bg-surface: #ffffff;
@@ -748,6 +758,265 @@
       color: var(--src-europepmc); 
       border: 1px solid var(--src-europepmc-border);
     }
+    
+    /* Fuente OpenAlex & Badges de Literatura Científica */
+    .source-openalex { 
+      background-color: var(--src-openalex-bg); 
+      color: var(--src-openalex); 
+      border: 1px solid var(--src-openalex-border);
+    }
+    .oa-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .oa-open {
+      background-color: rgba(34, 197, 94, 0.16);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+    }
+    .oa-closed {
+      background-color: rgba(148, 163, 184, 0.16);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+    .fto-public-domain {
+      background-color: rgba(56, 189, 248, 0.16);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+
+    /* DUAL ENGINE SWITCHER (Patentes vs Literatura) */
+    .engine-mode-switcher {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      padding: 5px;
+      border-radius: 12px;
+    }
+    .engine-tab-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .engine-tab-btn:hover {
+      background-color: var(--bg-subtle);
+      color: var(--text-high);
+    }
+    .engine-tab-btn.active {
+      background-color: var(--bg-subtle);
+      border-color: var(--brand-primary);
+      color: var(--text-high);
+      box-shadow: 0 2px 8px rgba(0, 145, 255, 0.15);
+    }
+    .engine-tab-btn.active .engine-title {
+      color: var(--brand-primary);
+    }
+    .engine-icon {
+      font-size: 20px;
+      line-height: 1;
+    }
+    .engine-text-col {
+      display: flex;
+      flex-direction: column;
+    }
+    .engine-title {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .engine-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* BOTÓN Y MODAL DOSSIER DE VIGILANCIA */
+    .btn-dossier-export {
+      background-color: rgba(0, 145, 255, 0.12);
+      color: var(--brand-primary);
+      border: 1px solid rgba(0, 145, 255, 0.35);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .btn-dossier-export:hover {
+      background-color: var(--brand-primary);
+      color: #ffffff;
+      box-shadow: 0 0 12px var(--brand-glow);
+    }
+    .dossier-modal-content {
+      max-width: 900px;
+      width: 95%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    }
+    .dossier-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 18px;
+      background-color: var(--bg-subtle);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .dossier-sheet {
+      padding: 24px;
+      overflow-y: auto;
+      color: var(--text-high);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .dossier-header-block {
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .dossier-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .dossier-stat-card {
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .dossier-stat-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--brand-primary);
+    }
+    .dossier-stat-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 2px;
+    }
+    .dossier-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+    .dossier-bar-label {
+      width: 180px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text-high);
+      font-weight: 500;
+    }
+    .dossier-bar-track {
+      flex: 1;
+      height: 10px;
+      background-color: var(--bg-subtle);
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+    .dossier-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--brand-primary), #a855f7);
+      border-radius: 5px;
+    }
+    .dossier-bar-count {
+      width: 40px;
+      text-align: right;
+      font-family: monospace;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .dossier-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 14px;
+    }
+    .dossier-table th {
+      background-color: var(--bg-subtle);
+      color: var(--text-muted);
+      text-align: left;
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+    .dossier-table td {
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      color: var(--text-medium);
+    }
+
+    /* Print Stylesheet para Dossier */
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #dossier-sheet-print, #dossier-sheet-print * {
+        visibility: visible !important;
+      }
+      #dossier-sheet-print {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 25px;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .dossier-stat-card, .dossier-table td, .dossier-table th {
+        border-color: #ddd !important;
+        background: #fafafa !important;
+        color: #000 !important;
+      }
+      .dossier-bar-fill {
+        background: #0070f3 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .dossier-stat-val {
+        color: #0070f3 !important;
+      }
+    }
+
     .source-patentbrief { 
       background-color: var(--src-patentbrief-bg); 
       color: var(--src-patentbrief); 
@@ -1419,6 +1688,27 @@
       </div>
     </header>
 
+        <!-- =========================================================
+         DUAL-ENGINE SELECTOR: PATENTES vs LITERATURA CIENTÍFICA
+         ========================================================= -->
+    <div class="engine-mode-switcher">
+      <button id="engine-btn-patents" class="engine-tab-btn active" onclick="setEngineMode('patents')" title="Consultar patentes mundiales concedidas y en trámite">
+        <span class="engine-icon">⚡</span>
+        <div class="engine-text-col">
+          <span class="engine-title">Patentes Tecnológicas</span>
+          <span class="engine-sub">Google Patents &bull; Europe PMC (EPO/WIPO) &bull; PatentBrief</span>
+        </div>
+      </button>
+
+      <button id="engine-btn-literature" class="engine-tab-btn" onclick="setEngineMode('literature')" title="Consultar literatura científica académica, papers y tesis en OpenAlex">
+        <span class="engine-icon">📚</span>
+        <div class="engine-text-col">
+          <span class="engine-title">Literatura Científica</span>
+          <span class="engine-sub">OpenAlex &bull; Artículos y Papers &bull; 250M+ Obras Abiertas</span>
+        </div>
+      </button>
+    </div>
+
     <!-- =========================================================
          BARRA DE BÚSQUEDA / PROMPT BOX ESTILO ANTIGRAVITY
          ========================================================= -->
@@ -1718,6 +2008,37 @@
     </footer>
   </div>
 
+    <!-- Modal Dossier de Vigilancia Tecnológica -->
+  <div id="dossier-modal" class="modal-overlay" onclick="cerrarDossierModal(event)">
+    <div class="modal-content dossier-modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 18px;">📋</span>
+          <span style="font-weight: 700; font-size: 15px; color: var(--text-high);">Dossier Ejecutivo de Vigilancia Tecnológica</span>
+        </div>
+        <button class="btn-close-modal" onclick="cerrarDossierModal()">&times;</button>
+      </div>
+
+      <div class="dossier-toolbar">
+        <div style="font-size: 12px; color: var(--text-muted);">
+          <span>Formato normalizado de inteligencia competitiva y libertad de operación</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-ghost" onclick="descargarDossierHtml()" style="font-size: 11px;">
+            💾 Descargar Informe HTML
+          </button>
+          <button class="btn-dossier-export" onclick="imprimirDossier()" style="font-size: 11px;">
+            🖨️ Imprimir / Guardar en PDF
+          </button>
+        </div>
+      </div>
+
+      <div class="dossier-sheet" id="dossier-sheet-print">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
   <!-- Modal Lightbox for Technical Drawings / Figures -->
   <div id="image-modal" class="modal-overlay" onclick="cerrarModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
@@ -1816,6 +2137,14 @@
             <p><strong>¿De dónde sale?</strong> Administrado por el prestigioso Instituto Europeo de Bioinformática (EMBL-EBI) con sede en Hinxton, Reino Unido. Provee acceso REST en tiempo real a solicitudes de la Oficina Europea de Patentes (EPO, códigos <code>EP...</code>) y del tratado internacional de patentes (WIPO, códigos <code>WO...</code>), incluyendo citas hacia adelante.</p>
           </div>
 
+                    <div class="glossary-card">
+            <div class="glossary-card-title">
+              <span class="source-tag source-openalex">[OpenAlex (Literatura Científica)]</span>
+              <span>OpenAlex Global Scholarly Graph (OurResearch)</span>
+            </div>
+            <p><strong>¿De dónde sale?</strong> Es el catálogo abierto de literatura científica más grande del mundo, sucesor de Microsoft Academic Graph. Indexa más de 250 millones de obras académicas, tesis, preprints y artículos de miles de revistas arbitradas, identificando autores, afiliaciones universitarias, estado de Acceso Abierto (Open Access) y conteo de citas en tiempo real.</p>
+          </div>
+
           <div class="glossary-card">
             <div class="glossary-card-title">
               <span class="source-tag source-patentbrief">[PatentBrief (Tecnología Amigable)]</span>
@@ -1895,6 +2224,8 @@
   <script>
     let rawJsonData = null;
     let allRetrievedPatents = [];
+    let allRetrievedLiterature = [];
+    let currentEngineMode = 'patents'; // 'patents' | 'literature'
     let currentTab = 'cards';
     let currentSource = 'all';
     let currentSort = 'relevance';
@@ -1926,6 +2257,46 @@
         icon.textContent = '☀️';
         text.textContent = 'Modo Claro';
       }
+    }
+
+    
+    // GESTIÓN DE MODO DE MOTOR (PATENTES vs LITERATURA CIENTÍFICA)
+    function setEngineMode(mode) {
+      currentEngineMode = mode;
+      const btnPatents = document.getElementById('engine-btn-patents');
+      const btnLit = document.getElementById('engine-btn-literature');
+      const queryInput = document.getElementById('query-input');
+      const sourcePill = document.getElementById('source-pill-btn');
+      const shufflePill = document.getElementById('shuffle-pill-btn');
+      const countryShufflePill = document.getElementById('country-shuffle-pill-btn');
+      const intelDropdown = document.getElementById('intel-dropdown');
+      const activeFiltersBar = document.getElementById('active-filters-container');
+
+      if (mode === 'patents') {
+        if (btnPatents) btnPatents.classList.add('active');
+        if (btnLit) btnLit.classList.remove('active');
+        if (sourcePill) sourcePill.style.display = 'inline-flex';
+        if (shufflePill) shufflePill.style.display = 'inline-flex';
+        if (countryShufflePill) countryShufflePill.style.display = 'inline-flex';
+        queryInput.placeholder = 'Escribe conceptos técnicos, palabras clave o ecuaciones de patente (ej. piezoelectric footwear)...';
+        if (!queryInput.value || queryInput.value.includes('piezoelectric energy')) {
+          queryInput.value = 'piezoelectric footwear';
+        }
+      } else {
+        if (btnPatents) btnPatents.classList.remove('active');
+        if (btnLit) btnLit.classList.add('active');
+        if (sourcePill) sourcePill.style.display = 'none';
+        if (shufflePill) shufflePill.style.display = 'none';
+        if (countryShufflePill) countryShufflePill.style.display = 'none';
+        if (intelDropdown) intelDropdown.style.display = 'none';
+        if (activeFiltersBar) activeFiltersBar.style.display = 'none';
+        queryInput.placeholder = 'Escribe temas académicos, artículos científicos, autores o DOI (ej. piezoelectric energy harvesting footwear)...';
+        if (!queryInput.value || queryInput.value === 'piezoelectric footwear') {
+          queryInput.value = 'piezoelectric energy harvesting footwear';
+        }
+      }
+
+      buscar();
     }
 
     // Inicializar tema guardado
@@ -2106,7 +2477,7 @@
       document.getElementById('view-raw').style.display = tab === 'raw' ? 'block' : 'none';
     }
 
-    async function buscar(customQuery) {
+        async function buscar(customQuery) {
       if (customQuery) {
         document.getElementById('query-input').value = customQuery;
       }
@@ -2119,6 +2490,35 @@
       const intelDropdown = document.getElementById('intel-dropdown');
 
       btn.disabled = true;
+
+      if (currentEngineMode === 'literature') {
+        // MODO LITERATURA CIENTÍFICA (OpenAlex REST API)
+        cardsContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; padding: 30px; text-align: center;">Consultando literatura científica y papers arbitrados en OpenAlex...</div>';
+        try {
+          const res = await fetch(`/api/literature?q=${encodeURIComponent(q)}&page=1`);
+          const data = await res.json();
+          rawJsonData = data;
+          rawOutput.textContent = JSON.stringify(data, null, 2);
+          allRetrievedLiterature = data.organic_results || [];
+          
+          if (intelDropdown) intelDropdown.style.display = 'none';
+          
+          const countBadge = document.getElementById('results-count-badge');
+          if (countBadge) {
+            countBadge.textContent = `${allRetrievedLiterature.length} papers (OpenAlex)`;
+          }
+          
+          renderizarLiteratura(allRetrievedLiterature);
+        } catch (err) {
+          cardsContainer.innerHTML = `<div style="color: var(--status-danger); font-size: 13px; padding: 20px;">Error consultando literatura científica: ${err.message}</div>`;
+          rawOutput.textContent = JSON.stringify({ error: err.message }, null, 2);
+        } finally {
+          btn.disabled = false;
+        }
+        return;
+      }
+
+      // MODO PATENTES TECNOLÓGICAS (Google, Europe PMC, PatentBrief)
       cardsContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; padding: 30px; text-align: center;">Consultando patentes en las redes oficiales conectadas...</div>';
 
       try {
@@ -2148,7 +2548,7 @@
         applyFiltersAndRender();
 
       } catch (err) {
-        cardsContainer.innerHTML = `<div style="color: var(--status-danger); font-size: 13px; padding: 20px;">Error al conectar con la API: ${err.message}</div>`;
+        cardsContainer.innerHTML = `<div style="color: var(--status-danger); font-size: 13px; padding: 20px;">Error al conectar con la API de patentes: ${err.message}</div>`;
         rawOutput.textContent = JSON.stringify({ error: err.message }, null, 2);
       } finally {
         btn.disabled = false;
@@ -2636,7 +3036,7 @@
         <span class="source-tag source-${sourceBadge}">[${sourceName}]</span>
         <span class="jurisdiction-badge">${getJurisdictionFlag(pubNum)}</span>
         <span style="font-family: monospace; font-size: 14px; font-weight: 700; color: var(--text-high);">${pubNum}</span>
-        <span class="patent-status-badge ${active ? 'badge-ok' : 'badge-inactive'}">${p.legal_status || (active ? 'Activa' : 'NOT_ACTIVE')}</span>
+        <span class="patent-status-badge ${active ? 'badge-ok' : 'fto-public-domain'}" title="${active ? 'Patente vigente' : 'Libertad de Operación (FTO) en dominio público'}">${active ? (p.legal_status || '🟢 Vigente') : '⚪ Dominio Público (FTO)'}</span>
         ${cits > 0 ? `<span class="patent-citations-badge">⭐ ${cits} citas</span>` : ''}
       `;
 
@@ -2746,6 +3146,280 @@
 
       document.getElementById('patent-sidebar').classList.add('open');
       document.getElementById('sidebar-backdrop').classList.add('open');
+    }
+
+    
+    // GESTIÓN DEL DOSSIER EJECUTIVO DE VIGILANCIA TECNOLÓGICA
+    function abrirDossierModal() {
+      const modal = document.getElementById('dossier-modal');
+      const sheet = document.getElementById('dossier-sheet-print');
+      const q = document.getElementById('query-input').value.trim() || 'No especificada';
+      const fechaHoy = new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+      if (currentEngineMode === 'literature') {
+        // Dossier de Literatura Científica
+        const total = allRetrievedLiterature.length;
+        const totalCitations = allRetrievedLiterature.reduce((acc, curr) => acc + (curr.cited_by_count || 0), 0);
+        const oaCount = allRetrievedLiterature.filter(w => w.is_oa).length;
+        const oaPct = total > 0 ? Math.round((oaCount / total) * 100) : 0;
+
+        // Top Revistas / Fuentes
+        const venuesMap = {};
+        allRetrievedLiterature.forEach(w => {
+          const v = w.journal || 'Otros Repositorios';
+          venuesMap[v] = (venuesMap[v] || 0) + 1;
+        });
+        const topVenues = Object.entries(venuesMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        const maxVenueCount = topVenues.length > 0 ? topVenues[0][1] : 1;
+
+        sheet.innerHTML = `
+          <div class="dossier-header-block">
+            <div>
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brand-primary); font-weight: 700;">
+                Universidad del Rosario &bull; Céntrika &bull; Awake
+              </div>
+              <h1 style="font-size: 20px; font-weight: 800; color: var(--text-high); margin-top: 4px;">
+                Dossier de Vigilancia Científica y Estado del Arte
+              </h1>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                Ecuación analizada: <strong style="color: var(--text-high);">"${q}"</strong> &bull; Modo: <span style="color: var(--src-openalex); font-weight: 600;">OpenAlex Academic Graph</span>
+              </div>
+            </div>
+            <div style="text-align: right; font-size: 11px; color: var(--text-muted);">
+              <div>Fecha de Emisión: <strong>${fechaHoy}</strong></div>
+              <div>Auditoría: Grupo 6 Capstone Ingeniería</div>
+            </div>
+          </div>
+
+          <div class="dossier-stat-grid">
+            <div class="dossier-stat-card">
+              <div class="dossier-stat-val">${total}</div>
+              <div class="dossier-stat-lbl">Artículos Indexados</div>
+            </div>
+            <div class="dossier-stat-card">
+              <div class="dossier-stat-val" style="color: #22c55e;">${oaCount} (${oaPct}%)</div>
+              <div class="dossier-stat-lbl">Acceso Abierto (Open Access)</div>
+            </div>
+            <div class="dossier-stat-card">
+              <div class="dossier-stat-val" style="color: #f59e0b;">${totalCitations}</div>
+              <div class="dossier-stat-lbl">Citas Académicas Acumuladas</div>
+            </div>
+          </div>
+
+          <h3 style="font-size: 14px; font-weight: 700; color: var(--text-high); margin: 20px 0 10px 0;">
+            🏛️ Revistas y Repositorios Académicos Dominantes
+          </h3>
+          <div>
+            ${topVenues.map(([name, count]) => `
+              <div class="dossier-bar-row">
+                <div class="dossier-bar-label" title="${name}">${name}</div>
+                <div class="dossier-bar-track">
+                  <div class="dossier-bar-fill" style="width: ${(count / maxVenueCount) * 100}%; background: #10b981;"></div>
+                </div>
+                <div class="dossier-bar-count">${count} doc.</div>
+              </div>
+            `).join('')}
+          </div>
+
+          <h3 style="font-size: 14px; font-weight: 700; color: var(--text-high); margin: 24px 0 10px 0;">
+            📑 Tabla Ejecutiva de Publicaciones Analizadas
+          </h3>
+          <table class="dossier-table">
+            <thead>
+              <tr>
+                <th>Año</th>
+                <th>Título de la Investigación</th>
+                <th>Primer Autor / Filiación</th>
+                <th>Revista / Journal</th>
+                <th>Acceso</th>
+                <th>Citas</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${allRetrievedLiterature.map(w => `
+                <tr>
+                  <td><strong>${w.publication_year || 'N/A'}</strong></td>
+                  <td><a href="${w.doi_url || w.landing_url || '#'}" target="_blank" style="color: inherit; text-decoration: none; font-weight: 600;">${w.title}</a></td>
+                  <td>${w.primary_author || 'No especificado'}</td>
+                  <td>${w.journal}</td>
+                  <td>${w.is_oa ? '<span style="color:#22c55e; font-weight:700;">🔓 OA</span>' : '<span style="color:#94a3b8;">🔒 Suscripción</span>'}</td>
+                  <td style="font-family: monospace; font-weight: 700;">${w.cited_by_count}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+
+      } else {
+        // Dossier de Patentes Tecnológicas y Matriz FTO
+        const total = allRetrievedPatents.length;
+        const activeCount = allRetrievedPatents.filter(p => isPatentActive(p)).length;
+        const inactiveCount = total - activeCount;
+        const activePct = total > 0 ? Math.round((activeCount / total) * 100) : 0;
+        const inactivePct = total > 0 ? Math.round((inactiveCount / total) * 100) : 0;
+
+        // Top Solicitantes / Empresas
+        const assigneeMap = {};
+        allRetrievedPatents.forEach(p => {
+          let a = p.assignee || 'Persona natural / No especificado';
+          if (a.toLowerCase().includes('no especificado')) a = 'No especificado';
+          assigneeMap[a] = (assigneeMap[a] || 0) + 1;
+        });
+        const topAssignees = Object.entries(assigneeMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        const maxAssCount = topAssignees.length > 0 ? topAssignees[0][1] : 1;
+
+        // Distribución Geográfica
+        const geoMap = { US: 0, EP: 0, WO: 0, OTHER: 0 };
+        allRetrievedPatents.forEach(p => {
+          const j = getPatentJurisdiction(p);
+          if (geoMap[j] !== undefined) geoMap[j]++;
+          else geoMap.OTHER++;
+        });
+
+        sheet.innerHTML = `
+          <div class="dossier-header-block">
+            <div>
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brand-primary); font-weight: 700;">
+                Universidad del Rosario &bull; Céntrika &bull; Awake
+              </div>
+              <h1 style="font-size: 20px; font-weight: 800; color: var(--text-high); margin-top: 4px;">
+                Dossier de Vigilancia Tecnológica y Matriz FTO
+              </h1>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                Ecuación analizada: <strong style="color: var(--text-high);">"${q}"</strong> &bull; Fuentes: Google Patents, Europe PMC (EPO), PatentBrief
+              </div>
+            </div>
+            <div style="text-align: right; font-size: 11px; color: var(--text-muted);">
+              <div>Fecha de Emisión: <strong>${fechaHoy}</strong></div>
+              <div>Auditoría: Grupo 6 Capstone Ingeniería</div>
+            </div>
+          </div>
+
+          <div class="dossier-stat-grid">
+            <div class="dossier-stat-card">
+              <div class="dossier-stat-val">${total}</div>
+              <div class="dossier-stat-lbl">Patentes Analizadas</div>
+            </div>
+            <div class="dossier-stat-card">
+              <div class="dossier-stat-val" style="color: #22c55e;">${activeCount} (${activePct}%)</div>
+              <div class="dossier-stat-lbl">Vigentes (Protección Activa)</div>
+            </div>
+            <div class="dossier-stat-card">
+              <div class="dossier-stat-val" style="color: #38bdf8;">${inactiveCount} (${inactivePct}%)</div>
+              <div class="dossier-stat-lbl">Dominio Público (Libre Operación)</div>
+            </div>
+          </div>
+
+          <div style="background-color: var(--bg-subtle); border-left: 4px solid var(--brand-primary); padding: 12px 16px; border-radius: 4px; margin-bottom: 20px;">
+            <strong style="color: var(--text-high);">Diagnóstico de Libertad de Operación (Freedom to Operate - FTO):</strong>
+            <p style="margin-top: 4px; font-size: 12px; color: var(--text-medium);">
+              El <strong>${inactivePct}%</strong> de las invenciones analizadas se encuentran en dominio público (expiradas o discontinuadas), permitiendo su libre reproducción técnica o ensamblaje sin infracción de derechos. Para el <strong>${activePct}%</strong> de patentes vigentes, se recomienda diseño alrededor (design around) o licenciamiento formal.
+            </p>
+          </div>
+
+          <h3 style="font-size: 14px; font-weight: 700; color: var(--text-high); margin: 20px 0 10px 0;">
+            🏢 Titulares y Empresas con Mayor Densidad Tecnológica
+          </h3>
+          <div>
+            ${topAssignees.map(([name, count]) => `
+              <div class="dossier-bar-row">
+                <div class="dossier-bar-label" title="${name}">${name}</div>
+                <div class="dossier-bar-track">
+                  <div class="dossier-bar-fill" style="width: ${(count / maxAssCount) * 100}%;"></div>
+                </div>
+                <div class="dossier-bar-count">${count} pat.</div>
+              </div>
+            `).join('')}
+          </div>
+
+          <h3 style="font-size: 14px; font-weight: 700; color: var(--text-high); margin: 24px 0 10px 0;">
+            📑 Resumen de Patentes y Estado de Protección
+          </h3>
+          <table class="dossier-table">
+            <thead>
+              <tr>
+                <th>Publicación</th>
+                <th>Título de la Invención</th>
+                <th>Titular / Solicitante</th>
+                <th>Año</th>
+                <th>Estado Jurídico (FTO)</th>
+                <th>Citas</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${allRetrievedPatents.map(p => {
+                const act = isPatentActive(p);
+                const statusBadge = act 
+                  ? '<span style="color:#22c55e; font-weight:700;">🟢 Vigente</span>' 
+                  : '<span style="color:#38bdf8; font-weight:700;">⚪ Dominio Público</span>';
+                return `
+                  <tr>
+                    <td style="font-family: monospace; font-weight: 700;">${p.publication_number || 'N/A'}</td>
+                    <td><a href="${p.patent_link || '#'}" target="_blank" style="color: inherit; text-decoration: none; font-weight: 600;">${p.title}</a></td>
+                    <td>${p.assignee || 'No especificado'}</td>
+                    <td>${(p.publication_date || '').substring(0, 4) || 'N/A'}</td>
+                    <td>${statusBadge}</td>
+                    <td style="font-family: monospace; font-weight: 700;">${p.forwardCitationCount || 0}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function cerrarDossierModal(e) {
+      if (e && e.target && e.target.id !== 'dossier-modal' && !e.target.classList.contains('btn-close-modal')) {
+        return;
+      }
+      document.getElementById('dossier-modal').style.display = 'none';
+    }
+
+    function imprimirDossier() {
+      window.print();
+    }
+
+    function descargarDossierHtml() {
+      const content = document.getElementById('dossier-sheet-print').innerHTML;
+      const fullDoc = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dossier de Vigilancia Tecnológica - Capstone Awake</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; padding: 30px; color: #1a1a1a; line-height: 1.5; }
+    .dossier-header-block { border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; }
+    .dossier-stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+    .dossier-stat-card { border: 1px solid #ddd; background: #f9f9f9; padding: 15px; border-radius: 6px; }
+    .dossier-stat-val { font-size: 24px; font-weight: 800; color: #0070f3; }
+    .dossier-stat-lbl { font-size: 11px; text-transform: uppercase; color: #666; margin-top: 4px; }
+    .dossier-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+    .dossier-bar-label { width: 200px; font-weight: 600; }
+    .dossier-bar-track { flex: 1; height: 12px; background: #eee; border-radius: 6px; overflow: hidden; }
+    .dossier-bar-fill { height: 100%; background: #0070f3; }
+    .dossier-bar-count { width: 50px; text-align: right; font-family: monospace; font-weight: 700; }
+    .dossier-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+    .dossier-table th, .dossier-table td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; }
+    .dossier-table th { background: #f0f0f0; }
+  </style>
+</head>
+<body>
+  ${content}
+</body>
+</html>`;
+
+      const blob = new Blob([fullDoc], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Dossier_Vigilancia_Capstone_${new Date().toISOString().slice(0, 10)}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
 
     function cerrarSidebar() {
@@ -2869,6 +3543,237 @@
       }
     }
 
+    
+    // RENDERIZADOR DE LITERATURA CIENTÍFICA (OpenAlex)
+    let currentRenderedLiterature = [];
+
+    function renderizarLiteratura(works) {
+      currentRenderedLiterature = works || [];
+      const container = document.getElementById('view-cards');
+      if (!works || works.length === 0) {
+        container.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; padding: 40px; text-align: center;">No se encontraron artículos o papers científicos para esta búsqueda. Intente con términos en inglés como "piezoelectric energy harvesting".</div>`;
+        return;
+      }
+
+      container.innerHTML = works.map((w, idx) => {
+        const title = w.title || 'Sin título registrado';
+        const authors = w.authors || 'No especificados';
+        const journal = w.journal || 'Publicación Académica';
+        const year = w.publication_year || 'N/A';
+        const cits = w.cited_by_count || 0;
+        const isOA = w.is_oa;
+        const oaStatus = (w.oa_status || 'closed').toUpperCase();
+        const snippet = w.snippet || '';
+        const concepts = w.concepts || [];
+        const doiUrl = w.doi_url || (w.doi ? `https://doi.org/${w.doi}` : '#');
+        const pdfUrl = w.pdf_url;
+
+        let oaHtml = isOA 
+          ? `<span class="oa-badge oa-open" title="Documento accesible sin muro de pago">🔓 Acceso Abierto (${oaStatus})</span>` 
+          : `<span class="oa-badge oa-closed" title="Publicación bajo suscripción">🔒 Requiere Acceso / Suscripción</span>`;
+
+        let conceptsHtml = '';
+        if (concepts.length > 0) {
+          conceptsHtml = `
+            <div class="classif-row" style="margin-top: 8px;">
+              <span class="classif-label">Tópicos:</span>
+              ${concepts.map(c => `<span class="classif-pill" onclick="buscar('${c.name}')" title="Buscar este tema">${c.name} (${c.score}%)</span>`).join('')}
+            </div>
+          `;
+        }
+
+        let linksHtml = `
+          <a href="javascript:void(0)" onclick="abrirSidebarLiteratura(${idx})" style="font-weight: 600; color: var(--brand-primary);">
+            📖 Ver Ficha Académica &rarr;
+          </a>
+          <a href="${doiUrl}" target="_blank" rel="noopener">
+            🔗 DOI Oficial &nearr;
+          </a>
+        `;
+        if (pdfUrl) {
+          linksHtml += `<a href="${pdfUrl}" target="_blank" rel="noopener" class="pdf-link">📥 Descargar PDF Abierto &rarr;</a>`;
+        }
+
+        return `
+          <div class="patent-card">
+            <div class="patent-card-layout">
+              <div class="patent-main-content">
+                <div class="patent-header">
+                  <div class="patent-header-left">
+                    <span class="source-tag source-openalex">[OpenAlex (Literatura Científica)]</span>
+                    ${oaHtml}
+                    <span class="patent-status-badge badge-pending">📅 ${year}</span>
+                    ${cits > 0 ? `<span class="patent-citations-badge" title="${cits} publicaciones científicas citan este artículo">⭐ ${cits} citas académicas</span>` : ''}
+                  </div>
+                  <div class="patent-dates-text">
+                    🏛️ ${journal}
+                  </div>
+                </div>
+
+                <div class="patent-title-text" style="cursor: pointer;" onclick="abrirSidebarLiteratura(${idx})" title="Ver ficha en panel lateral">
+                  ${title}
+                </div>
+
+                <div class="patent-meta-grid">
+                  <span class="meta-lbl">Autor(es):</span>
+                  <span class="meta-val">${authors}</span>
+
+                  <span class="meta-lbl">Revista / Repositorio:</span>
+                  <span class="meta-val assignee-val">${journal}</span>
+
+                  <span class="meta-lbl">Tipo de Obra:</span>
+                  <span class="meta-val">${w.type || 'Artículo científico arbitrado'}</span>
+                </div>
+
+                ${conceptsHtml}
+
+                ${snippet ? `
+                  <div class="abstract-box">
+                    <div class="abstract-header">
+                      <span class="abstract-label">Resumen / Abstract Científico</span>
+                      <button class="btn-translate" id="trans-btn-lit-${idx}" onclick="toggleTraduccionLit(${idx}, '${escapeHtml(snippet)}')">
+                        <span>🌐 Traducir al Español</span>
+                      </button>
+                    </div>
+                    <div id="abstract-text-lit-${idx}">${snippet}</div>
+                  </div>
+                ` : ''}
+
+                <div class="patent-links">
+                  ${linksHtml}
+                </div>
+              </div>
+
+              <div class="patent-thumbnail-col">
+                <div class="no-thumb-box" style="border-color: rgba(16, 185, 129, 0.3);">
+                  <span style="font-size: 20px; margin-bottom: 2px;">📚</span>
+                  <span style="font-size: 10px; color: var(--src-openalex); font-weight: 600;">Paper Arbitrado</span>
+                  <span style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">${year}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function toggleTraduccionLit(idx, originalText) {
+      const btn = document.getElementById(`trans-btn-lit-${idx}`);
+      const textElem = document.getElementById(`abstract-text-lit-${idx}`);
+      if (btn.dataset.translated === "true") {
+        textElem.textContent = originalText;
+        btn.dataset.translated = "false";
+        btn.innerHTML = `<span>🌐 Traducir al Español</span>`;
+        return;
+      }
+      if (translationCache[originalText]) {
+        textElem.textContent = translationCache[originalText];
+        btn.dataset.translated = "true";
+        btn.innerHTML = `<span>↺ Ver Original en Inglés</span>`;
+        return;
+      }
+      btn.innerHTML = `<span>Traduciendo...</span>`;
+      try {
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: originalText })
+        });
+        const data = await res.json();
+        if (data.translated) {
+          translationCache[originalText] = data.translated;
+          textElem.textContent = data.translated;
+          btn.dataset.translated = "true";
+          btn.innerHTML = `<span>↺ Ver Original en Inglés</span>`;
+        }
+      } catch (e) {
+        btn.innerHTML = `<span>Error de traducción</span>`;
+      }
+    }
+
+    function abrirSidebarLiteratura(idx) {
+      const w = currentRenderedLiterature[idx];
+      if (!w) return;
+      currentActivePatentData = {
+        pdf: w.pdf_url,
+        patent_link: w.doi_url || w.landing_url
+      };
+
+      cambiarSidebarTab('dossier');
+
+      const isOA = w.is_oa;
+      const oaStatus = (w.oa_status || 'closed').toUpperCase();
+      let oaHtml = isOA 
+        ? `<span class="oa-badge oa-open">🔓 Acceso Abierto (${oaStatus})</span>` 
+        : `<span class="oa-badge oa-closed">🔒 Suscripción / Pago</span>`;
+
+      document.getElementById('sidebar-header-left').innerHTML = `
+        <span class="source-tag source-openalex">[OpenAlex Literatura]</span>
+        ${oaHtml}
+        <span class="patent-status-badge badge-pending">📅 ${w.publication_year || 'N/A'}</span>
+        ${w.cited_by_count > 0 ? `<span class="patent-citations-badge">⭐ ${w.cited_by_count} citas</span>` : ''}
+      `;
+
+      document.getElementById('sidebar-ext-btn').href = w.doi_url || w.landing_url || '#';
+
+      let conceptsHtml = '';
+      if (w.concepts && w.concepts.length) {
+        conceptsHtml = `
+          <div style="margin-bottom: 14px;">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Tópicos de Investigación</div>
+            <div class="classif-row">
+              ${w.concepts.map(c => `<span class="classif-pill" onclick="cerrarSidebar(); buscar('${c.name}')">🏷️ ${c.name} (${c.score}%)</span>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      document.getElementById('sidebar-body-dossier').innerHTML = `
+        <h2 style="font-size: 17px; font-weight: 700; color: var(--text-high); line-height: 1.35; margin-bottom: 14px;">
+          ${w.title}
+        </h2>
+
+        <div style="background-color: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+          <div class="patent-meta-grid" style="margin-bottom: 0;">
+            <span class="meta-lbl">Autor(es):</span>
+            <span class="meta-val">${w.authors}</span>
+
+            <span class="meta-lbl">Revista / Publicación:</span>
+            <span class="meta-val assignee-val">${w.journal}</span>
+
+            <span class="meta-lbl">Año:</span>
+            <span class="meta-val">${w.publication_year}</span>
+
+            <span class="meta-lbl">Citas Académicas:</span>
+            <span class="meta-val">${w.cited_by_count} citas</span>
+
+            <span class="meta-lbl">DOI:</span>
+            <span class="meta-val">${w.doi || 'No asignado'}</span>
+          </div>
+        </div>
+
+        ${conceptsHtml}
+
+        <div class="abstract-box" style="margin-bottom: 18px;">
+          <div class="abstract-header">
+            <span class="abstract-label">Resumen / Abstract Científico</span>
+            <button class="btn-translate" id="sidebar-trans-abstract-btn" onclick="toggleTraduccionSidebarAbstract('${escapeHtml(w.snippet)}')">
+              <span>🌐 Traducir al Español</span>
+            </button>
+          </div>
+          <div id="sidebar-abstract-text">${w.snippet || 'Sin resumen registrado'}</div>
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--border-color);">
+          ${w.pdf_url ? `<a href="${w.pdf_url}" target="_blank" class="btn-ghost" style="color: var(--status-success); font-weight: 600; text-decoration: none;">📥 Descargar PDF Abierto (OA)</a>` : ''}
+          <a href="${w.doi_url || w.landing_url}" target="_blank" class="btn-ghost" style="color: var(--brand-primary); font-weight: 600; text-decoration: none;">🔗 Ver en Repositorio Oficial (DOI) &nearr;</a>
+        </div>
+      `;
+
+      document.getElementById('patent-sidebar').classList.add('open');
+      document.getElementById('sidebar-backdrop').classList.add('open');
+    }
+
     function renderizarPatentes(patents) {
       currentRenderedPatents = patents || [];
       const container = document.getElementById('view-cards');
@@ -2889,8 +3794,13 @@
         const sourceName = p.source || 'Google Patents';
 
         const active = isPatentActive(p);
-        let statusClass = active ? 'badge-ok' : 'badge-inactive';
-        let statusText = p.legal_status || (active ? 'Activa' : 'NOT_ACTIVE');
+        let statusClass = active ? 'badge-ok' : 'fto-public-domain';
+        let statusText = active 
+          ? (p.legal_status || '🟢 Vigente') 
+          : '⚪ Dominio Público (FTO)';
+        let statusTitle = active
+          ? 'Patente con derechos vigentes: requiere licenciamiento o diseño alternativo.'
+          : 'Libertad de Operación (Freedom to Operate): Patente en dominio público. Se puede fabricar, adaptar y comercializar libremente sin regalías.';
         const cits = p.forwardCitationCount || 0;
 
         // Thumbnail o figura técnica
@@ -2969,7 +3879,7 @@
                     <span class="source-tag source-${sourceBadge}">[${sourceName}]</span>
                     <span class="jurisdiction-badge">${getJurisdictionFlag(pubNum)}</span>
                     <span class="patent-id-badge">${pubNum}</span>
-                    <span class="patent-status-badge ${statusClass}">${statusText}</span>
+                    <span class="patent-status-badge ${statusClass}" title="${statusTitle}">${statusText}</span>
                     ${cits > 0 ? `<span class="patent-citations-badge" title="${cits} patentes posteriores citan esta invención">⭐ ${cits} citas</span>` : ''}
                   </div>
                   <div class="patent-dates-text">

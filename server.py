@@ -291,6 +291,86 @@ def query_patent_brief(q):
         print(f"Error consultando PatentBrief: {e}")
     return results
 
+def query_openalex(q, page=1):
+    """Consulta literatura científica académica en OpenAlex REST API"""
+    try:
+        encoded_q = urllib.parse.quote(q)
+        url = f"https://api.openalex.org/works?search={encoded_q}&per_page=15&page={page}&mailto=fabianem.osorio@gmail.com"
+        req = urllib.request.Request(url, headers={'User-Agent': 'CapstonePatentSearch/1.0 (mailto:fabianem.osorio@gmail.com)'})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            raw_results = data.get('results', [])
+            total_count = data.get('meta', {}).get('count', 0)
+            
+            works = []
+            for item in raw_results:
+                authors = []
+                for a in item.get('authorships', []):
+                    name = a.get('author', {}).get('display_name', '')
+                    insts = [i.get('display_name') for i in a.get('institutions', []) if i.get('display_name')]
+                    inst_str = f" ({', '.join(insts)})" if insts else ""
+                    if name:
+                        authors.append(f"{name}{inst_str}")
+                
+                abstract = ''
+                inv_index = item.get('abstract_inverted_index')
+                if inv_index:
+                    pos_list = []
+                    for word, positions in inv_index.items():
+                        for pos in positions:
+                            pos_list.append((pos, word))
+                    pos_list.sort(key=lambda x: x[0])
+                    abstract = ' '.join([w for _, w in pos_list])
+                
+                concepts = []
+                for c in item.get('concepts', []):
+                    if (c.get('score') or 0) > 0.4:
+                        concepts.append({
+                            "name": c.get('display_name'),
+                            "level": c.get('level'),
+                            "score": round((c.get('score') or 0) * 100)
+                        })
+                concepts = concepts[:5]
+                
+                oa = item.get('open_access', {})
+                is_oa = oa.get('is_oa', False)
+                oa_status = oa.get('oa_status', 'closed')
+                pdf_url = oa.get('oa_url')
+                
+                primary_loc = item.get('primary_location') or {}
+                source_obj = primary_loc.get('source') or {}
+                journal = source_obj.get('display_name') or 'Publicación / Repositorio Académico'
+                venue_type = source_obj.get('type') or item.get('type') or 'Artículo científico'
+                
+                doi_url = item.get('doi')
+                if not doi_url and item.get('ids', {}).get('doi'):
+                    doi_url = f"https://doi.org/{item['ids']['doi']}"
+
+                works.append({
+                    "id": item.get('id'),
+                    "doi": item.get('doi'),
+                    "doi_url": doi_url,
+                    "title": (item.get('title') or 'Sin título registrado').strip(),
+                    "publication_year": item.get('publication_year') or 'N/A',
+                    "publication_date": item.get('publication_date') or str(item.get('publication_year') or 'N/A'),
+                    "authors": '; '.join(authors[:5]) or 'No especificados',
+                    "primary_author": authors[0] if authors else 'No especificado',
+                    "journal": journal,
+                    "type": venue_type,
+                    "cited_by_count": item.get('cited_by_count') or 0,
+                    "is_oa": is_oa,
+                    "oa_status": oa_status,
+                    "pdf_url": pdf_url,
+                    "landing_url": primary_loc.get('landing_page_url') or doi_url,
+                    "concepts": concepts,
+                    "snippet": abstract or 'Resumen en texto completo en el enlace oficial de la publicación.',
+                    "source": 'OpenAlex (Literatura Científica)',
+                    "source_badge": 'openalex'
+                })
+            return {"query": q, "total_found": total_count, "results_count": len(works), "organic_results": works}
+    except Exception as e:
+        return {"query": q, "total_found": 0, "results_count": 0, "organic_results": [], "error": str(e)}
+
 class PatentSearchHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
@@ -299,6 +379,8 @@ class PatentSearchHandler(http.server.SimpleHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         if parsed.path == '/api/patents':
             self.handle_patents(parsed)
+        elif parsed.path == '/api/literature':
+            self.handle_literature(parsed)
         elif parsed.path == '/api/usage':
             self.handle_usage(parsed)
         elif parsed.path == '/api/translate':
@@ -388,13 +470,40 @@ class PatentSearchHandler(http.server.SimpleHTTPRequestHandler):
             "connected": False
         }
 
+        openalex_usage = {
+            "name": "OpenAlex (Literatura Científica Mundial)",
+            "status": "Activa • API REST Oficial Abierta",
+            "plan": "Polite Pool Académico (EMBL/OurResearch)",
+            "limit": "Ilimitado (100,000 req/día)",
+            "percentage_remaining": 100.0,
+            "percentage_used": 0.0,
+            "connected": True
+        }
+
         self.send_json(200, {
             "serpapi": serpapi_usage,
             "europepmc": europepmc_usage,
             "patentbrief": patentbrief_usage,
+            "openalex": openalex_usage,
             "lens": lens_usage,
             "epo": epo_usage
         })
+
+    def handle_literature(self, parsed):
+        qs = urllib.parse.parse_qs(parsed.query)
+        q = qs.get('q', [''])[0].strip()
+        page = qs.get('page', ['1'])[0].strip()
+        try:
+            page = int(page)
+        except ValueError:
+            page = 1
+
+        if not q:
+            self.send_json(400, {'error': 'Parámetro "q" es requerido'})
+            return
+
+        res = query_openalex(q, page=page)
+        self.send_json(200, res)
 
     def handle_translate(self, parsed):
         text = urllib.parse.parse_qs(parsed.query).get('text', [''])[0].strip()
