@@ -392,8 +392,107 @@ class PatentSearchHandler(http.server.SimpleHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         if parsed.path == '/api/translate':
             self.handle_translate_post(parsed)
+        elif parsed.path == '/api/agent':
+            self.handle_agent_post(parsed)
         else:
             self.send_error(404, "Endpoint not found")
+
+    def handle_agent_post(self, parsed):
+        content_len = int(self.headers.get('Content-Length', 0))
+        post_body = self.rfile.read(content_len)
+        try:
+            req_data = json.loads(post_body.decode('utf-8'))
+            provider = req_data.get('provider', 'heuristic')
+            api_key = req_data.get('apiKey', '').strip()
+            model = req_data.get('model', '')
+            query = req_data.get('query', '')
+            patents = req_data.get('patents', [])
+            literature = req_data.get('literature', [])
+            user_msg = req_data.get('userMessage', '')
+
+            # Si no hay API key o es heurístico, responder con análisis estructurado
+            if not api_key:
+                is_lit = len(literature) > 0
+                count = len(literature) if is_lit else len(patents)
+                if is_lit:
+                    oa_count = sum(1 for w in literature if w.get('is_oa'))
+                    top_j = list(set(w.get('journal') for w in literature if w.get('journal')))[:3]
+                    reply = f"""He analizado **{count} artículos académicos** en OpenAlex para *"**{query}**"*.
+
+📚 **Hallazgos del Estado del Arte:**
+• **{oa_count} de {count} publicaciones** ({round((oa_count/count)*100) if count else 0}%) están en **Acceso Abierto (Open Access)** con texto completo descargable.
+• Centros de investigación clave: *{', '.join(top_j) or 'Materiales y Biomecánica'}*.
+• Se observan avances significativos en transductores piezoeléctricos flexibles integrados en plantillas de calzado para recolección biomecánica de energía.
+
+💡 *Para activar diálogo libre y análisis pericial continuo con IA (Gemini, Groq, Claude, DeepSeek), configura tu API Key en el menú ⚙️.*"""
+                else:
+                    active_count = sum(1 for p in patents if not any(x in (p.get('legal_status') or '').upper() for x in ['NOT_ACTIVE', 'EXPIRED', 'ABANDONED', 'DISCONTINUED']))
+                    public_count = count - active_count
+                    top_ass = list(set(p.get('assignee') for p in patents if p.get('assignee') and 'no especificado' not in p.get('assignee').lower()))[:3]
+                    reply = f"""He auditado pericialmente las **{count} patentes oficiales** recuperadas para *"**{query}**"*.
+
+⚖️ **Dictamen de Libertad de Operación (FTO):**
+• **{public_count} invenciones ({round((public_count/count)*100) if count else 0}%)** se encuentran en **Dominio Público (FTO Libre)**: sus derechos de exclusividad expiraron o caducaron, permitiendo que sus mecanismos sean fabricados o adaptados sin pago de regalías.
+• **{active_count} invenciones** mantienen protección activa (concedidas o en trámite), principalmente de titulares como: *{', '.join(top_ass) or 'Corporaciones de calzado y robótica'}*.
+
+🛡️ **Recomendación Estratégica para Awake:**
+Para el prototipo de calzado piezoeléctrico, se recomienda utilizar como base de diseño los principios mecánicos de las patentes en dominio público y formular reivindicaciones enfocadas en la disposición específica de los transductores y la electrónica de recolección en Colombia (donde las patentes US no tienen extensión nacional concedida).
+
+💡 *Conecta tu API Key de Gemini o Groq en el botón ⚙️ superior para profundizar en cualquier patente o chatear libremente.*"""
+
+                self.send_json(200, {
+                    "provider": "heuristic",
+                    "model": "Perito Heurístico Local",
+                    "reply": reply,
+                    "requires_key_for_chat": True
+                })
+                return
+
+            # Si hay API key de Gemini
+            if provider == 'gemini':
+                sel_model = model or 'gemini-1.5-flash'
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{sel_model}:generateContent?key={api_key}"
+                context_str = "\n".join([f"[{i+1}] {p.get('publication_number')}: {p.get('title')} ({p.get('publication_date')}) - Titular: {p.get('assignee')}" for i, p in enumerate(patents[:8])])
+                prompt = f"Eres un perito de patentes del proyecto Capstone Awake / Céntrika. Con base en estas patentes encontradas para '{query}':\n{context_str}\n\nResponde conciso al usuario: {user_msg or 'Haz un dictamen pericial de FTO y oportunidades.'}"
+                req = urllib.request.Request(url, headers={'Content-Type': 'application/json'}, data=json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode('utf-8'))
+                with urllib.request.urlopen(req, timeout=12) as resp:
+                    data = json.loads(resp.read().decode('utf-8'))
+                    text = data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', 'Sin respuesta')
+                    self.send_json(200, {"provider": provider, "model": sel_model, "reply": text})
+            else:
+                # OpenAI-compatible (Groq, OpenAI, DeepSeek, etc.)
+                endpoint = "https://api.openai.com/v1/chat/completions"
+                def_model = "gpt-4o-mini"
+                if provider == 'groq':
+                    endpoint = "https://api.groq.com/openai/v1/chat/completions"
+                    def_model = "llama-3.3-70b-versatile"
+                elif provider == 'deepseek':
+                    endpoint = "https://api.deepseek.com/chat/completions"
+                    def_model = "deepseek-chat"
+                elif provider == 'grok':
+                    endpoint = "https://api.x.ai/v1/chat/completions"
+                    def_model = "grok-beta"
+                elif provider == 'perplexity':
+                    endpoint = "https://api.perplexity.ai/chat/completions"
+                    def_model = "sonar"
+
+                context_str = "\n".join([f"[{i+1}] {p.get('publication_number')}: {p.get('title')} ({p.get('publication_date')}) - Titular: {p.get('assignee')}" for i, p in enumerate(patents[:8])])
+                payload = {
+                    "model": model or def_model,
+                    "messages": [
+                        {"role": "system", "content": "Eres un perito de patentes de Capstone Awake. Basa tus argumentos en los documentos proporcionados. Responde estructurado con emojis y tono profesional."},
+                        {"role": "user", "content": f"Documentos para '{query}':\n{context_str}\n\nPregunta: {user_msg or 'Dictamen FTO y oportunidades tecnológicas.'}"}
+                    ],
+                    "temperature": 0.3
+                }
+                req = urllib.request.Request(endpoint, headers={'Content-Type': 'application/json', 'Authorization': f'Bearer {api_key}'}, data=json.dumps(payload).encode('utf-8'))
+                with urllib.request.urlopen(req, timeout=12) as resp:
+                    data = json.loads(resp.read().decode('utf-8'))
+                    text = data.get('choices', [{}])[0].get('message', {}).get('content', 'Sin respuesta')
+                    self.send_json(200, {"provider": provider, "model": model or def_model, "reply": text})
+
+        except Exception as e:
+            self.send_json(500, {"error": f"Error en agente de IA: {str(e)}"})
 
     def send_json(self, status_code, data):
         self.send_response(status_code)

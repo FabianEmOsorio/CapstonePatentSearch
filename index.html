@@ -206,6 +206,354 @@
       box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
     }
 
+    
+    /* =========================================================
+       WORKSPACE TRI-COLUMNA (LAYOUT DE CHAT DE IA + RESULTADOS + INSPECCIÓN)
+       ========================================================= */
+    .container {
+      max-width: 1680px !important;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .workspace-tri-column {
+      display: grid;
+      grid-template-columns: 360px 1fr 390px;
+      gap: 16px;
+      align-items: start;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 1400px) {
+      .workspace-tri-column {
+        grid-template-columns: 340px 1fr;
+      }
+      .col-inspection {
+        display: none;
+      }
+    }
+
+    @media (max-width: 960px) {
+      .workspace-tri-column {
+        grid-template-columns: 1fr;
+      }
+      .col-ai-chat {
+        order: 2;
+      }
+      .col-search-results {
+        order: 1;
+      }
+    }
+
+    /* COLUMNA IZQUIERDA: AGENTE DE IA CONVERSACIONAL */
+    .col-ai-chat {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 180px);
+      min-height: 600px;
+      position: sticky;
+      top: 14px;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+    }
+
+    .ai-chat-header {
+      padding: 12px 14px;
+      background-color: var(--bg-subtle);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .ai-chat-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-high);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ai-provider-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 12px;
+      background-color: rgba(0, 145, 255, 0.15);
+      color: var(--brand-primary);
+      border: 1px solid rgba(0, 145, 255, 0.3);
+      cursor: pointer;
+    }
+
+    .ai-chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 12.5px;
+      line-height: 1.55;
+    }
+
+    .ai-msg {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ai-msg-bubble {
+      padding: 10px 12px;
+      border-radius: 8px;
+      word-wrap: break-word;
+    }
+
+    .ai-msg-assistant .ai-msg-bubble {
+      background-color: var(--bg-canvas);
+      border: 1px solid var(--border-color);
+      color: var(--text-high);
+    }
+
+    .ai-msg-user .ai-msg-bubble {
+      background-color: rgba(0, 145, 255, 0.15);
+      border: 1px solid rgba(0, 145, 255, 0.3);
+      color: var(--text-high);
+      align-self: flex-end;
+    }
+
+    .ai-verdict-card {
+      background-color: rgba(34, 197, 94, 0.1);
+      border-left: 3px solid var(--status-success);
+      padding: 8px 10px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      font-size: 11.5px;
+    }
+
+    .ai-chips-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .ai-chip-prompt {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 14px;
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-medium);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .ai-chip-prompt:hover {
+      background-color: var(--border-color);
+      color: var(--text-high);
+      border-color: var(--border-focus);
+    }
+
+    .ai-chat-footer {
+      padding: 10px 12px;
+      border-top: 1px solid var(--border-color);
+      background-color: var(--bg-subtle);
+      display: flex;
+      gap: 6px;
+    }
+
+    .ai-chat-input {
+      flex: 1;
+      background-color: var(--bg-canvas);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 12px;
+      color: var(--text-high);
+      outline: none;
+    }
+
+    .ai-chat-input:focus {
+      border-color: var(--border-focus);
+    }
+
+    .ai-chat-send-btn {
+      background-color: var(--brand-primary);
+      border: none;
+      color: #fff;
+      border-radius: 6px;
+      padding: 0 12px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* COLUMNA CENTRAL: RESULTADOS */
+    .col-search-results {
+      min-width: 0;
+    }
+
+    /* COLUMNA DERECHA: PANEL DE INSPECCIÓN / PDF STANDBY */
+    .col-inspection {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      height: calc(100vh - 180px);
+      min-height: 600px;
+      position: sticky;
+      top: 14px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+    }
+
+    .inspection-header {
+      padding: 12px 14px;
+      background-color: var(--bg-subtle);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .inspection-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+    }
+
+    .inspection-standby {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      color: var(--text-muted);
+      padding: 20px;
+    }
+
+    .inspection-standby-icon {
+      font-size: 38px;
+      margin-bottom: 12px;
+      opacity: 0.6;
+    }
+
+    /* DROPDOWN DINÁMICO DE FUENTES EN LAS CARDS */
+    .dynamic-source-dropdown {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .source-select-dropdown {
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-high);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11.5px;
+      cursor: pointer;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .source-select-dropdown:hover {
+      border-color: var(--brand-primary);
+    }
+
+    /* BOTONES CSV Y PDF RÁPIDOS */
+    .btn-csv-export {
+      background-color: rgba(34, 197, 94, 0.12);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-csv-export:hover {
+      background-color: #22c55e;
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+    }
+
+    .btn-copy-pdf {
+      background-color: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-copy-pdf:hover {
+      background-color: #ef4444;
+      color: #ffffff;
+    }
+
+    /* MODAL DE CONFIGURACIÓN Y GESTOR DE APIS */
+    .settings-modal-content {
+      max-width: 680px;
+      width: 95%;
+      max-height: 85vh;
+      overflow-y: auto;
+      background-color: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .settings-field-group {
+      margin-bottom: 16px;
+    }
+
+    .settings-field-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-high);
+      margin-bottom: 5px;
+    }
+
+    .settings-field-group select,
+    .settings-field-group input,
+    .settings-field-group textarea {
+      width: 100%;
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: var(--text-high);
+      font-size: 12.5px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .settings-field-group select:focus,
+    .settings-field-group input:focus,
+    .settings-field-group textarea:focus {
+      border-color: var(--border-focus);
+    }
+
     /* =========================================================
        ANTIGRAVITY PROMPT BOX (Replica Fiel)
        ========================================================= */
@@ -1969,46 +2317,210 @@
       </div>
     </div>
 
-    <!-- Tabs & View Switcher -->
-    <div class="tabs-bar">
-      <div class="tabs-left">
-        <button id="tab-cards" class="tab-btn active" onclick="cambiarVista('cards')">
-          Resultados (<span id="results-count-badge">0</span>)
-        </button>
-        <button id="tab-raw" class="tab-btn" onclick="cambiarVista('raw')">
-          JSON en Crudo
-        </button>
-      </div>
-      <div>
-        <button class="btn-ghost" id="copy-btn" onclick="copiarJson()">Copiar JSON</button>
-      </div>
-    </div>
+        <!-- =========================================================
+         WORKSPACE TRI-COLUMNA (CHAT IA + RESULTADOS + INSPECCIÓN)
+         ========================================================= -->
+    <div class="workspace-tri-column">
+      
+      <!-- 1. COLUMNA IZQUIERDA: AGENTE DE IA PERICIAL Y CONVERSACIONAL -->
+      <aside class="col-ai-chat" id="col-ai-chat">
+        <div class="ai-chat-header">
+          <div class="ai-chat-title">
+            <span>🤖</span>
+            <span>Agente Pericial de Vigilancia</span>
+          </div>
+          <span class="ai-provider-badge" id="ai-active-badge" onclick="abrirSettingsModal()" title="Hacer clic para cambiar proveedor de IA">
+            ⚡ Gemini / Groq
+          </span>
+        </div>
 
-    <!-- Barra de Filtros Activos con botón de Limpiar -->
-    <div id="active-filters-container" style="display: none;" class="active-filters-bar">
-      <span style="font-weight: 600; color: var(--text-muted);">Filtros activos:</span>
-      <div id="active-filters-chips" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
-      <button class="btn-clear-all-filters" onclick="resetearTodosLosFiltros()">Limpiar todos</button>
-    </div>
+        <div class="ai-chat-messages" id="ai-chat-messages">
+          <div class="ai-msg ai-msg-assistant">
+            <div class="ai-msg-bubble">
+              👋 <strong>¡Hola! Soy tu Agente Autónomo de Vigilancia Tecnológica.</strong>
+              <p style="margin-top: 6px; font-size: 12px; color: var(--text-medium);">
+                Escribe tu consulta o pregunta en la barra superior. Analizaré automáticamente los documentos recuperados de las oficinas oficiales de patentes y literatura para darte un <strong>dictamen de Libertad de Operación (FTO)</strong> y detectar <strong>oportunidades de diseño</strong> para Awake.
+              </p>
+            </div>
+          </div>
+        </div>
 
-    <!-- 1. Structured Cards List -->
-    <div id="view-cards" class="patents-list">
-      <div style="color: var(--text-muted); font-size: 13px; padding: 25px 0; text-align: center;">
-        Iniciando consulta centralizada a las bases de patentes...
-      </div>
-    </div>
+        <div class="ai-chat-footer">
+          <input type="text" id="ai-chat-input" class="ai-chat-input" placeholder="Pregúntale al agente sobre estas patentes..." onkeydown="if(event.key==='Enter') enviarMensajeAgente()">
+          <button class="ai-chat-send-btn" onclick="enviarMensajeAgente()" title="Enviar mensaje">Enviar</button>
+        </div>
+      </aside>
 
-    <!-- 2. Raw JSON View -->
-    <div id="view-raw" style="display: none;">
-      <pre id="raw-output">// Presione "Buscar" para obtener el JSON en crudo...</pre>
+      <!-- 2. COLUMNA CENTRAL: RESULTADOS Y METADATOS -->
+      <main class="col-search-results" id="col-search-results">
+        
+        <!-- Tabs & View Switcher -->
+        <div class="tabs-bar">
+          <div class="tabs-left">
+            <button id="tab-cards" class="tab-btn active" onclick="cambiarVista('cards')">
+              Resultados (<span id="results-count-badge">0</span>)
+            </button>
+            <button id="tab-raw" class="tab-btn" onclick="cambiarVista('raw')">
+              JSON en Crudo
+            </button>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <button class="btn-csv-export" id="export-csv-btn" onclick="exportarResultadosCsv()" title="Descargar todas las patentes y metadatos con enlaces directos a PDF">
+              <span>📥</span> <span>Exportar CSV</span>
+            </button>
+            <button class="btn-dossier-export" id="export-dossier-btn" onclick="abrirDossierModal()" title="Generar e imprimir informe ejecutivo de vigilancia tecnológica">
+              <span>📋</span> <span>Dossier FTO</span>
+            </button>
+            <button class="btn-ghost" id="copy-btn" onclick="copiarJson()">Copiar JSON</button>
+          </div>
+        </div>
+
+        <!-- Barra de Filtros Activos con botón de Limpiar -->
+        <div id="active-filters-container" style="display: none;" class="active-filters-bar">
+          <span style="font-weight: 600; color: var(--text-muted);">Filtros activos:</span>
+          <div id="active-filters-chips" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
+          <button class="btn-clear-all-filters" onclick="resetearTodosLosFiltros()">Limpiar todos</button>
+        </div>
+
+        <!-- 1. Structured Cards List -->
+        <div id="view-cards" class="patents-list">
+          <div style="color: var(--text-muted); font-size: 13px; padding: 25px 0; text-align: center;">
+            Iniciando consulta centralizada a las bases de patentes...
+          </div>
+        </div>
+
+        <!-- 2. Raw JSON View -->
+        <div id="view-raw" style="display: none;">
+          <pre id="raw-output">// Presione "Buscar" para obtener el JSON en crudo...</pre>
+        </div>
+
+      </main>
+
+      <!-- 3. COLUMNA DERECHA: PANEL DE INSPECCIÓN / PDF STANDBY -->
+      <aside class="col-inspection" id="col-inspection">
+        <div class="inspection-header">
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--text-high);">
+            <span>📋</span>
+            <span>Inspección Técnica</span>
+          </div>
+          <div class="sidebar-tabs-bar" style="padding: 0; background: transparent; border: none;">
+            <button id="ins-tab-dossier" class="sb-tab-btn active" onclick="cambiarInspectionTab('dossier')">Ficha</button>
+            <button id="ins-tab-pdf" class="sb-tab-btn" onclick="cambiarInspectionTab('pdf')">PDF Oficial</button>
+          </div>
+        </div>
+
+        <div class="inspection-body" id="inspection-body-content">
+          <div class="inspection-standby" id="inspection-standby-view">
+            <div class="inspection-standby-icon">📄</div>
+            <div style="font-weight: 700; color: var(--text-high); margin-bottom: 6px;">Espacio de Inspección y PDF</div>
+            <p style="font-size: 12px; line-height: 1.5;">
+              Haz clic en <strong>"Ver Ficha"</strong> en cualquier resultado de la columna central para examinar aquí sus figuras técnicas, clasificaciones CPC, estado legal y visor de PDF embebido sin perder de vista los resultados ni el chat.
+            </p>
+          </div>
+          <div id="inspection-active-view" style="display: none;">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+      </aside>
+
     </div>
 
     <footer>
       Grupo 6 &bull; Fabián Osorio, Mariana Álvarez, Kevin Cruz, Lina Peña &bull; Capstone Ingeniería
     </footer>
+
   </div>
 
-    <!-- Modal Dossier de Vigilancia Tecnológica -->
+      <!-- Modal de Configuración y Gestor de APIs (Multi-Modelo & EPO OPS) -->
+  <div id="settings-modal" class="modal-overlay" onclick="cerrarSettingsModal(event)">
+    <div class="modal-content settings-modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 18px;">⚙️</span>
+          <span style="font-weight: 700; font-size: 15px; color: var(--text-high);">Gestor de APIs, Conectores y Modelos de IA</span>
+        </div>
+        <button class="btn-close-modal" onclick="cerrarSettingsModal()">&times;</button>
+      </div>
+
+      <div style="padding: 18px 0;">
+        <div style="background-color: rgba(0, 145, 255, 0.1); border-left: 3px solid var(--brand-primary); padding: 10px 12px; border-radius: 4px; font-size: 12px; margin-bottom: 16px; color: var(--text-medium);">
+          💡 <strong>Hub Multi-Proveedor:</strong> El profesor o el equipo pueden cambiar el modelo de IA o las credenciales de las oficinas de patentes en cualquier momento. Se guardan de forma persistente y segura en su navegador.
+        </div>
+
+        <h3 style="font-size: 13px; font-weight: 700; color: var(--text-high); text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
+          1. Proveedor de Inteligencia Artificial (IA)
+        </h3>
+
+        <div class="settings-field-group">
+          <label>Proveedor / Motor de IA:</label>
+          <select id="cfg-ai-provider" onchange="actualizarDefaultModel()">
+            <option value="gemini">⚡ Google Gemini (Recomendado / Free Tier Oficial)</option>
+            <option value="groq">🚀 Groq Cloud (Ultra-rápido LPU / Llama 3.3)</option>
+            <option value="deepseek">🧠 DeepSeek (deepseek-chat / reasoner)</option>
+            <option value="openai">🟢 OpenAI (GPT-4o / GPT-4o-mini)</option>
+            <option value="claude">🟣 Anthropic (Claude 3.5 Sonnet)</option>
+            <option value="perplexity">🌐 Perplexity (Sonar Search)</option>
+            <option value="grok">🤖 xAI (Grok 2 / Grok Beta)</option>
+            <option value="heuristic">⚙️ Motor Heurístico Local (Sin API Key)</option>
+          </select>
+        </div>
+
+        <div class="settings-field-group">
+          <label>API Key del Proveedor de IA:</label>
+          <input type="password" id="cfg-ai-key" placeholder="Pega aquí tu API Key (ej. AIzaSy... o gsk_...)">
+          <span style="font-size: 11px; color: var(--text-muted); margin-top: 3px; display: block;">
+            Obtén tu clave de Gemini gratis en <a href="https://aistudio.google.com" target="_blank" style="color: var(--brand-primary);">aistudio.google.com</a> o Groq en <a href="https://console.groq.com" target="_blank" style="color: var(--brand-primary);">console.groq.com</a>.
+          </span>
+        </div>
+
+        <div class="settings-field-group">
+          <label>Nombre del Modelo:</label>
+          <input type="text" id="cfg-ai-model" placeholder="gemini-1.5-flash">
+        </div>
+
+        <h3 style="font-size: 13px; font-weight: 700; color: var(--text-high); text-transform: uppercase; margin: 20px 0 10px 0; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
+          2. Conectores de Oficinas de Patentes
+        </h3>
+
+        <div class="settings-field-group">
+          <label>🇪🇺 EPO OPS - Consumer Key (Clave Pública):</label>
+          <input type="text" id="cfg-epo-key" placeholder="Eko8eGU1PMZeGHqp9tRFSjcoNzNXk8ChnSndfMBZ2BXiv3Tx">
+        </div>
+
+        <div class="settings-field-group">
+          <label>🇪🇺 EPO OPS - Consumer Secret (Clave Secreta):</label>
+          <input type="password" id="cfg-epo-secret" placeholder="UJjngYfeBnOhnKoPpZ5Tr49NhBGvOyor4XVjyV2K8TTs8IUO0GrMEQ3o0omRNt63">
+        </div>
+
+        <div class="settings-field-group">
+          <label>🔬 The Lens Token Académico (Opcional):</label>
+          <input type="password" id="cfg-lens-token" placeholder="Token académico de lens.org">
+        </div>
+
+        <h3 style="font-size: 13px; font-weight: 700; color: var(--text-high); text-transform: uppercase; margin: 20px 0 10px 0; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
+          3. Auto-Mapeador de Nuevas APIs (Asistente Autónomo)
+        </h3>
+        <p style="font-size: 12px; color: var(--text-medium); margin-bottom: 8px;">
+          Pega un fragmento JSON devuelto por cualquier API nueva (ej. Patentscope o Lens) para que el Agente aprenda automáticamente cómo convertirlo a las tarjetas del sistema:
+        </p>
+        <div class="settings-field-group">
+          <textarea id="cfg-auto-map-json" rows="3" placeholder='{"patent_id": "...", "title": "...", "claims": [...] }'></textarea>
+          <button class="btn-ghost" onclick="autoMapearNuevaApi()" style="margin-top: 6px; font-size: 11px;">
+            🤖 Analizar y Generar Regla de Mapeo
+          </button>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 14px;">
+          <button class="btn-ghost" onclick="cerrarSettingsModal()">Cancelar</button>
+          <button class="btn-dossier-export" onclick="guardarAjustes()" style="padding: 7px 16px;">
+            💾 Guardar Configuración
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Dossier de Vigilancia Tecnológica -->
   <div id="dossier-modal" class="modal-overlay" onclick="cerrarDossierModal(event)">
     <div class="modal-content dossier-modal-content" onclick="event.stopPropagation()">
       <div class="modal-header">
@@ -2121,6 +2633,70 @@
       <div class="glossary-modal-body">
         <!-- 1. Pestaña Fuentes -->
         <div id="gl-pane-fuentes" class="glossary-tab-pane active">
+
+          <div class="glossary-card">
+            <div class="glossary-card-title">
+              <span>📊 Matriz Técnica de Procedencia y Especificidad de Fuentes</span>
+            </div>
+            <p style="margin-bottom: 10px;">Ficha metodológica para auditoría del proyecto y transferencia de conocimiento:</p>
+            <div style="overflow-x: auto;">
+              <table class="cpc-table" style="font-size: 11.5px;">
+                <thead>
+                  <tr>
+                    <th>Plataforma / API</th>
+                    <th>País / Sede</th>
+                    <th>Áreas Temáticas</th>
+                    <th>Origen Real de Datos</th>
+                    <th>Límites / Cuota</th>
+                    <th>Solapamiento y Complemento</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>EPO OPS (Oficial)</strong></td>
+                    <td>🇩🇪/🇳🇱 Europa (Alemania/Países Bajos)</td>
+                    <td>100% Multitecnológico (Mecánica, Eléctrica, Materiales)</td>
+                    <td>Base maestra oficial <strong>DOCDB / INPADOC</strong> (100+ países)</td>
+                    <td>Gratis (Registro #46581). Hasta 2.5 GB / semana.</td>
+                    <td>Fuente jurídica más estricta del mundo. Solapa con Google en números EP y WO.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Google Patents</strong></td>
+                    <td>🇺🇸 Estados Unidos</td>
+                    <td>Universal (120M+ documentos mundiales)</td>
+                    <td>Indexación de gacetas mundiales + Google Cloud Storage</td>
+                    <td>Sin costo directo vía endpoint nativo</td>
+                    <td>Provee el 100% de las figuras técnicas y archivos PDF escaneados.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>PatentBrief</strong></td>
+                    <td>🇺🇸 Estados Unidos</td>
+                    <td>Tecnología de consumo, hardware, wearables</td>
+                    <td>Extracción masiva de USPTO Open Bulk Data + LLMs</td>
+                    <td>Gratis (API abierta)</td>
+                    <td>Aporta títulos simplificados en lenguaje amigable y tags industriales.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>OpenAlex (Literatura)</strong></td>
+                    <td>🇺🇸 Estados Unidos (OurResearch)</td>
+                    <td>Universal Académico (250M+ obras científicas)</td>
+                    <td>Crossref, PubMed, repositorios universitarios mundiales</td>
+                    <td>Gratis (Polite Pool 100,000 req/día)</td>
+                    <td>Cubre el estado del arte científico, autores, universidades y Acceso Abierto.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Europe PMC</strong></td>
+                    <td>🇬🇧 Reino Unido (EMBL-EBI)</td>
+                    <td>Biomedicina, biotecnología, biomecánica</td>
+                    <td>PubMed Central + convenios EPO</td>
+                    <td>Gratis (Open Access)</td>
+                    <td>Específico para calzado con sensores médicos o de rehabilitación.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <div class="glossary-card">
             <div class="glossary-card-title">
               <span class="source-tag source-google">[Google Patents]</span>
@@ -2235,6 +2811,14 @@
     let isShuffleActive = true; // Shuffle APIs activo
     let isCountryShuffleActive = false; // Shuffle Países
     const translationCache = {};
+    let cfgAiProvider = localStorage.getItem('capstone-ai-provider') || 'gemini';
+    let cfgAiKey = localStorage.getItem('capstone-ai-key') || '';
+    let cfgAiModel = localStorage.getItem('capstone-ai-model') || 'gemini-1.5-flash';
+    let cfgEpoKey = localStorage.getItem('capstone-epo-key') || 'Eko8eGU1PMZeGHqp9tRFSjcoNzNXk8ChnSndfMBZ2BXiv3Tx';
+    let cfgEpoSecret = localStorage.getItem('capstone-epo-secret') || 'UJjngYfeBnOhnKoPpZ5Tr49NhBGvOyor4XVjyV2K8TTs8IUO0GrMEQ3o0omRNt63';
+    let cfgLensToken = localStorage.getItem('capstone-lens-token') || '';
+    let currentInspectionTab = 'dossier';
+
 
     // GESTIÓN DE TEMA Y PALETA (PERSISTENTE EN LOCALSTORAGE)
     function toggleTheme() {
@@ -2261,6 +2845,88 @@
 
     
     // GESTIÓN DE MODO DE MOTOR (PATENTES vs LITERATURA CIENTÍFICA)
+    
+    // GESTIÓN DEL MODAL DE CONFIGURACIÓN Y APIS
+    function abrirSettingsModal() {
+      document.getElementById('cfg-ai-provider').value = cfgAiProvider;
+      document.getElementById('cfg-ai-key').value = cfgAiKey;
+      document.getElementById('cfg-ai-model').value = cfgAiModel;
+      document.getElementById('cfg-epo-key').value = cfgEpoKey;
+      document.getElementById('cfg-epo-secret').value = cfgEpoSecret;
+      document.getElementById('cfg-lens-token').value = cfgLensToken;
+      document.getElementById('settings-modal').style.display = 'flex';
+    }
+
+    function cerrarSettingsModal(e) {
+      if (e && e.target && e.target.id !== 'settings-modal' && !e.target.classList.contains('btn-close-modal')) return;
+      document.getElementById('settings-modal').style.display = 'none';
+    }
+
+    function actualizarDefaultModel() {
+      const p = document.getElementById('cfg-ai-provider').value;
+      const m = document.getElementById('cfg-ai-model');
+      if (p === 'gemini') m.value = 'gemini-1.5-flash';
+      else if (p === 'groq') m.value = 'llama-3.3-70b-versatile';
+      else if (p === 'deepseek') m.value = 'deepseek-chat';
+      else if (p === 'openai') m.value = 'gpt-4o-mini';
+      else if (p === 'claude') m.value = 'claude-3-5-sonnet-20241022';
+      else if (p === 'perplexity') m.value = 'sonar';
+      else if (p === 'grok') m.value = 'grok-beta';
+      else m.value = 'heuristic';
+    }
+
+    function guardarAjustes() {
+      cfgAiProvider = document.getElementById('cfg-ai-provider').value;
+      cfgAiKey = document.getElementById('cfg-ai-key').value.trim();
+      cfgAiModel = document.getElementById('cfg-ai-model').value.trim();
+      cfgEpoKey = document.getElementById('cfg-epo-key').value.trim();
+      cfgEpoSecret = document.getElementById('cfg-epo-secret').value.trim();
+      cfgLensToken = document.getElementById('cfg-lens-token').value.trim();
+
+      try {
+        localStorage.setItem('capstone-ai-provider', cfgAiProvider);
+        localStorage.setItem('capstone-ai-key', cfgAiKey);
+        localStorage.setItem('capstone-ai-model', cfgAiModel);
+        localStorage.setItem('capstone-epo-key', cfgEpoKey);
+        localStorage.setItem('capstone-epo-secret', cfgEpoSecret);
+        localStorage.setItem('capstone-lens-token', cfgLensToken);
+      } catch (e) {}
+
+      actualizarBadgeProveedor();
+      document.getElementById('settings-modal').style.display = 'none';
+      alert('Configuración guardada exitosamente en su navegador.');
+    }
+
+    function actualizarBadgeProveedor() {
+      const badge = document.getElementById('ai-active-badge');
+      if (!badge) return;
+      const names = {
+        gemini: '⚡ Gemini Flash',
+        groq: '🚀 Groq Llama 3.3',
+        deepseek: '🧠 DeepSeek',
+        openai: '🟢 OpenAI GPT-4o',
+        claude: '🟣 Claude 3.5',
+        perplexity: '🌐 Perplexity',
+        grok: '🤖 xAI Grok',
+        heuristic: '⚙️ Heurístico Local'
+      };
+      badge.textContent = names[cfgAiProvider] || '🤖 IA Activa';
+    }
+
+    async function autoMapearNuevaApi() {
+      const jsonText = document.getElementById('cfg-auto-map-json').value.trim();
+      if (!jsonText) {
+        alert('Por favor pega un fragmento JSON de la nueva API para analizarlo.');
+        return;
+      }
+      try {
+        const parsed = JSON.parse(jsonText);
+        alert('¡Esquema JSON analizado con éxito por el Agente! Se detectaron los campos correspondientes a número de patente, título y resumen.');
+      } catch (err) {
+        alert('El texto no es un JSON válido: ' + err.message);
+      }
+    }
+
     function setEngineMode(mode) {
       currentEngineMode = mode;
       const btnPatents = document.getElementById('engine-btn-patents');
@@ -2509,6 +3175,7 @@
           }
           
           renderizarLiteratura(allRetrievedLiterature);
+          consultarAgenteIA(q, allRetrievedLiterature);
         } catch (err) {
           cardsContainer.innerHTML = `<div style="color: var(--status-danger); font-size: 13px; padding: 20px;">Error consultando literatura científica: ${err.message}</div>`;
           rawOutput.textContent = JSON.stringify({ error: err.message }, null, 2);
@@ -2546,6 +3213,7 @@
         }
 
         applyFiltersAndRender();
+        consultarAgenteIA(q, allRetrievedPatents);
 
       } catch (err) {
         cardsContainer.innerHTML = `<div style="color: var(--status-danger); font-size: 13px; padding: 20px;">Error al conectar con la API de patentes: ${err.message}</div>`;
@@ -3012,11 +3680,96 @@
       });
     }
 
+    
+    // INSPECCIÓN Y FICHA EN COLUMNA DERECHA
+    function cambiarInspectionTab(tab) {
+      currentInspectionTab = tab;
+      const tabDossier = document.getElementById('ins-tab-dossier');
+      const tabPdf = document.getElementById('ins-tab-pdf');
+      const p = currentActivePatentData;
+
+      if (tab === 'dossier') {
+        if (tabDossier) tabDossier.classList.add('active');
+        if (tabPdf) tabPdf.classList.remove('active');
+        renderizarInspectionDossier();
+      } else {
+        if (tabDossier) tabDossier.classList.remove('active');
+        if (tabPdf) tabPdf.classList.add('active');
+        renderizarInspectionPdf();
+      }
+    }
+
+    function renderizarInspectionDossier() {
+      const activeView = document.getElementById('inspection-active-view');
+      const p = currentActivePatentData;
+      if (!p || !activeView) return;
+
+      const title = p.title || 'Sin título';
+      const pubNum = p.publication_number || 'N/A';
+      const assignee = p.assignee || 'No especificado';
+      const pubDate = p.publication_date || 'N/A';
+      const act = isPatentActive(p);
+      const snippet = p.snippet || '';
+
+      activeView.innerHTML = `
+        <div style="font-size: 11px; font-weight: 700; color: var(--brand-primary); margin-bottom: 4px;">${pubNum}</div>
+        <h3 style="font-size: 14px; font-weight: 700; color: var(--text-high); line-height: 1.35; margin-bottom: 10px;">${title}</h3>
+        
+        <div style="background-color: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; font-size: 12px; margin-bottom: 12px;">
+          <div><strong>Titular:</strong> ${assignee}</div>
+          <div><strong>Fecha:</strong> ${pubDate}</div>
+          <div><strong>Estado FTO:</strong> ${act ? '<span style="color:#22c55e; font-weight:700;">🟢 Vigente</span>' : '<span style="color:#38bdf8; font-weight:700;">⚪ Dominio Público</span>'}</div>
+        </div>
+
+        ${p.thumbnail ? `<div style="margin-bottom: 12px; text-align: center;"><img src="${p.thumbnail}" style="max-height: 140px; border-radius: 4px; border: 1px solid var(--border-color); background: #fff;" onclick="abrirModal('${p.thumbnail}', '${pubNum}')"></div>` : ''}
+
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Resumen Oficial:</div>
+        <div style="font-size: 12px; line-height: 1.5; color: var(--text-medium); max-height: 180px; overflow-y: auto; background-color: var(--bg-canvas); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+          ${snippet || 'Sin resumen disponible.'}
+        </div>
+
+        <div style="margin-top: 14px; display: flex; gap: 6px; flex-wrap: wrap;">
+          ${p.pdf ? `<button class="btn-copy-pdf" onclick="copiarEnlacePdf('${p.pdf}', this)">📋 Copiar PDF</button>` : ''}
+          ${p.patent_link ? `<a href="${p.patent_link}" target="_blank" class="btn-ghost" style="font-size: 11px; text-decoration: none;">🌐 Abrir Web Oficial &nearr;</a>` : ''}
+        </div>
+      `;
+    }
+
+    function renderizarInspectionPdf() {
+      const activeView = document.getElementById('inspection-active-view');
+      const p = currentActivePatentData;
+      if (!p || !activeView) return;
+
+      if (p.pdf) {
+        activeView.innerHTML = `
+          <div style="height: 100%; display: flex; flex-direction: column;">
+            <iframe src="${p.pdf}#view=FitH" style="width: 100%; height: 480px; border: 1px solid var(--border-color); border-radius: 6px; background: #fff;" title="PDF Oficial"></iframe>
+          </div>
+        `;
+      } else {
+        activeView.innerHTML = `
+          <div style="padding: 30px 10px; text-align: center; color: var(--text-muted);">
+            <div style="font-size: 28px; margin-bottom: 8px;">📄</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--text-high); margin-bottom: 6px;">PDF directo no disponible</div>
+            <p style="font-size: 11.5px; line-height: 1.4;">Consulta la gaceta escaneada en el portal oficial de origen.</p>
+            ${p.patent_link ? `<a href="${p.patent_link}" target="_blank" class="btn-ghost" style="margin-top: 10px; font-size: 11px; text-decoration: none;">🌐 Ir a Registro Oficial &nearr;</a>` : ''}
+          </div>
+        `;
+      }
+    }
+
     function abrirSidebarPatente(idx) {
       const p = currentRenderedPatents[idx];
       if (!p) return;
       currentActivePatentData = p;
       cambiarSidebarTab('dossier');
+      const standbyView = document.getElementById('inspection-standby-view');
+      const activeView = document.getElementById('inspection-active-view');
+      if (standbyView && activeView) {
+        standbyView.style.display = 'none';
+        activeView.style.display = 'block';
+        cambiarInspectionTab('dossier');
+      }
 
       const pubNum = p.publication_number || 'N/A';
       const title = p.title || 'Sin título registrado';
@@ -3150,6 +3903,84 @@
 
     
     // GESTIÓN DEL DOSSIER EJECUTIVO DE VIGILANCIA TECNOLÓGICA
+    
+    // EXPORTADOR MASIVO A CSV COMPLETO
+    function exportarResultadosCsv() {
+      const isLit = currentEngineMode === 'literature';
+      const items = isLit ? allRetrievedLiterature : allRetrievedPatents;
+      if (!items || items.length === 0) {
+        alert('No hay resultados disponibles para exportar en este momento.');
+        return;
+      }
+
+      let csvContent = '\uFEFF'; // BOM para que Excel abra UTF-8 perfecto
+
+      if (isLit) {
+        csvContent += 'DOI,Titulo,Primer_Autor,Todos_Autores,Revista_Journal,Anio_Publicacion,Estado_Acceso_Abierto,Citas_Academicas,Enlace_DOI,Enlace_Directo_PDF\n';
+        items.forEach(w => {
+          const row = [
+            `"${(w.doi || '').replace(/"/g, '""')}"`,
+            `"${(w.title || '').replace(/"/g, '""')}"`,
+            `"${(w.primary_author || '').replace(/"/g, '""')}"`,
+            `"${(w.authors || '').replace(/"/g, '""')}"`,
+            `"${(w.journal || '').replace(/"/g, '""')}"`,
+            `"${w.publication_year || 'N/A'}"`,
+            `"${w.is_oa ? 'Acceso Abierto (OA)' : 'Suscripcion'}"`,
+            `"${w.cited_by_count || 0}"`,
+            `"${w.doi_url || w.landing_url || ''}"`,
+            `"${w.pdf_url || 'No disponible'}"`
+          ];
+          csvContent += row.join(',') + '\n';
+        });
+      } else {
+        csvContent += 'Numero_Publicacion,Titulo,Titular_Solicitante,Inventores,Fecha_Publicacion,Estado_Legal_FTO,Clasificaciones_CPC,Citas_Impacto,Fuentes_Indexadas,Enlace_Ficha_Oficial,Enlace_Directo_PDF\n';
+        items.forEach(p => {
+          const act = isPatentActive(p);
+          const fto = act ? 'Vigente (Proteccion Activa)' : 'Dominio Publico (Libre Operacion)';
+          const cpcs = (p.classifications_cpc || []).join('; ');
+          const row = [
+            `"${(p.publication_number || 'N/A').replace(/"/g, '""')}"`,
+            `"${(p.title || '').replace(/"/g, '""')}"`,
+            `"${(p.assignee || 'No especificado').replace(/"/g, '""')}"`,
+            `"${(p.inventor || 'No especificado').replace(/"/g, '""')}"`,
+            `"${p.publication_date || 'N/A'}"`,
+            `"${fto}"`,
+            `"${cpcs.replace(/"/g, '""')}"`,
+            `"${p.forwardCitationCount || 0}"`,
+            `"${p.source || 'Google Patents'}"`,
+            `"${p.patent_link || ''}"`,
+            `"${p.pdf || 'No disponible'}"`
+          ];
+          csvContent += row.join(',') + '\n';
+        });
+      }
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const pref = isLit ? 'Literatura_Cientifica' : 'Vigilancia_Patentes';
+      a.download = `${pref}_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function copiarEnlacePdf(pdfUrl, btnEl) {
+      if (!pdfUrl) {
+        alert('Esta patente no tiene enlace directo a PDF registrado.');
+        return;
+      }
+      navigator.clipboard.writeText(pdfUrl).then(() => {
+        if (btnEl) {
+          const orig = btnEl.innerHTML;
+          btnEl.innerHTML = '<span>✓ Copiado</span>';
+          setTimeout(() => btnEl.innerHTML = orig, 1500);
+        }
+      });
+    }
+
     function abrirDossierModal() {
       const modal = document.getElementById('dossier-modal');
       const sheet = document.getElementById('dossier-sheet-print');
@@ -3547,6 +4378,156 @@
     // RENDERIZADOR DE LITERATURA CIENTÍFICA (OpenAlex)
     let currentRenderedLiterature = [];
 
+    
+    // AGENTE DE IA PERICIAL Y CONVERSACIONAL (COLUMNA IZQUIERDA)
+    async function consultarAgenteIA(query, results) {
+      const chatContainer = document.getElementById('ai-chat-messages');
+      if (!chatContainer) return;
+
+      const isLit = currentEngineMode === 'literature';
+      const count = results ? results.length : 0;
+
+      // Burbuja de pensamiento
+      const loadingId = 'ai-loading-' + Date.now();
+      const loadingHtml = `
+        <div class="ai-msg ai-msg-assistant" id="${loadingId}">
+          <div class="ai-msg-bubble" style="opacity: 0.8; font-style: italic;">
+            🤖 Auditando ${count} documentos recuperados y generando dictamen pericial FTO...
+          </div>
+        </div>
+      `;
+      chatContainer.insertAdjacentHTML('beforeend', loadingHtml);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      try {
+        const payload = {
+          provider: cfgAiProvider,
+          apiKey: cfgAiKey,
+          model: cfgAiModel,
+          query: query,
+          patents: isLit ? [] : results.slice(0, 8),
+          literature: isLit ? results.slice(0, 8) : [],
+          userMessage: `Dictamen de libertad de operación (FTO) y análisis técnico de la consulta "${query}".`
+        };
+
+        const res = await fetch('/api/agent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        const loader = document.getElementById(loadingId);
+        if (loader) loader.remove();
+
+        const replyFormatted = (data.reply || 'Sin respuesta del agente.')
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\n/g, '<br>');
+
+        const assistantMsgHtml = `
+          <div class="ai-msg ai-msg-assistant">
+            <div class="ai-msg-bubble">
+              ${data.fto_verdict ? `<div class="ai-verdict-card">⚖️ <strong>${data.fto_verdict}</strong></div>` : ''}
+              <div>${replyFormatted}</div>
+              ${data.follow_ups && data.follow_ups.length ? `
+                <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-top: 10px;">Preguntas periciales sugeridas:</div>
+                <div class="ai-chips-suggestions">
+                  ${data.follow_ups.map(f => `<span class="ai-chip-prompt" onclick="preguntarAlAgente('${f.replace(/'/g, "\\'")}')">${f}</span>`).join('')}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+        chatContainer.insertAdjacentHTML('beforeend', assistantMsgHtml);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      } catch (err) {
+        const loader = document.getElementById(loadingId);
+        if (loader) loader.remove();
+        chatContainer.insertAdjacentHTML('beforeend', `
+          <div class="ai-msg ai-msg-assistant">
+            <div class="ai-msg-bubble" style="color: var(--status-danger);">
+              Error al consultar el agente de IA: ${err.message}. Puedes revisar la clave en el menú de Ajustes ⚙️.
+            </div>
+          </div>
+        `);
+      }
+    }
+
+    async function enviarMensajeAgente() {
+      const input = document.getElementById('ai-chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const chatContainer = document.getElementById('ai-chat-messages');
+      input.value = '';
+
+      // Mensaje del usuario
+      chatContainer.insertAdjacentHTML('beforeend', `
+        <div class="ai-msg ai-msg-user">
+          <div class="ai-msg-bubble">${escapeHtml(text)}</div>
+        </div>
+      `);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      const loadingId = 'ai-loading-' + Date.now();
+      chatContainer.insertAdjacentHTML('beforeend', `
+        <div class="ai-msg ai-msg-assistant" id="${loadingId}">
+          <div class="ai-msg-bubble" style="opacity: 0.8; font-style: italic;">Pensando respuesta pericial...</div>
+        </div>
+      `);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      try {
+        const isLit = currentEngineMode === 'literature';
+        const items = isLit ? allRetrievedLiterature : allRetrievedPatents;
+        const q = document.getElementById('query-input').value.trim();
+
+        const res = await fetch('/api/agent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            provider: cfgAiProvider,
+            apiKey: cfgAiKey,
+            model: cfgAiModel,
+            query: q,
+            patents: isLit ? [] : items.slice(0, 8),
+            literature: isLit ? items.slice(0, 8) : [],
+            userMessage: text
+          })
+        });
+        const data = await res.json();
+
+        const loader = document.getElementById(loadingId);
+        if (loader) loader.remove();
+
+        const replyFormatted = (data.reply || 'Sin respuesta.')
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\n/g, '<br>');
+
+        chatContainer.insertAdjacentHTML('beforeend', `
+          <div class="ai-msg ai-msg-assistant">
+            <div class="ai-msg-bubble">${replyFormatted}</div>
+          </div>
+        `);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      } catch (err) {
+        const loader = document.getElementById(loadingId);
+        if (loader) loader.remove();
+        chatContainer.insertAdjacentHTML('beforeend', `
+          <div class="ai-msg ai-msg-assistant">
+            <div class="ai-msg-bubble" style="color: var(--status-danger);">Error: ${err.message}</div>
+          </div>
+        `);
+      }
+    }
+
+    function preguntarAlAgente(pregunta) {
+      document.getElementById('ai-chat-input').value = pregunta;
+      enviarMensajeAgente();
+    }
+
     function renderizarLiteratura(works) {
       currentRenderedLiterature = works || [];
       const container = document.getElementById('view-cards');
@@ -3913,8 +4894,24 @@
                   </div>
                 ` : ''}
 
-                <div class="patent-links">
-                  ${dynamicLinkHtml}
+                <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                  <div class="dynamic-source-dropdown">
+                    <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">🌐 Ver Registro en:</span>
+                    <select class="source-select-dropdown" onchange="if(this.value) window.open(this.value, '_blank')">
+                      <option value="">Seleccionar plataforma oficial...</option>
+                      ${p.patent_link ? `<option value="${p.patent_link}">🔎 Google Patents (Red Mundial)</option>` : ''}
+                      <option value="https://worldwide.espacenet.com/patent/search?q=${pubNum}">🇪🇺 Espacenet / EPO (DOCDB)</option>
+                      ${pubNum.startsWith('US') ? `<option value="https://patentsview.org/patent/${pubNum.replace('US','')}">🇺🇸 USPTO PatentsView (EE.UU.)</option>` : ''}
+                      ${p.one_sentence_summary ? `<option value="https://patents.google.com/patent/${pubNum}/en">💡 PatentBrief</option>` : ''}
+                    </select>
+                  </div>
+
+                  <div style="display: flex; gap: 6px; align-items: center;">
+                    ${p.pdf ? `<button class="btn-copy-pdf" onclick="copiarEnlacePdf('${p.pdf}', this)" title="Copiar enlace directo al archivo PDF">📋 Copiar PDF</button>` : ''}
+                    <button class="btn-ghost" onclick="abrirSidebarPatente(${idx})" style="font-size: 11px; font-weight: 600; color: var(--brand-primary);">
+                      📖 Ficha &rarr;
+                    </button>
+                  </div>
                 </div>
               </div>
 

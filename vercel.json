@@ -10,6 +10,10 @@
       "destination": "/api/literature.js"
     },
     {
+      "source": "/api/agent",
+      "destination": "/api/agent.js"
+    },
+    {
       "source": "/api/usage",
       "destination": "/api/usage.js"
     },
