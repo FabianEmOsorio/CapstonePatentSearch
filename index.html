@@ -294,8 +294,8 @@
 
     .workspace-tri-column {
       display: grid;
-      grid-template-columns: minmax(290px, 340px) 1fr minmax(310px, 380px);
-      gap: 16px;
+      grid-template-columns: 1fr minmax(360px, 440px);
+      gap: 20px;
       align-items: start;
       margin-top: 14px;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -304,30 +304,126 @@
     .workspace-tri-column.mode-dialog {
       grid-template-columns: 1fr;
     }
-    .workspace-tri-column.mode-dialog .col-ai-chat,
     .workspace-tri-column.mode-dialog .col-inspection {
       display: none;
     }
 
-    @media (max-width: 1200px) {
+    @media (max-width: 1100px) {
       .workspace-tri-column {
-        grid-template-columns: 320px 1fr;
+        grid-template-columns: 1fr;
       }
       .col-inspection {
         display: none;
       }
     }
 
-    @media (max-width: 900px) {
-      .workspace-tri-column {
-        grid-template-columns: 1fr;
-      }
-      .col-ai-chat {
-        order: 2;
-      }
-      .col-search-results {
-        order: 1;
-      }
+    /* PADDING INFERIOR PARA QUE LA BARRA FLOTANTE NUNCA TAPE EL CONTENIDO */
+    body {
+      padding-bottom: 160px;
+    }
+
+    /* PANEL UNIFICADO DE ASESORÍA Y DICTAMEN DE IA EN EL FEED */
+    .ai-unified-panel {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 18px;
+      box-shadow: var(--card-shadow);
+      display: none;
+      transition: all 0.25s ease;
+    }
+    .ai-unified-panel.active {
+      display: block;
+    }
+    .ai-unified-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+    .ai-unified-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ai-unified-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-high);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ai-model-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background-color: rgba(0, 145, 255, 0.12);
+      border: 1px solid rgba(0, 145, 255, 0.3);
+      color: var(--brand-primary);
+      font-weight: 600;
+    }
+    .ai-unified-content {
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: var(--text-high);
+    }
+    .ai-unified-content h1, .ai-unified-content h2, .ai-unified-content h3, .ai-unified-content h4 {
+      color: var(--text-high);
+      margin: 14px 0 6px 0;
+      font-weight: 700;
+    }
+    .ai-unified-content h3 {
+      font-size: 14.5px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 4px;
+    }
+    .ai-unified-content ul, .ai-unified-content ol {
+      padding-left: 20px;
+      margin: 8px 0;
+    }
+    .ai-unified-content li {
+      margin-bottom: 5px;
+    }
+    .ai-unified-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 12px;
+    }
+    .ai-unified-content th, .ai-unified-content td {
+      border: 1px solid var(--border-color);
+      padding: 6px 10px;
+      text-align: left;
+    }
+    .ai-unified-content th {
+      background-color: var(--bg-subtle);
+      font-weight: 700;
+    }
+
+    /* BOTÓN DE CONSULTA RÁPIDA DE PATENTE AL AGENTE [ROBOT + ?] */
+    .btn-ask-patent {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-medium);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .btn-ask-patent:hover {
+      background-color: rgba(0, 145, 255, 0.12);
+      border-color: var(--brand-primary);
+      color: var(--brand-primary);
     }
 
     /* COLUMNA IZQUIERDA: AGENTE DE IA CONVERSACIONAL (STICKY AL VIEWPORT) */
@@ -738,13 +834,20 @@
        ANTIGRAVITY PROMPT BOX (Replica Fiel)
        ========================================================= */
     .ag-prompt-container {
-      background-color: #161922;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(920px, 94vw);
+      z-index: 1000;
+      background: rgba(22, 27, 34, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 14px 16px 10px 16px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-      margin-bottom: 18px;
-      position: relative;
+      border-radius: 16px;
+      padding: 10px 16px 8px 16px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      margin-bottom: 0;
     }
     .ag-prompt-container:focus-within {
       border-color: var(--border-focus);
@@ -2126,6 +2229,11 @@
       .patent-links { gap: 8px; flex-direction: column; }
     }
   </style>
+  <!-- Motor LaTeX Math (KaTeX) y Markdown (Marked) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
 </head>
 <body>
 
@@ -2134,7 +2242,7 @@
     <header>
       <div class="header-title">
         <h1>
-          <span>⚡</span>
+          <span></span>
           <span>Sistema de Vigilancia y Búsqueda de Patentes</span>
         </h1>
         <div class="subtitle">Proyecto Capstone Grupo 6 &bull; Céntrika &bull; Awake</div>
@@ -2142,7 +2250,7 @@
       <div class="header-actions" style="position: relative;">
         <!-- Switcher de Tema Antigravity -->
         <button class="btn-theme-pill" onclick="toggleTheme()" id="theme-btn" title="Alternar entre modo oscuro Antigravity y modo claro">
-          <span id="theme-icon">🌙</span>
+          <span id="theme-icon"></span>
           <span id="theme-text">Modo Oscuro</span>
         </button>
 
@@ -2202,13 +2310,17 @@
               </div>
             </div>
 
-            <div class="ag-health-row" style="opacity: 0.6;">
+            <div class="ag-health-row">
               <div class="ag-health-info">
                 <span class="ag-health-name">EPO OPS Oficial</span>
-                <span class="ag-health-desc">En validación Ref: 46581</span>
+                <span class="ag-health-desc">Conectada &bull; Clave Apigee Ref: 46581</span>
               </div>
               <div class="ag-health-val">
-                <span style="font-size: 11px; color: var(--status-warning); font-family: monospace;">Pendiente</span>
+                <span class="ag-health-pct" style="color: #22c55e;">100%</span>
+                <svg class="circular-ring" viewBox="0 0 36 36">
+                  <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  <path class="circular-ring-fill" stroke="#22c55e" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                </svg>
               </div>
             </div>
           </div>
@@ -2221,7 +2333,7 @@
          ========================================================= -->
     <div class="engine-mode-switcher">
       <button id="engine-btn-patents" class="engine-tab-btn active" onclick="setEngineMode('patents')" title="Consultar patentes mundiales concedidas y en trámite">
-        <span class="engine-icon">⚡</span>
+        
         <div class="engine-text-col">
           <span class="engine-title">Patentes Tecnológicas</span>
           <span class="engine-sub">Google Patents &bull; Europe PMC (EPO/WIPO) &bull; PatentBrief</span>
@@ -2229,7 +2341,7 @@
       </button>
 
       <button id="engine-btn-literature" class="engine-tab-btn" onclick="setEngineMode('literature')" title="Consultar literatura científica académica, papers y tesis en OpenAlex">
-        <span class="engine-icon">📚</span>
+        
         <div class="engine-text-col">
           <span class="engine-title">Literatura Científica</span>
           <span class="engine-sub">OpenAlex &bull; Artículos y Papers &bull; 250M+ Obras Abiertas</span>
@@ -2243,8 +2355,8 @@
         <!-- BARRA DE ESPACIOS DE TRABAJO (WORKSPACES ESTILO ANTIGRAVITY) -->
     <div class="workspace-bar">
       <div class="workspace-selector-pill" onclick="toggleWorkspaceMenu(event)" id="workspace-pill-btn">
-        <span style="font-size: 13px;">📂</span>
-        <span id="current-workspace-label">Proyecto: Awake (Calzado Piezoeléctrico)</span>
+        <span style="font-size: 13px;"></span>
+        <span id="current-workspace-label">Proyecto: Principal</span>
         <span class="ag-pill-caret" id="workspace-caret">▼</span>
       </div>
 
@@ -2256,16 +2368,20 @@
         </div>
         <div class="ag-menu-divider"></div>
         <div class="ag-menu-item" onclick="crearNuevoWorkspaceModal()">
-          <span>➕ Crear Nuevo Espacio de Trabajo...</span>
+          <span>+ Crear Nuevo Espacio de Trabajo...</span>
         </div>
         <div class="ag-menu-item" onclick="exportarWorkspaceActual()">
-          <span>💾 Exportar Memoria de este Proyecto (.json)</span>
+          <span>Exportar Memoria del Proyecto (.json)</span>
         </div>
       </div>
 
       <div class="workspace-actions">
         <button class="btn-ws-pinned" onclick="togglePinnedPatentsView()" id="btn-pinned-count" title="Ver patentes fijadas en este proyecto">
-          <span>📌</span> <span id="pinned-count-label">0 Guardadas</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="17" x2="12" y2="22"></line>
+            <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
+          </svg>
+          <span id="pinned-count-label">0 Guardadas</span>
         </button>
         <button class="btn-ghost" onclick="crearNuevoWorkspaceModal()" style="font-size: 11px; padding: 4px 8px;">
           <span>+</span> Proyecto
@@ -2286,7 +2402,7 @@
         <div class="ag-toolbar-left">
           <div class="ag-pill-btn" onclick="toggleSourceMenu(event)" id="source-pill-btn">
             <span style="font-weight: 700; color: #8b949e;">+</span>
-            <span id="current-source-label">🌐 Todas las fuentes</span>
+            <span id="current-source-label">Todas las fuentes</span>
             <span class="ag-pill-caret" id="source-caret">▼</span>
           </div>
 
@@ -2294,33 +2410,33 @@
           <div class="ag-popup-menu" id="source-popup-menu">
             <div class="ag-menu-header">Fuentes de Patentes Conectadas</div>
             
-            <div class="ag-menu-item selected" onclick="seleccionarFuente('all', '🌐 Todas las fuentes')">
+            <div class="ag-menu-item selected" onclick="seleccionarFuente('all', 'Todas las fuentes')">
               <div>
-                <div>🌐 Todas las fuentes</div>
+                <div>Todas las fuentes</div>
                 <div class="ag-item-desc">Búsqueda Centralizada Multihilo</div>
               </div>
               <span class="ag-item-check" id="check-all">✓</span>
             </div>
 
-            <div class="ag-menu-item" onclick="seleccionarFuente('google', '🔎 Google Patents')">
+            <div class="ag-menu-item" onclick="seleccionarFuente('google', 'Google Patents')">
               <div>
-                <div>🔎 Google Patents</div>
+                <div>Google Patents</div>
                 <div class="ag-item-desc">Red Mundial Oficial (120M+ documentos)</div>
               </div>
               <span class="ag-item-check" id="check-google">✓</span>
             </div>
 
-            <div class="ag-menu-item" onclick="seleccionarFuente('europepmc', '🇪🇺 Europe PMC')">
+            <div class="ag-menu-item" onclick="seleccionarFuente('europepmc', 'Europe PMC')">
               <div>
-                <div>🇪🇺 Europe PMC (EPO / WIPO)</div>
+                <div>Europe PMC (EPO / WIPO)</div>
                 <div class="ag-item-desc">Oficina Europea y Tratado PCT</div>
               </div>
               <span class="ag-item-check" id="check-europepmc">✓</span>
             </div>
 
-            <div class="ag-menu-item" onclick="seleccionarFuente('patentbrief', '💡 PatentBrief')">
+            <div class="ag-menu-item" onclick="seleccionarFuente('patentbrief', 'PatentBrief')">
               <div>
-                <div>💡 PatentBrief</div>
+                <div>PatentBrief</div>
                 <div class="ag-item-desc">Tecnología en Lenguaje Amigable</div>
               </div>
               <span class="ag-item-check" id="check-patentbrief">✓</span>
@@ -2330,7 +2446,7 @@
 
             <!-- Item para ver Estado de Salud / Uptime (Como View Usage en Antigravity) -->
             <div class="ag-menu-item" onmouseenter="mostrarHealthHover(true)" onclick="toggleHealthSubmenu(event)">
-              <div>📊 Estado y Salud de Fuentes</div>
+              <div>Estado y Conectividad de APIs</div>
               <span style="font-size: 11px; color: var(--text-muted);">▸</span>
             </div>
           </div>
@@ -2348,7 +2464,7 @@
 
             <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-color); text-align: center;">
               <button class="btn-ghost" onclick="abrirAsistenteConectarApi()" style="font-size: 11px; color: var(--brand-primary); width: 100%;">
-                🤖 Conectar Nueva API con el Asistente
+                Conectar Nueva API con el Asistente
               </button>
             </div>
           </div>
@@ -2358,18 +2474,15 @@
         <div class="ag-toolbar-right">
           <!-- Botón de Shuffle APIs -->
           <div class="ag-pill-btn" onclick="toggleShuffle()" id="shuffle-pill-btn" title="Intercalado equilibrado: muestra 1 patente de cada API alternadamente (Google, Europe PMC, PatentBrief)">
-            <span>🔀</span>
             <span id="shuffle-label">Shuffle APIs</span>
           </div>
 
           <!-- Botón de Shuffle Países -->
           <div class="ag-pill-btn" onclick="toggleCountryShuffle()" id="country-shuffle-pill-btn" title="Intercalado por países: muestra 1 patente de cada territorio alternadamente (EE.UU., Europa, PCT, etc.)">
-            <span>🌍</span>
             <span id="country-shuffle-label">Shuffle Países</span>
           </div>
 
           <div class="ag-pill-btn" onclick="toggleFilterMenu(event)" id="filter-pill-btn">
-            <span>⚙️</span>
             <span id="current-sort-label">Relevancia</span>
             <span class="ag-pill-caret" id="filter-caret">▼</span>
           </div>
@@ -2394,23 +2507,23 @@
 
             <div class="ag-menu-header">Territorio / Jurisdicción</div>
             <div class="ag-menu-item selected" id="opt-juris-all" onclick="setJurisdictionFilter('ALL', 'Todas las regiones')">
-              <span>🌐 Todas las regiones / mundiales</span>
+              <span>[INT] Todas las regiones / mundiales</span>
               <span class="ag-item-check" id="check-juris-all">✓</span>
             </div>
-            <div class="ag-menu-item" id="opt-juris-us" onclick="setJurisdictionFilter('US', '🇺🇸 Estados Unidos (US)')">
-              <span>🇺🇸 Estados Unidos (USPTO)</span>
+            <div class="ag-menu-item" id="opt-juris-us" onclick="setJurisdictionFilter('US', '[US] Estados Unidos')">
+              <span>[US] Estados Unidos (USPTO)</span>
               <span class="ag-item-check" id="check-juris-us" style="display:none;">✓</span>
             </div>
-            <div class="ag-menu-item" id="opt-juris-ep" onclick="setJurisdictionFilter('EP', '🇪🇺 Europa (EP)')">
-              <span>🇪🇺 Oficina Europea (EPO)</span>
+            <div class="ag-menu-item" id="opt-juris-ep" onclick="setJurisdictionFilter('EP', '[EP] Europa')">
+              <span>[EP] Oficina Europea (EPO)</span>
               <span class="ag-item-check" id="check-juris-ep" style="display:none;">✓</span>
             </div>
-            <div class="ag-menu-item" id="opt-juris-wo" onclick="setJurisdictionFilter('WO', '🌐 Mundial PCT (WO)')">
-              <span>🌐 Tratado Internacional (PCT / WIPO)</span>
+            <div class="ag-menu-item" id="opt-juris-wo" onclick="setJurisdictionFilter('WO', '[PCT] Mundial PCT')">
+              <span>[PCT] Tratado Internacional (PCT / WIPO)</span>
               <span class="ag-item-check" id="check-juris-wo" style="display:none;">✓</span>
             </div>
-            <div class="ag-menu-item" id="opt-juris-other" onclick="setJurisdictionFilter('OTHER', '🇯🇵/🇨🇳 Otras Regiones')">
-              <span>🇯🇵/🇨🇳 Otras Oficinas (JP, CN, DE, KR...)</span>
+            <div class="ag-menu-item" id="opt-juris-other" onclick="setJurisdictionFilter('OTHER', '[Otras] Otras Regiones')">
+              <span>[Otras] Otras Oficinas (JP, CN, DE, KR...)</span>
               <span class="ag-item-check" id="check-juris-other" style="display:none;">✓</span>
             </div>
 
@@ -2418,15 +2531,15 @@
 
             <div class="ag-menu-header">Estado Legal (Vigencia)</div>
             <div class="ag-menu-item selected" id="opt-status-all" onclick="setStatusFilter('all', 'Todos los estados')">
-              <span>⚪+🟢 Todos los estados</span>
+              <span>Todos los estados</span>
               <span class="ag-item-check" id="check-status-all">✓</span>
             </div>
             <div class="ag-menu-item" id="opt-status-active" onclick="setStatusFilter('active', 'Solo Activas / Vigentes')">
-              <span>🟢 Solo Activas (ACTIVE, Concedida, Publicada)</span>
+              <span>Solo Activas (Concedidas / Vigentes)</span>
               <span class="ag-item-check" id="check-status-active" style="display:none;">✓</span>
             </div>
             <div class="ag-menu-item" id="opt-status-inactive" onclick="setStatusFilter('inactive', 'Solo Inactivas / Dominio Público')">
-              <span>⚪ Solo Inactivas (NOT_ACTIVE, Expiradas)</span>
+              <span>Solo Inactivas (Dominio Público)</span>
               <span class="ag-item-check" id="check-status-inactive" style="display:none;">✓</span>
             </div>
 
@@ -2434,27 +2547,27 @@
 
             <div class="ag-menu-header">Filtros Rápidos</div>
             <label class="ag-filter-checkbox-row">
-              <span>💡 Solo con resumen amigable (PatentBrief)</span>
+              <span>Solo con resumen en lenguaje amigable</span>
               <input type="checkbox" id="chk-friendly" onchange="applyFiltersAndRender()">
             </label>
             <label class="ag-filter-checkbox-row">
-              <span>📄 Solo con PDF oficial descargable</span>
+              <span>Solo con PDF oficial descargable</span>
               <input type="checkbox" id="chk-has-pdf" onchange="applyFiltersAndRender()">
             </label>
             <label class="ag-filter-checkbox-row">
-              <span>🏢 Solo empresas / corporaciones</span>
+              <span>Solo empresas y corporaciones</span>
               <input type="checkbox" id="chk-corporate" onchange="applyFiltersAndRender()">
             </label>
             <label class="ag-filter-checkbox-row">
-              <span>📐 Solo con lámina técnica (Fig. 1)</span>
+              <span>Solo con lámina técnica (Fig. 1)</span>
               <input type="checkbox" id="chk-drawings" onchange="applyFiltersAndRender()">
             </label>
             <label class="ag-filter-checkbox-row">
-              <span>📅 Solo últimos 5 años (2021+)</span>
+              <span>Solo últimos 5 años (2021+)</span>
               <input type="checkbox" id="chk-recent" onchange="applyFiltersAndRender()">
             </label>
             <label class="ag-filter-checkbox-row">
-              <span>🔀 Intercalado 1x1 (Shuffle Fuentes)</span>
+              <span>Intercalado 1x1 (Shuffle Fuentes)</span>
               <input type="checkbox" id="chk-shuffle-menu" onchange="toggleShuffle(event)">
             </label>
           </div>
@@ -2474,7 +2587,7 @@
     <div id="intel-dropdown" class="intel-dropdown">
       <button class="intel-header-btn" onclick="toggleIntelBody()">
         <div class="intel-title-left">
-          <span>🔬 Inteligencia de Clasificaciones Tecnológicas (CPC / IPC)</span>
+          <span>Inteligencia de Clasificaciones Tecnológicas (CPC / IPC)</span>
           <span class="intel-badge-count" id="intel-badge-count">0 detectadas</span>
         </div>
         <span class="intel-arrow" id="intel-arrow">▼</span>
@@ -2494,35 +2607,38 @@
          ========================================================= -->
     <div class="workspace-tri-column">
       
-      <!-- 1. COLUMNA IZQUIERDA: AGENTE DE IA PERICIAL Y CONVERSACIONAL -->
-      <aside class="col-ai-chat" id="col-ai-chat">
-        <div class="ai-chat-header">
-          <div class="ai-chat-title">
-            <span>🤖</span>
-            <span>Agente Pericial de Vigilancia</span>
-          </div>
-          <button class="btn-ghost" onclick="abrirSettingsModal()" title="Configuración de Modelos y APIs" style="font-size: 13px; padding: 2px 6px;">⚙️</button>
-        </div>
-
-        <div class="ai-chat-messages" id="ai-chat-messages">
-          <div class="ai-msg ai-msg-assistant">
-            <div class="ai-msg-bubble">
-              👋 <strong>¡Hola! Soy tu Agente Autónomo de Vigilancia Tecnológica & Patentes.</strong>
-              <p style="margin-top: 6px; font-size: 12px; color: var(--text-medium);">
-                Escribe tu consulta en la barra superior o pregúntame directamente aquí abajo. Evaluaré <strong>Libertad de Operación (FTO)</strong>, antecedentes técnicos y oportunidades de diseño para tu proyecto.
-              </p>
+      <!-- ESPACIO UNIFICADO: DICTAMEN DE IA + RESULTADOS DE BÚSQUEDA -->
+      <main class="col-search-results" id="col-search-results">
+        
+        <!-- PANEL UNIFICADO DE ASESORÍA Y DICTAMEN DE IA -->
+        <div class="ai-unified-panel" id="ai-unified-panel">
+          <div class="ai-unified-header">
+            <div class="ai-unified-title-wrap">
+              <div class="ai-unified-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="18" height="12" x="3" y="8" rx="2"/>
+                  <path d="M12 2v6"/>
+                  <path d="M12 18v4"/>
+                  <path d="M4.93 19.07l2.83-2.83"/>
+                  <path d="M16.24 16.24l2.83 2.83"/>
+                  <circle cx="9" cy="14" r="1"/>
+                  <circle cx="15" cy="14" r="1"/>
+                </svg>
+                <span>Dictamen Pericial & Asesoría Tecnológica</span>
+              </div>
+              <span class="ai-model-tag" id="ai-active-model-tag">Gemini 3.5 Flash</span>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <button class="btn-ghost" onclick="copiarAnalisisIa()" style="font-size:11px; padding:3px 8px;" title="Copiar texto del análisis">Copiar</button>
+              <button class="btn-ghost" onclick="cerrarPanelIa()" style="font-size:11px; padding:3px 8px;" title="Ocultar análisis">✕ Ocultar</button>
             </div>
           </div>
+          <div id="ai-unified-verdict-slot"></div>
+          <div class="ai-unified-content" id="ai-unified-content">
+            <!-- Renderizado dinámico vía Marked + KaTeX -->
+          </div>
+          <div id="ai-unified-followups" class="ai-chips-suggestions" style="margin-top:14px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06);"></div>
         </div>
-
-        <div class="ai-chat-footer">
-          <input type="text" id="ai-chat-input" class="ai-chat-input" placeholder="Pregúntale al agente sobre estas patentes..." onkeydown="if(event.key==='Enter') enviarMensajeAgente()">
-          <button class="ai-chat-send-btn" onclick="enviarMensajeAgente()" title="Enviar mensaje">Enviar</button>
-        </div>
-      </aside>
-
-      <!-- 2. COLUMNA CENTRAL: RESULTADOS Y METADATOS -->
-      <main class="col-search-results" id="col-search-results">
         
         <!-- Tabs & View Switcher -->
         <div class="tabs-bar">
@@ -2536,10 +2652,10 @@
           </div>
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
             <button class="btn-csv-export" id="export-csv-btn" onclick="exportarResultadosCsv()" title="Descargar todas las patentes y metadatos con enlaces directos a PDF">
-              <span>📥</span> <span>Exportar CSV</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> <span>Exportar CSV</span>
             </button>
             <button class="btn-dossier-export" id="export-dossier-btn" onclick="abrirDossierModal()" title="Generar e imprimir informe ejecutivo de vigilancia tecnológica">
-              <span>📋</span> <span>Dossier FTO</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> <span>Dossier FTO</span>
             </button>
             <button class="btn-ghost" id="copy-btn" onclick="copiarJson()">Copiar JSON</button>
           </div>
@@ -2570,19 +2686,19 @@
       <aside class="col-inspection" id="col-inspection">
         <div class="inspection-header">
           <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--text-high);">
-            <span>📋</span>
+            <span></span>
             <span>Inspección Técnica</span>
           </div>
           <div class="sidebar-tabs-bar" style="padding: 0; background: transparent; border: none; display: flex; align-items: center; gap: 4px;">
             <button id="ins-tab-dossier" class="sb-tab-btn active" onclick="cambiarInspectionTab('dossier')">Ficha</button>
             <button id="ins-tab-pdf" class="sb-tab-btn" onclick="cambiarInspectionTab('pdf')">PDF Oficial</button>
-            <button class="btn-ghost" onclick="maximizarInspeccionModal()" title="Ver en pantalla completa" style="font-size: 12px; padding: 3px 6px;">⛶</button>
+            <button class="btn-ghost" onclick="maximizarInspeccionModal()" title="Ver en pantalla completa" style="font-size: 12px; padding: 3px 6px;"></button>
           </div>
         </div>
 
         <div class="inspection-body" id="inspection-body-content">
           <div class="inspection-standby" id="inspection-standby-view">
-            <div class="inspection-standby-icon">📄</div>
+            <div class="inspection-standby-icon"></div>
             <div style="font-weight: 700; color: var(--text-high); margin-bottom: 6px;">Espacio de Inspección y PDF</div>
             <p style="font-size: 12px; line-height: 1.5;">
               Haz clic en <strong>"Ver Ficha"</strong> en cualquier resultado de la columna central para examinar aquí sus figuras técnicas, clasificaciones CPC, estado legal y visor de PDF embebido sin perder de vista los resultados ni el chat.
@@ -2607,7 +2723,7 @@
     <div class="modal-content settings-modal-content" onclick="event.stopPropagation()">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 18px;">⚙️</span>
+          <span style="font-size: 18px;">️</span>
           <span style="font-weight: 700; font-size: 15px; color: var(--text-high);">Gestor de APIs, Conectores y Modelos de IA</span>
         </div>
         <button class="btn-close-modal" onclick="cerrarSettingsModal()">&times;</button>
@@ -2615,7 +2731,7 @@
 
       <div style="padding: 18px 0;">
         <div style="background-color: rgba(0, 145, 255, 0.1); border-left: 3px solid var(--brand-primary); padding: 10px 12px; border-radius: 4px; font-size: 12px; margin-bottom: 16px; color: var(--text-medium);">
-          💡 <strong>Hub Multi-Proveedor:</strong> El profesor o el equipo pueden cambiar el modelo de IA o las credenciales de las oficinas de patentes en cualquier momento. Se guardan de forma persistente y segura en su navegador.
+           <strong>Hub Multi-Proveedor:</strong> El equipo o los investigadores pueden cambiar el modelo de IA o las credenciales de las oficinas de patentes en cualquier momento. Se guardan de forma persistente y segura en su navegador.
         </div>
 
         <h3 style="font-size: 13px; font-weight: 700; color: var(--text-high); text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
@@ -2625,14 +2741,14 @@
         <div class="settings-field-group">
           <label>Proveedor / Motor de IA:</label>
           <select id="cfg-ai-provider" onchange="actualizarDefaultModel()">
-            <option value="gemini">⚡ Google Gemini (Recomendado / Free Tier Oficial)</option>
-            <option value="groq">🚀 Groq Cloud (Ultra-rápido LPU / Llama 3.3)</option>
-            <option value="deepseek">🧠 DeepSeek (deepseek-chat / reasoner)</option>
-            <option value="openai">🟢 OpenAI (GPT-4o / GPT-4o-mini)</option>
-            <option value="claude">🟣 Anthropic (Claude 3.5 Sonnet)</option>
-            <option value="perplexity">🌐 Perplexity (Sonar Search)</option>
-            <option value="grok">🤖 xAI (Grok 2 / Grok Beta)</option>
-            <option value="heuristic">⚙️ Motor Heurístico Local (Sin API Key)</option>
+            <option value="gemini">Google Gemini (Recomendado / Free Tier Oficial)</option>
+            <option value="groq"> Groq Cloud (Ultra-rápido LPU / Llama 3.3)</option>
+            <option value="deepseek"> DeepSeek (deepseek-chat / reasoner)</option>
+            <option value="openai"> OpenAI (GPT-4o / GPT-4o-mini)</option>
+            <option value="claude"> Anthropic (Claude 3.5 Sonnet)</option>
+            <option value="perplexity"> Perplexity (Sonar Search)</option>
+            <option value="grok"> xAI (Grok 2 / Grok Beta)</option>
+            <option value="heuristic">Motor Heurístico Local (Sin API Key)</option>
           </select>
         </div>
 
@@ -2654,17 +2770,17 @@
         </h3>
 
         <div class="settings-field-group">
-          <label>🇪🇺 EPO OPS - Consumer Key (Clave Pública):</label>
+          <label> EPO OPS - Consumer Key (Clave Pública):</label>
           <input type="text" id="cfg-epo-key" placeholder="Eko8eGU1PMZeGHqp9tRFSjcoNzNXk8ChnSndfMBZ2BXiv3Tx">
         </div>
 
         <div class="settings-field-group">
-          <label>🇪🇺 EPO OPS - Consumer Secret (Clave Secreta):</label>
+          <label> EPO OPS - Consumer Secret (Clave Secreta):</label>
           <input type="password" id="cfg-epo-secret" placeholder="UJjngYfeBnOhnKoPpZ5Tr49NhBGvOyor4XVjyV2K8TTs8IUO0GrMEQ3o0omRNt63">
         </div>
 
         <div class="settings-field-group">
-          <label>🔬 The Lens Token Académico (Opcional):</label>
+          <label> The Lens Token Académico (Opcional):</label>
           <input type="password" id="cfg-lens-token" placeholder="Token académico de lens.org">
         </div>
 
@@ -2677,14 +2793,14 @@
         <div class="settings-field-group">
           <textarea id="cfg-auto-map-json" rows="3" placeholder='{"patent_id": "...", "title": "...", "claims": [...] }'></textarea>
           <button class="btn-ghost" onclick="autoMapearNuevaApi()" style="margin-top: 6px; font-size: 11px;">
-            🤖 Analizar y Generar Regla de Mapeo
+             Analizar y Generar Regla de Mapeo
           </button>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 14px;">
           <button class="btn-ghost" onclick="cerrarSettingsModal()">Cancelar</button>
           <button class="btn-dossier-export" onclick="guardarAjustes()" style="padding: 7px 16px;">
-            💾 Guardar Configuración
+            Guardar Configuración
           </button>
         </div>
       </div>
@@ -2696,7 +2812,7 @@
     <div class="modal-content dossier-modal-content" onclick="event.stopPropagation()">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 18px;">📋</span>
+          <span style="font-size: 18px;"></span>
           <span style="font-weight: 700; font-size: 15px; color: var(--text-high);">Dossier Ejecutivo de Vigilancia Tecnológica</span>
         </div>
         <button class="btn-close-modal" onclick="cerrarDossierModal()">&times;</button>
@@ -2708,10 +2824,10 @@
         </div>
         <div style="display: flex; gap: 8px;">
           <button class="btn-ghost" onclick="descargarDossierHtml()" style="font-size: 11px;">
-            💾 Descargar Informe HTML
+             Descargar Informe HTML
           </button>
           <button class="btn-dossier-export" onclick="imprimirDossier()" style="font-size: 11px;">
-            🖨️ Imprimir / Guardar en PDF
+            Imprimir / Guardar en PDF
           </button>
         </div>
       </div>
@@ -2727,7 +2843,7 @@
     <div class="modal-content" style="max-width: 480px; width: 92%;" onclick="event.stopPropagation()">
       <div class="modal-header">
         <div style="font-weight: 700; font-size: 15px; color: var(--text-high); display: flex; align-items: center; gap: 8px;">
-          <span>📂</span> <span>Nuevo Proyecto / Espacio de Trabajo</span>
+          <span></span> <span>Nuevo Proyecto / Espacio de Trabajo</span>
         </div>
         <button class="btn-close-modal" onclick="cerrarModalNuevoProyecto()">&times;</button>
       </div>
@@ -2756,7 +2872,7 @@
     <div class="modal-content" style="max-width: 900px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;" onclick="event.stopPropagation()">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 8px;" id="modal-fullscreen-title">
-          <span>📋</span> <span style="font-weight: 700;">Inspección Técnica en Pantalla Completa</span>
+          <span></span> <span style="font-weight: 700;">Inspección Técnica en Pantalla Completa</span>
         </div>
         <button class="btn-close-modal" onclick="cerrarInspeccionModal()">&times;</button>
       </div>
@@ -2788,7 +2904,7 @@
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
         <a id="sidebar-ext-btn" href="#" target="_blank" rel="noopener" class="btn-ghost" style="text-decoration: none; font-size: 11px;">
-          🔗 Abrir en pestaña nueva &nearr;
+           Abrir en pestaña nueva &nearr;
         </a>
         <button class="btn-close-sidebar" onclick="cerrarSidebar()" title="Cerrar barra lateral (Esc)">&times;</button>
       </div>
@@ -2797,10 +2913,10 @@
     <!-- Pestañas del Sidebar: Ficha Nativa vs PDF Oficial Embebido -->
     <div class="sidebar-tabs-bar">
       <button id="sb-tab-dossier" class="sb-tab-btn active" onclick="cambiarSidebarTab('dossier')">
-        📋 Ficha Técnica Nativa
+         Ficha Técnica Nativa
       </button>
       <button id="sb-tab-pdf" class="sb-tab-btn" onclick="cambiarSidebarTab('pdf')">
-        📄 Documento PDF Oficial
+         Documento PDF Oficial
       </button>
     </div>
 
@@ -2815,7 +2931,7 @@
 
   <!-- Botón Flotante (FAB) de Guía, Glosario y Fuentes -->
   <button class="fab-glossary-btn" onclick="abrirGlosarioModal()" title="Abrir Guía y Glosario Tecnológico de Patentes">
-    <span class="fab-icon">📖</span>
+    <span class="fab-icon"></span>
     <span class="fab-text">Glosario y Fuentes</span>
   </button>
 
@@ -2824,7 +2940,7 @@
     <div class="modal-content glossary-modal-content" onclick="event.stopPropagation()">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 18px;">📖</span>
+          <span style="font-size: 18px;"></span>
           <span style="font-weight: 700; font-size: 15px; color: var(--text-high);">Centro de Conocimiento y Glosario de Patentes</span>
         </div>
         <button class="btn-close-modal" onclick="cerrarGlosarioModal()">&times;</button>
@@ -2832,16 +2948,16 @@
 
       <div class="glossary-tabs-nav">
         <button id="gl-nav-fuentes" class="glossary-tab-btn active" onclick="cambiarGlosarioTab('fuentes')">
-          🌐 Fuentes de Patentes
+          Fuentes de Patentes
         </button>
         <button id="gl-nav-cpc" class="glossary-tab-btn" onclick="cambiarGlosarioTab('cpc')">
-          🔬 Códigos CPC / IPC
+          Códigos CPC / IPC
         </button>
         <button id="gl-nav-estados" class="glossary-tab-btn" onclick="cambiarGlosarioTab('estados')">
-          ⚖️ Estados Jurídicos
+          Estados Jurídicos
         </button>
         <button id="gl-nav-territorio" class="glossary-tab-btn" onclick="cambiarGlosarioTab('territorio')">
-          🌍 Territorialidad y Citas
+           Territorialidad y Citas
         </button>
       </div>
 
@@ -2851,7 +2967,7 @@
 
           <div class="glossary-card">
             <div class="glossary-card-title">
-              <span>📊 Matriz Técnica de Procedencia y Especificidad de Fuentes</span>
+              <span> Matriz Técnica de Procedencia y Especificidad de Fuentes</span>
             </div>
             <p style="margin-bottom: 10px;">Ficha metodológica para auditoría del proyecto y transferencia de conocimiento:</p>
             <div style="overflow-x: auto;">
@@ -2869,7 +2985,7 @@
                 <tbody>
                   <tr>
                     <td><strong>EPO OPS (Oficial)</strong></td>
-                    <td>🇩🇪/🇳🇱 Europa (Alemania/Países Bajos)</td>
+                    <td>/ Europa (Alemania/Países Bajos)</td>
                     <td>100% Multitecnológico (Mecánica, Eléctrica, Materiales)</td>
                     <td>Base maestra oficial <strong>DOCDB / INPADOC</strong> (100+ países)</td>
                     <td>Gratis (Registro #46581). Hasta 2.5 GB / semana.</td>
@@ -2877,7 +2993,7 @@
                   </tr>
                   <tr>
                     <td><strong>Google Patents</strong></td>
-                    <td>🇺🇸 Estados Unidos</td>
+                    <td>[US] Estados Unidos</td>
                     <td>Universal (120M+ documentos mundiales)</td>
                     <td>Indexación de gacetas mundiales + Google Cloud Storage</td>
                     <td>Sin costo directo vía endpoint nativo</td>
@@ -2885,7 +3001,7 @@
                   </tr>
                   <tr>
                     <td><strong>PatentBrief</strong></td>
-                    <td>🇺🇸 Estados Unidos</td>
+                    <td>[US] Estados Unidos</td>
                     <td>Tecnología de consumo, hardware, wearables</td>
                     <td>Extracción masiva de USPTO Open Bulk Data + LLMs</td>
                     <td>Gratis (API abierta)</td>
@@ -2893,7 +3009,7 @@
                   </tr>
                   <tr>
                     <td><strong>OpenAlex (Literatura)</strong></td>
-                    <td>🇺🇸 Estados Unidos (OurResearch)</td>
+                    <td>[US] Estados Unidos (OurResearch)</td>
                     <td>Universal Académico (250M+ obras científicas)</td>
                     <td>Crossref, PubMed, repositorios universitarios mundiales</td>
                     <td>Gratis (Polite Pool 100,000 req/día)</td>
@@ -2901,7 +3017,7 @@
                   </tr>
                   <tr>
                     <td><strong>Europe PMC</strong></td>
-                    <td>🇬🇧 Reino Unido (EMBL-EBI)</td>
+                    <td>[GB] Reino Unido (EMBL-EBI)</td>
                     <td>Biomedicina, biotecnología, biomecánica</td>
                     <td>PubMed Central + convenios EPO</td>
                     <td>Gratis (Open Access)</td>
@@ -2999,12 +3115,12 @@
         <!-- 4. Pestaña Territorialidad y Citas -->
         <div id="gl-pane-territorio" class="glossary-tab-pane">
           <div class="glossary-card">
-            <div class="glossary-card-title">🌍 Principio de Territorialidad</div>
+            <div class="glossary-card-title"> Principio de Territorialidad</div>
             <p>Las patentes <strong>solo tienen validez legal en el país donde fueron concedidas</strong>. Por ejemplo, una patente con prefijo <code>US</code> (EE.UU.) no protege en Colombia a menos que la empresa haya radicado una extensión nacional ante la Superintendencia de Industria y Comercio (SIC). El tratado <code>WO</code> (PCT) otorga una ventana de tiempo para reclamar prioridad en más de 150 naciones.</p>
           </div>
 
           <div class="glossary-card">
-            <div class="glossary-card-title">⭐ Citas hacia adelante (Forward Citations)</div>
+            <div class="glossary-card-title"> Citas hacia adelante (Forward Citations)</div>
             <p>Mide cuántas patentes posteriores tuvieron que citar este documento como antecedente obligado. En el ecosistema de vigilancia e inversión tecnológica, un alto número de citas indica que la invención es una <strong>tecnología pionera o estándar fundamental</strong> de la industria.</p>
           </div>
         </div>
@@ -3050,10 +3166,10 @@
       const icon = document.getElementById('theme-icon');
       const text = document.getElementById('theme-text');
       if (theme === 'dark') {
-        icon.textContent = '🌙';
+        icon.textContent = '';
         text.textContent = 'Modo Oscuro';
       } else {
-        icon.textContent = '☀️';
+        icon.textContent = '';
         text.textContent = 'Modo Claro';
       }
     }
@@ -3116,16 +3232,16 @@
       const badge = document.getElementById('ai-active-badge');
       if (!badge) return;
       const names = {
-        gemini: '⚡ Gemini Flash',
-        groq: '🚀 Groq Llama 3.3',
-        deepseek: '🧠 DeepSeek',
-        openai: '🟢 OpenAI GPT-4o',
-        claude: '🟣 Claude 3.5',
-        perplexity: '🌐 Perplexity',
-        grok: '🤖 xAI Grok',
-        heuristic: '⚙️ Heurístico Local'
+        gemini: 'Gemini Flash',
+        groq: ' Groq Llama 3.3',
+        deepseek: ' DeepSeek',
+        openai: ' OpenAI GPT-4o',
+        claude: ' Claude 3.5',
+        perplexity: ' Perplexity',
+        grok: ' xAI Grok',
+        heuristic: 'Heurístico Local'
       };
-      badge.textContent = names[cfgAiProvider] || '🤖 IA Activa';
+      badge.textContent = names[cfgAiProvider] || 'IA Activa';
     }
 
     async function autoMapearNuevaApi() {
@@ -3147,9 +3263,9 @@
     // GESTIÓN DE WORKSPACES / ESPACIOS DE TRABAJO DE VIGILANCIA
     // =========================================================
     const defaultWorkspaces = [
-      { id: 'awake', name: 'Awake (Calzado Piezoeléctrico)', query: 'piezoelectric footwear', pinned: [] },
-      { id: 'centrika', name: 'Céntrika (Sensores & Telas Inteligentes)', query: 'smart fabrics pressure sensors', pinned: [] },
-      { id: 'competencia', name: 'Benchmarking (Nike / Dephy)', query: 'adaptive cushioning shoe sole', pinned: [] }
+      { id: 'principal', name: 'Proyecto Principal', query: '', pinned: [] },
+      { id: 'emergentes', name: 'Tecnologías Emergentes', query: '', pinned: [] },
+      { id: 'benchmarking', name: 'Benchmarking Competitivo', query: '', pinned: [] }
     ];
 
     let workspaces = [];
@@ -3188,7 +3304,7 @@
       container.innerHTML = workspaces.map(w => `
         <div class="ag-menu-item ${w.id === activeWorkspaceId ? 'selected' : ''}" onclick="seleccionarWorkspace('${w.id}')">
           <div>
-            <div>📂 ${w.name}</div>
+            <div>${w.name}</div>
             <div class="ag-item-desc">${w.pinned ? w.pinned.length : 0} patentes fijadas &bull; "${w.query}"</div>
           </div>
           <span class="ag-item-check" style="${w.id === activeWorkspaceId ? 'display:inline;' : 'display:none;'}">✓</span>
@@ -3327,10 +3443,7 @@
         if (sourcePill) sourcePill.style.display = 'inline-flex';
         if (shufflePill) shufflePill.style.display = 'inline-flex';
         if (countryShufflePill) countryShufflePill.style.display = 'inline-flex';
-        queryInput.placeholder = 'Escribe conceptos técnicos, palabras clave o ecuaciones de patente (ej. piezoelectric footwear)...';
-        if (!queryInput.value || queryInput.value.includes('piezoelectric energy')) {
-          queryInput.value = 'piezoelectric footwear';
-        }
+        queryInput.placeholder = 'Escribe conceptos técnicos, palabras clave o ecuaciones de patente (ej. solid state battery, neural interface, optical metamaterials)...';
       } else {
         if (btnPatents) btnPatents.classList.remove('active');
         if (btnLit) btnLit.classList.add('active');
@@ -3339,13 +3452,14 @@
         if (countryShufflePill) countryShufflePill.style.display = 'none';
         if (intelDropdown) intelDropdown.style.display = 'none';
         if (activeFiltersBar) activeFiltersBar.style.display = 'none';
-        queryInput.placeholder = 'Escribe temas académicos, artículos científicos, autores o DOI (ej. piezoelectric energy harvesting footwear)...';
-        if (!queryInput.value || queryInput.value === 'piezoelectric footwear') {
-          queryInput.value = 'piezoelectric energy harvesting footwear';
-        }
+        queryInput.placeholder = 'Escribe temas académicos, artículos científicos, autores o DOI (ej. CRISPR gene therapy, quantum key distribution)...';
       }
 
-      buscar();
+      if (queryInput.value.trim()) {
+        buscar();
+      } else {
+        mostrarZeroState();
+      }
     }
 
     // Inicializar tema guardado
@@ -3550,24 +3664,7 @@
       // 1. Detectar si la entrada es una pregunta conceptual o diálogo con el agente
       if (esPreguntaConversacional(q)) {
         btn.disabled = true;
-        const triCol = document.querySelector('.workspace-tri-column');
-        if (triCol) triCol.classList.add('mode-dialog');
-
-        cardsContainer.innerHTML = `
-          <div style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; text-align: left; max-width: 820px; margin: 12px auto; box-shadow: var(--card-shadow);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-              <div style="display:flex; align-items:center; gap:8px; font-weight:700; font-size:14px; color:var(--brand-primary);">
-                <span>🤖 Consulta Pericial:</span>
-                <span style="color:var(--text-high); font-weight:600;">"${escapeHtml(q)}"</span>
-              </div>
-              <button class="btn-ghost" onclick="restaurarModoTriColumna()" style="font-size:11px;">✕ Modo Normal</button>
-            </div>
-            <div id="central-dialog-response-area" style="font-size:13.5px; color:var(--text-high); line-height:1.65;">
-              <span style="opacity:0.8; font-style:italic;">Analizando y consultando al Agente Pericial de Vigilancia...</span>
-            </div>
-          </div>
-        `;
-        consultarAgenteIA(q, [], true);
+        consultarAgenteIA(q, allRetrievedPatents, false, q);
         btn.disabled = false;
         return;
       }
@@ -3745,7 +3842,7 @@
       const activeList = [];
 
       if (currentSource !== 'all') {
-        activeList.push({ label: `Fuente: ${currentSource}`, reset: () => seleccionarFuente('all', '🌐 Todas las fuentes') });
+        activeList.push({ label: `Fuente: ${currentSource}`, reset: () => seleccionarFuente('all', 'Todas las fuentes') });
       }
       if (currentJurisdictionFilter !== 'ALL') {
         activeList.push({ label: `Región: ${currentJurisdictionFilter}`, reset: () => setJurisdictionFilter('ALL', 'Todas las regiones') });
@@ -3754,19 +3851,19 @@
         activeList.push({ label: `Estado: ${currentStatusFilter === 'active' ? 'Solo Activas' : 'Solo Inactivas'}`, reset: () => setStatusFilter('all', 'Todos los estados') });
       }
       if (chkFriendly) {
-        activeList.push({ label: '💡 Solo Resumen Amigable', reset: () => { document.getElementById('chk-friendly').checked = false; applyFiltersAndRender(); } });
+        activeList.push({ label: 'Solo Resumen Amigable', reset: () => { document.getElementById('chk-friendly').checked = false; applyFiltersAndRender(); } });
       }
       if (chkCorporate) {
-        activeList.push({ label: '🏢 Solo Corporaciones', reset: () => { document.getElementById('chk-corporate').checked = false; applyFiltersAndRender(); } });
+        activeList.push({ label: 'Solo Corporaciones', reset: () => { document.getElementById('chk-corporate').checked = false; applyFiltersAndRender(); } });
       }
       if (chkHasPdf) {
-        activeList.push({ label: '📄 Solo con PDF', reset: () => { document.getElementById('chk-has-pdf').checked = false; applyFiltersAndRender(); } });
+        activeList.push({ label: 'Solo con PDF', reset: () => { document.getElementById('chk-has-pdf').checked = false; applyFiltersAndRender(); } });
       }
       if (chkDrawings) {
-        activeList.push({ label: '📐 Solo con Figuras', reset: () => { document.getElementById('chk-drawings').checked = false; applyFiltersAndRender(); } });
+        activeList.push({ label: 'Solo con Figuras', reset: () => { document.getElementById('chk-drawings').checked = false; applyFiltersAndRender(); } });
       }
       if (chkRecent) {
-        activeList.push({ label: '📅 Recientes 2021+', reset: () => { document.getElementById('chk-recent').checked = false; applyFiltersAndRender(); } });
+        activeList.push({ label: 'Recientes 2021+', reset: () => { document.getElementById('chk-recent').checked = false; applyFiltersAndRender(); } });
       }
 
       if (activeList.length > 0) {
@@ -3793,7 +3890,7 @@
 
     function resetearTodosLosFiltros() {
       currentSource = 'all';
-      document.getElementById('current-source-label').textContent = '🌐 Todas las fuentes';
+      document.getElementById('current-source-label').textContent = 'Todas las fuentes';
       currentJurisdictionFilter = 'ALL';
       currentStatusFilter = 'all';
       
@@ -3990,8 +4087,8 @@
       const countBadge = document.getElementById('results-count-badge');
       if (countBadge) {
         let tag = '';
-        if (isShuffleActive && currentSource === 'all') tag += ' 🔀 APIs';
-        if (isCountryShuffleActive) tag += ' 🌍 Países';
+        if (isShuffleActive && currentSource === 'all') tag += ' [Shuffle APIs]';
+        if (isCountryShuffleActive) tag += ' [Shuffle Países]';
         countBadge.textContent = tag ? `${filtered.length} (${tag.trim()})` : `${filtered.length}`;
       }
       renderizarPatentes(filtered);
@@ -4000,14 +4097,14 @@
     
     function getJurisdictionFlag(pubNum) {
       const p = (pubNum || '').toUpperCase();
-      if (p.startsWith('US')) return '🇺🇸 US';
-      if (p.startsWith('EP')) return '🇪🇺 EP';
-      if (p.startsWith('WO')) return '🌐 WO';
-      if (p.startsWith('JP')) return '🇯🇵 JP';
-      if (p.startsWith('CN')) return '🇨🇳 CN';
-      if (p.startsWith('DE')) return '🇩🇪 DE';
-      if (p.startsWith('KR')) return '🇰🇷 KR';
-      return '📄 INT';
+      if (p.startsWith('US')) return '[US]';
+      if (p.startsWith('EP')) return '[EP]';
+      if (p.startsWith('WO')) return '[PCT/WO]';
+      if (p.startsWith('JP')) return '[JP]';
+      if (p.startsWith('CN')) return '[CN]';
+      if (p.startsWith('DE')) return '[DE]';
+      if (p.startsWith('KR')) return '[KR]';
+      return '[INT]';
     }
 
     
@@ -4051,7 +4148,7 @@
             <div style="padding: 8px 16px; background-color: var(--bg-canvas); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
               <span>Documento Oficial Escaneado (PDF Gaceta)</span>
               <a href="${p.pdf}" target="_blank" rel="noopener" class="btn-ghost" style="text-decoration: none; font-size: 11px;">
-                📥 Descargar archivo PDF
+                 Descargar archivo PDF
               </a>
             </div>
             <iframe src="${p.pdf}#view=FitH" style="width: 100%; height: 100%; border: none; background: #fff;" title="Visor PDF Oficial"></iframe>
@@ -4060,13 +4157,13 @@
       } else {
         viewPdf.innerHTML = `
           <div style="padding: 40px 24px; text-align: center; color: var(--text-medium);">
-            <div style="font-size: 32px; margin-bottom: 10px;">📄</div>
+            <div style="font-size: 32px; margin-bottom: 10px;"></div>
             <h3 style="font-size: 16px; color: var(--text-high); margin-bottom: 8px;">Documento PDF no indexado en caché directo</h3>
             <p style="font-size: 13px; line-height: 1.5; max-width: 420px; margin: 0 auto 16px auto; color: var(--text-muted);">
               Esta patente está registrada en la oficina de origen pero el enlace directo al archivo binario no está disponible en este momento. Puedes consultar la gaceta oficial en la web externa:
             </p>
             <a href="${p.patent_link || '#'}" target="_blank" rel="noopener" class="btn-ghost" style="color: var(--brand-primary); font-weight: 600; text-decoration: none; padding: 8px 16px;">
-              🌐 Ver Registro en la Oficina de Origen &nearr;
+              Ver Registro en Oficina Oficial &nearr;
             </a>
           </div>
         `;
@@ -4138,7 +4235,7 @@
         <div style="background-color: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; font-size: 12px; margin-bottom: 12px;">
           <div><strong>Titular:</strong> ${assignee}</div>
           <div><strong>Fecha:</strong> ${pubDate}</div>
-          <div><strong>Estado FTO:</strong> ${act ? '<span style="color:#22c55e; font-weight:700;">🟢 Vigente</span>' : '<span style="color:#38bdf8; font-weight:700;">⚪ Dominio Público</span>'}</div>
+          <div><strong>Estado FTO:</strong> ${act ? '<span style="color:#22c55e; font-weight:700;">Vigente</span>' : '<span style="color:#38bdf8; font-weight:700;">Dominio Público</span>'}</div>
         </div>
 
         ${p.thumbnail ? `<div style="margin-bottom: 12px; text-align: center;"><img src="${p.thumbnail}" style="max-height: 140px; border-radius: 4px; border: 1px solid var(--border-color); background: #fff;" onclick="abrirModal('${p.thumbnail}', '${pubNum}')"></div>` : ''}
@@ -4149,8 +4246,8 @@
         </div>
 
         <div style="margin-top: 14px; display: flex; gap: 6px; flex-wrap: wrap;">
-          ${p.pdf ? `<button class="btn-copy-pdf" onclick="copiarEnlacePdf('${p.pdf}', this)">📋 Copiar PDF</button>` : ''}
-          ${p.patent_link ? `<a href="${p.patent_link}" target="_blank" class="btn-ghost" style="font-size: 11px; text-decoration: none;">🌐 Abrir Web Oficial &nearr;</a>` : ''}
+          ${p.pdf ? `<button class="btn-copy-pdf" onclick="copiarEnlacePdf('${p.pdf}', this)">Copiar PDF</button>` : ''}
+          ${p.patent_link ? `<a href="${p.patent_link}" target="_blank" class="btn-ghost" style="font-size: 11px; text-decoration: none;"> Abrir Web Oficial &nearr;</a>` : ''}
         </div>
       `;
     }
@@ -4169,10 +4266,10 @@
       } else {
         activeView.innerHTML = `
           <div style="padding: 30px 10px; text-align: center; color: var(--text-muted);">
-            <div style="font-size: 28px; margin-bottom: 8px;">📄</div>
+            <div style="font-size: 28px; margin-bottom: 8px;"></div>
             <div style="font-size: 13px; font-weight: 600; color: var(--text-high); margin-bottom: 6px;">PDF directo no disponible</div>
             <p style="font-size: 11.5px; line-height: 1.4;">Consulta la gaceta escaneada en el portal oficial de origen.</p>
-            ${p.patent_link ? `<a href="${p.patent_link}" target="_blank" class="btn-ghost" style="margin-top: 10px; font-size: 11px; text-decoration: none;">🌐 Ir a Registro Oficial &nearr;</a>` : ''}
+            ${p.patent_link ? `<a href="${p.patent_link}" target="_blank" class="btn-ghost" style="margin-top: 10px; font-size: 11px; text-decoration: none;">Ir a Registro Oficial &nearr;</a>` : ''}
           </div>
         `;
       }
@@ -4217,8 +4314,8 @@
           <span class="source-tag source-${sourceBadge}">[${sourceName}]</span>
           <span class="jurisdiction-badge">${getJurisdictionFlag(pubNum)}</span>
           <span style="font-family: monospace; font-size: 14px; font-weight: 700; color: var(--text-high);">${pubNum}</span>
-          <span class="patent-status-badge ${active ? 'badge-ok' : 'fto-public-domain'}" title="${active ? 'Patente vigente' : 'Libertad de Operación (FTO) en dominio público'}">${active ? (p.legal_status || '🟢 Vigente') : '⚪ Dominio Público (FTO)'}</span>
-          ${cits > 0 ? `<span class="patent-citations-badge">⭐ ${cits} citas</span>` : ''}
+          <span class="patent-status-badge ${active ? 'badge-ok' : 'fto-public-domain'}" title="${active ? 'Patente vigente' : 'Libertad de Operación (FTO) en dominio público'}">${active ? (p.legal_status || 'Vigente') : 'Dominio Público (FTO)'}</span>
+          ${cits > 0 ? `<span class="patent-citations-badge">Citas: ${cits}</span>` : ''}
         `;
       }
 
@@ -4231,7 +4328,7 @@
         figsHtml = `
           <div style="margin-bottom: 18px;">
             <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">
-              📐 Galería Técnica de Figuras (${p.figures.length})
+               Galería Técnica de Figuras (${p.figures.length})
             </div>
             <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px;">
               ${p.figures.map(f => `
@@ -4244,7 +4341,7 @@
         figsHtml = `
           <div style="margin-bottom: 18px;">
             <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">
-              📐 Lámina Técnica
+              Figura Técnica
             </div>
             <img src="${p.thumbnail}" style="max-height: 180px; border: 1px solid var(--border-color); border-radius: 6px; background: #fff; cursor: pointer; padding: 4px;" onclick="abrirModal('${p.thumbnail}', '${pubNum}')" title="Ver en grande">
           </div>
@@ -4256,15 +4353,15 @@
         friendlyHtml = `
           <div class="friendly-summary-box" style="margin-bottom: 16px;">
             <div class="friendly-summary-title" style="justify-content: space-between;">
-              <span>💡 Resumen Tecnológico en Lenguaje Sencillo:</span>
+              <span>Resumen Tecnológico en Lenguaje Sencillo:</span>
               <button class="btn-translate" id="sidebar-trans-friendly-btn" onclick="toggleTraduccionSidebarFriendly('${escapeHtml(p.one_sentence_summary)}')">
-                <span>🌐 Traducir</span>
+                <span>Traducir</span>
               </button>
             </div>
             <div id="sidebar-friendly-text" style="font-size: 13.5px; line-height: 1.5;">${p.one_sentence_summary}</div>
             ${p.industry_tags && p.industry_tags.length ? `
               <div class="industry-tags-row">
-                ${p.industry_tags.map(tag => `<span class="badge-industry">🏷️ ${tag.replace('_', ' ')}</span>`).join('')}
+                ${p.industry_tags.map(tag => `<span class="badge-industry">${tag.replace('_', ' ')}</span>`).join('')}
               </div>
             ` : ''}
           </div>
@@ -4315,15 +4412,15 @@
           <div class="abstract-header">
             <span class="abstract-label">Resumen / Abstract Oficial</span>
             <button class="btn-translate" id="sidebar-trans-abstract-btn" onclick="toggleTraduccionSidebarAbstract('${escapeHtml(snippet)}')">
-              <span>🌐 Traducir al Español</span>
+              <span>Traducir al Español</span>
             </button>
           </div>
           <div id="sidebar-abstract-text">${snippet || 'Sin resumen registrado'}</div>
         </div>
 
         <div style="display: flex; gap: 10px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--border-color);">
-          ${p.pdf ? `<a href="${p.pdf}" target="_blank" class="btn-ghost" style="color: var(--status-danger); font-weight: 600; text-decoration: none;">📥 Descargar PDF Oficial</a>` : ''}
-          <a href="${patentLink}" target="_blank" class="btn-ghost" style="color: var(--brand-primary); font-weight: 600; text-decoration: none;">🌐 Ver en Ficha Web Externa &nearr;</a>
+          ${p.pdf ? `<a href="${p.pdf}" target="_blank" class="btn-ghost" style="color: var(--status-danger); font-weight: 600; text-decoration: none;"> Descargar PDF Oficial</a>` : ''}
+          <a href="${patentLink}" target="_blank" class="btn-ghost" style="color: var(--brand-primary); font-weight: 600; text-decoration: none;"> Ver en Ficha Web Externa &nearr;</a>
         </div>
       `;
 
@@ -4471,7 +4568,7 @@
           </div>
 
           <h3 style="font-size: 14px; font-weight: 700; color: var(--text-high); margin: 20px 0 10px 0;">
-            🏛️ Revistas y Repositorios Académicos Dominantes
+            Revistas y Repositorios Académicos Dominantes
           </h3>
           <div>
             ${topVenues.map(([name, count]) => `
@@ -4486,7 +4583,7 @@
           </div>
 
           <h3 style="font-size: 14px; font-weight: 700; color: var(--text-high); margin: 24px 0 10px 0;">
-            📑 Tabla Ejecutiva de Publicaciones Analizadas
+            Tabla Ejecutiva de Publicaciones Analizadas
           </h3>
           <table class="dossier-table">
             <thead>
@@ -4506,7 +4603,7 @@
                   <td><a href="${w.doi_url || w.landing_url || '#'}" target="_blank" style="color: inherit; text-decoration: none; font-weight: 600;">${w.title}</a></td>
                   <td>${w.primary_author || 'No especificado'}</td>
                   <td>${w.journal}</td>
-                  <td>${w.is_oa ? '<span style="color:#22c55e; font-weight:700;">🔓 OA</span>' : '<span style="color:#94a3b8;">🔒 Suscripción</span>'}</td>
+                  <td>${w.is_oa ? '<span style="color:#22c55e; font-weight:700;"> OA</span>' : '<span style="color:#94a3b8;"> Suscripción</span>'}</td>
                   <td style="font-family: monospace; font-weight: 700;">${w.cited_by_count}</td>
                 </tr>
               `).join('')}
@@ -4582,7 +4679,7 @@
           </div>
 
           <h3 style="font-size: 14px; font-weight: 700; color: var(--text-high); margin: 20px 0 10px 0;">
-            🏢 Titulares y Empresas con Mayor Densidad Tecnológica
+             Titulares y Empresas con Mayor Densidad Tecnológica
           </h3>
           <div>
             ${topAssignees.map(([name, count]) => `
@@ -4597,7 +4694,7 @@
           </div>
 
           <h3 style="font-size: 14px; font-weight: 700; color: var(--text-high); margin: 24px 0 10px 0;">
-            📑 Resumen de Patentes y Estado de Protección
+             Resumen de Patentes y Estado de Protección
           </h3>
           <table class="dossier-table">
             <thead>
@@ -4614,8 +4711,8 @@
               ${allRetrievedPatents.map(p => {
                 const act = isPatentActive(p);
                 const statusBadge = act 
-                  ? '<span style="color:#22c55e; font-weight:700;">🟢 Vigente</span>' 
-                  : '<span style="color:#38bdf8; font-weight:700;">⚪ Dominio Público</span>';
+                  ? '<span style="color:#22c55e; font-weight:700;">Vigente</span>' 
+                  : '<span style="color:#38bdf8; font-weight:700;">Dominio Público</span>';
                 return `
                   <tr>
                     <td style="font-family: monospace; font-weight: 700;">${p.publication_number || 'N/A'}</td>
@@ -4709,7 +4806,7 @@
       if (btn.dataset.translated === "true") {
         textElem.textContent = originalText;
         btn.dataset.translated = "false";
-        btn.innerHTML = `<span>🌐 Traducir</span>`;
+        btn.innerHTML = `<span>Traducir</span>`;
         return;
       }
 
@@ -4745,7 +4842,7 @@
       if (btn.dataset.translated === "true") {
         textElem.textContent = originalText;
         btn.dataset.translated = "false";
-        btn.innerHTML = `<span>🌐 Traducir</span>`;
+        btn.innerHTML = `<span>Traducir</span>`;
         return;
       }
       if (translationCache[originalText]) {
@@ -4779,7 +4876,7 @@
       if (btn.dataset.translated === "true") {
         textElem.textContent = originalText;
         btn.dataset.translated = "false";
-        btn.innerHTML = `<span>🌐 Traducir al Español</span>`;
+        btn.innerHTML = `<span>Traducir al Español</span>`;
         return;
       }
       if (translationCache[originalText]) {
@@ -4846,17 +4943,17 @@
       
       // Parsear acción de búsqueda: [ACTION:SEARCH query="..."]
       let formatted = text.replace(/\[ACTION:SEARCH\s+query=["'](.*?)["']\]/gi, (match, q) => {
-        return `<div style="margin: 6px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('search', '${escapeHtml(q).replace(/'/g, "\\'")}')">🔍 Ejecutar búsqueda en panel: "<strong>${escapeHtml(q)}</strong>"</button></div>`;
+        return `<div style="margin: 6px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('search', '${escapeHtml(q).replace(/'/g, "\\'")}')">Ejecutar búsqueda en panel: "<strong>${escapeHtml(q)}</strong>"</button></div>`;
       });
 
       // Parsear acción de filtrado CPC: [ACTION:FILTER_CPC code="..."]
       formatted = formatted.replace(/\[ACTION:FILTER_CPC\s+code=["'](.*?)["']\]/gi, (match, code) => {
-        return `<div style="margin: 6px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('filter_cpc', '${escapeHtml(code).replace(/'/g, "\\'")}')">⚡ Refinar por CPC: <strong>${escapeHtml(code)}</strong></button></div>`;
+        return `<div style="margin: 6px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('filter_cpc', '${escapeHtml(code).replace(/'/g, "\\'")}')">Refinar por CPC: <strong>${escapeHtml(code)}</strong></button></div>`;
       });
 
       // Parsear acción de modo de motor: [ACTION:MODE mode="..."]
       formatted = formatted.replace(/\[ACTION:MODE\s+mode=["'](.*?)["']\]/gi, (match, mode) => {
-        return `<div style="margin: 6px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('mode', '${escapeHtml(mode).replace(/'/g, "\\'")}')">📚 Cambiar a modo: <strong>${escapeHtml(mode)}</strong></button></div>`;
+        return `<div style="margin: 6px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('mode', '${escapeHtml(mode).replace(/'/g, "\\'")}')">Cambiar a modo: <strong>${escapeHtml(mode)}</strong></button></div>`;
       });
 
       // Formato Markdown esencial
@@ -4887,37 +4984,43 @@
       const countBadge = document.getElementById('results-count-badge');
       if (countBadge) countBadge.textContent = '0';
       const ws = getActiveWorkspace();
-      const wsName = ws ? ws.name : 'Awake';
+      const wsName = ws ? ws.name : 'General';
 
       container.innerHTML = `
         <div class="zero-state-container" id="zero-state-hub">
           <div class="zero-state-hero">
-            <div class="zero-state-icon">🔬</div>
+            <div style="margin-bottom: 14px;">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <circle cx="11" cy="11" r="3"/>
+              </svg>
+            </div>
             <h2 class="zero-state-title">Vigilancia Tecnológica, Inteligencia de Patentes & Literatura</h2>
             <p class="zero-state-subtitle">
-              Proyecto activo: <strong>${escapeHtml(wsName)}</strong>. Búsqueda y auditoría legal en EPO, USPTO, WIPO, Google Patents y OpenAlex.
+              Espacio activo: <strong>${escapeHtml(wsName)}</strong>. Búsqueda y auditoría pericial en EPO (Espacenet), USPTO, WIPO (PCT), Google Patents y OpenAlex.
             </p>
           </div>
           <div class="zero-state-grid">
-            <div class="zero-state-card" onclick="ejecutarAccionAgente('search', 'piezoelectric footwear energy harvesting')">
-              <div class="zero-card-tag">👟 Awake &bull; Calzado Piezoeléctrico</div>
-              <div class="zero-card-title">Cosecha de Energía en Suela</div>
-              <div class="zero-card-desc">Explorar patentes de plantillas biomecánicas, transductores y amortiguación adaptativa.</div>
+            <div class="zero-state-card" onclick="ejecutarAccionAgente('search', 'solid state battery electrolyte high energy density')">
+              <div class="zero-card-tag">[Materiales & Energía]</div>
+              <div class="zero-card-title">Baterías de Estado Sólido</div>
+              <div class="zero-card-desc">Explorar patentes de electrolitos cerámicos, ánodos de litio metálico y alta densidad energética.</div>
             </div>
-            <div class="zero-state-card" onclick="ejecutarAccionAgente('search', 'smart fabrics biomechanical pressure sensor')">
-              <div class="zero-card-tag">🧵 Céntrika &bull; Textiles Inteligentes</div>
-              <div class="zero-card-title">Sensores Textiles & Bioseñales</div>
-              <div class="zero-card-desc">Auditar telas conductoras con sensores piezoeléctricos de presión y movimiento.</div>
+            <div class="zero-state-card" onclick="ejecutarAccionAgente('search', 'robotic actuator soft gripper tactile sensor')">
+              <div class="zero-card-tag">[Robótica & Sensores]</div>
+              <div class="zero-card-title">Robótica Blanda & Actuadores</div>
+              <div class="zero-card-desc">Auditar mecanismos de agarre adaptativo, sensórica táctil y retroalimentación háptica.</div>
             </div>
             <div class="zero-state-card" onclick="preguntarAlAgente('¿Cómo se evalúa la Libertad de Operación (FTO) según normas PCT para evitar infracción de patentes?')">
-              <div class="zero-card-tag">⚖️ Marco Legal &bull; Peritaje FTO</div>
+              <div class="zero-card-tag">[Marco Legal & Peritaje FTO]</div>
               <div class="zero-card-title">Dictamen de Libertad de Operación</div>
-              <div class="zero-card-desc">Consultar al perito cómo distinguir invenciones en dominio público de patentes vigentes.</div>
+              <div class="zero-card-desc">Consultar al agente cómo evaluar el estado de dominio público vs. antecedentes vigentes.</div>
             </div>
-            <div class="zero-state-card" onclick="setEngineMode('literature'); ejecutarAccionAgente('search', 'biomechanical energy harvesting shoe review')">
-              <div class="zero-card-tag">📚 OpenAlex &bull; Artículos y Papers</div>
-              <div class="zero-card-title">Literatura Científica Abierta</div>
-              <div class="zero-card-desc">Acceder a 250M+ artículos de investigación con PDF descargable y revisión por pares.</div>
+            <div class="zero-state-card" onclick="setEngineMode('literature'); ejecutarAccionAgente('search', 'neural network medical image segmentation transformer')">
+              <div class="zero-card-tag">[OpenAlex &bull; Literatura Científica]</div>
+              <div class="zero-card-title">Modelos y Papers Académicos</div>
+              <div class="zero-card-desc">Acceder a más de 250M+ artículos de investigación con PDF descargable y revisión por pares.</div>
             </div>
           </div>
         </div>
@@ -5005,7 +5108,7 @@
         <div style="background-color: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-size: 13px; margin-bottom: 16px;">
           <div><strong>Titular / Solicitante:</strong> ${assignee}</div>
           <div><strong>Fecha de Publicación:</strong> ${pubDate}</div>
-          <div><strong>Estado FTO:</strong> ${act ? '<span style="color:#22c55e; font-weight:700;">🟢 Vigente (Protección activa)</span>' : '<span style="color:#38bdf8; font-weight:700;">⚪ Dominio Público (Libre Operación)</span>'}</div>
+          <div><strong>Estado FTO:</strong> ${act ? '<span style="color:#22c55e; font-weight:700;">Vigente (Protección activa)</span>' : '<span style="color:#38bdf8; font-weight:700;"> Dominio Público (Libre Operación)</span>'}</div>
         </div>
 
         ${p.pdf ? `
@@ -5039,39 +5142,120 @@
       if (modal) modal.classList.remove('open');
     }
 
-    // AGENTE DE IA PERICIAL Y CONVERSACIONAL (COLUMNA IZQUIERDA Y CENTRAL)
-    async function consultarAgenteIA(query, results, isCentralDialog = false) {
-      const chatContainer = document.getElementById('ai-chat-messages');
-      if (!chatContainer) return;
+        // MOTOR DE COMPILACIÓN MARKDOWN + LATEX MATH (KATEX + MARKED)
+    let lastAgentRawReply = '';
+
+    function renderMarkdownAndMath(text, targetElement) {
+      if (!targetElement) return;
+      if (!text) {
+        targetElement.innerHTML = '';
+        return;
+      }
+      lastAgentRawReply = text;
+
+      // 1. Reemplazar acciones del agente por botones interactivos
+      let parsed = text.replace(/\[ACTION:SEARCH\s+query=["'](.*?)["']\]/gi, (match, q) => {
+        return `<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('search', '${escapeHtml(q).replace(/'/g, "\\'")}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Ejecutar búsqueda: "<strong>${escapeHtml(q)}</strong>"</button></div>`;
+      });
+
+      parsed = parsed.replace(/\[ACTION:FILTER_CPC\s+code=["'](.*?)["']\]/gi, (match, code) => {
+        return `<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('filter_cpc', '${escapeHtml(code).replace(/'/g, "\\'")}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Refinar por clase CPC: <strong>${escapeHtml(code)}</strong></button></div>`;
+      });
+
+      parsed = parsed.replace(/\[ACTION:MODE\s+mode=["'](.*?)["']\]/gi, (match, mode) => {
+        return `<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('mode', '${escapeHtml(mode).replace(/'/g, "\\'")}')">Cambiar modo: <strong>${escapeHtml(mode)}</strong></button></div>`;
+      });
+
+      // 2. Compilar Markdown a HTML con marked.js
+      let html = '';
+      if (typeof marked !== 'undefined' && marked.parse) {
+        html = marked.parse(parsed);
+      } else {
+        html = parsed
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+          .replace(/\n/g, '<br>');
+      }
+      targetElement.innerHTML = html;
+
+      // 3. Compilar expresiones LaTeX matemáticas con KaTeX
+      if (typeof renderMathInElement !== 'undefined') {
+        try {
+          renderMathInElement(targetElement, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '$', right: '$', display: false },
+              { left: '\\(', right: '\\)', display: false },
+              { left: '\\[', right: '\\]', display: true }
+            ],
+            throwOnError: false
+          });
+        } catch (e) {
+          console.warn('KaTeX render warning:', e);
+        }
+      }
+    }
+
+    function copiarAnalisisIa() {
+      if (!lastAgentRawReply) return;
+      navigator.clipboard.writeText(lastAgentRawReply).then(() => {
+        alert('Análisis copiado al portapapeles.');
+      });
+    }
+
+    function cerrarPanelIa() {
+      const panel = document.getElementById('ai-unified-panel');
+      if (panel) panel.classList.remove('active');
+    }
+
+    // AGENTE DE IA PERICIAL Y CONVERSACIONAL (FEED PRINCIPAL UNIFICADO)
+    async function consultarAgenteIA(query, results, isCentralDialog = false, explicitUserMsg = null) {
+      const panel = document.getElementById('ai-unified-panel');
+      const contentElem = document.getElementById('ai-unified-content');
+      const verdictSlot = document.getElementById('ai-unified-verdict-slot');
+      const followupsElem = document.getElementById('ai-unified-followups');
+      const modelTag = document.getElementById('ai-active-model-tag');
+
+      if (panel) panel.classList.add('active');
+      if (modelTag) modelTag.textContent = cfgAiModel || 'Gemini 3.5 Flash';
+
+      if (verdictSlot) verdictSlot.innerHTML = '';
+      if (followupsElem) followupsElem.innerHTML = '';
+      if (contentElem) {
+        contentElem.innerHTML = `
+          <div style="display:flex; align-items:center; gap:10px; color:var(--text-muted); font-size:13px; padding:12px 0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2" class="spin-icon">
+              <line x1="12" y1="2" x2="12" y2="6"/>
+              <line x1="12" y1="18" x2="12" y2="22"/>
+              <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/>
+              <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+              <line x1="2" y1="12" x2="6" y2="12"/>
+              <line x1="18" y1="12" x2="22" y2="12"/>
+              <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/>
+              <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+            </svg>
+            <span>Consultando al Agente Pericial de Vigilancia (${cfgAiModel || 'Gemini 3.5 Flash'})...</span>
+          </div>
+        `;
+      }
 
       const isLit = currentEngineMode === 'literature';
       const count = results ? results.length : 0;
       const ws = getActiveWorkspace();
 
-      // Burbuja de pensamiento en el chat
-      const loadingId = 'ai-loading-' + Date.now();
-      const loadingHtml = `
-        <div class="ai-msg ai-msg-assistant" id="${loadingId}">
-          <div class="ai-msg-bubble" style="opacity: 0.8; font-style: italic;">
-            🤖 ${count > 0 ? `Auditando ${count} documentos recuperados y generando dictamen FTO...` : 'Procesando consulta pericial...'}
-          </div>
-        </div>
-      `;
-      chatContainer.insertAdjacentHTML('beforeend', loadingHtml);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-
       try {
         const payload = {
           provider: cfgAiProvider,
           apiKey: cfgAiKey,
-          model: cfgAiModel,
+          model: cfgAiModel || 'gemini-3.5-flash',
           workspaceName: ws ? ws.name : 'General',
           query: query,
+          activePatent: currentActivePatentData,
           patents: isLit ? [] : (results ? results.slice(0, 8) : []),
           literature: isLit ? (results ? results.slice(0, 8) : []) : [],
-          userMessage: count > 0 
+          userMessage: explicitUserMsg || (count > 0 
             ? `Dictamen de libertad de operación (FTO), antecedentes cercanos y oportunidades técnicas para la consulta "${query}".`
-            : query
+            : query)
         };
 
         const res = await fetch('/api/agent', {
@@ -5081,131 +5265,82 @@
         });
         const data = await res.json();
 
-        const loader = document.getElementById(loadingId);
-        if (loader) loader.remove();
-
-        const replyFormatted = formatearRespuestaAgente(data.reply);
-
-        // Si es diálogo centralizado, actualizar también el panel central
-        if (isCentralDialog) {
-          const centralArea = document.getElementById('central-dialog-response-area');
-          if (centralArea) {
-            centralArea.innerHTML = replyFormatted;
-          }
+        if (data.fto_verdict && verdictSlot) {
+          verdictSlot.innerHTML = `<div class="ai-verdict-card" style="margin-bottom:12px;"><strong>[Dictamen FTO]:</strong> ${escapeHtml(data.fto_verdict)}</div>`;
         }
 
-        const assistantMsgHtml = `
-          <div class="ai-msg ai-msg-assistant">
-            <div class="ai-msg-bubble">
-              ${data.fto_verdict ? `<div class="ai-verdict-card">⚖️ <strong>${data.fto_verdict}</strong></div>` : ''}
-              <div>${replyFormatted}</div>
-              ${data.follow_ups && data.follow_ups.length ? `
-                <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-top: 10px;">Preguntas periciales sugeridas:</div>
-                <div class="ai-chips-suggestions">
-                  ${data.follow_ups.map(f => `<span class="ai-chip-prompt" onclick="preguntarAlAgente('${f.replace(/'/g, "\\'")}')">${f}</span>`).join('')}
-                </div>
-              ` : ''}
-            </div>
-          </div>
-        `;
-        chatContainer.insertAdjacentHTML('beforeend', assistantMsgHtml);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        renderMarkdownAndMath(data.reply || 'Sin respuesta estructurada devuelta.', contentElem);
+
+        if (data.follow_ups && data.follow_ups.length && followupsElem) {
+          followupsElem.innerHTML = `
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Preguntas periciales sugeridas:</div>
+            ${data.follow_ups.map(f => `<span class="ai-chip-prompt" onclick="preguntarAlAgente('${f.replace(/'/g, "\\'")}')">${escapeHtml(f)}</span>`).join('')}
+          `;
+        }
+
+        // Desplazamiento suave al panel de IA si está fuera de pantalla
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
       } catch (err) {
-        const loader = document.getElementById(loadingId);
-        if (loader) loader.remove();
-        chatContainer.insertAdjacentHTML('beforeend', `
-          <div class="ai-msg ai-msg-assistant">
-            <div class="ai-msg-bubble" style="color: var(--status-danger);">
-              Error al consultar el agente de IA: ${err.message}. Puedes revisar la clave en el menú de Ajustes ⚙️.
+        if (contentElem) {
+          contentElem.innerHTML = `
+            <div style="color: var(--status-danger); font-size: 13px; padding: 10px 0;">
+              Error al consultar el agente de IA: ${escapeHtml(err.message)}. Verifica tu API Key o conexión en Ajustes.
             </div>
-          </div>
-        `);
-      }
-    }
-
-    async function enviarMensajeAgente() {
-      const input = document.getElementById('ai-chat-input');
-      const text = input.value.trim();
-      if (!text) return;
-
-      const chatContainer = document.getElementById('ai-chat-messages');
-      input.value = '';
-
-      // Mensaje del usuario
-      chatContainer.insertAdjacentHTML('beforeend', `
-        <div class="ai-msg ai-msg-user">
-          <div class="ai-msg-bubble">${escapeHtml(text)}</div>
-        </div>
-      `);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-
-      const loadingId = 'ai-loading-' + Date.now();
-      chatContainer.insertAdjacentHTML('beforeend', `
-        <div class="ai-msg ai-msg-assistant" id="${loadingId}">
-          <div class="ai-msg-bubble" style="opacity: 0.8; font-style: italic;">Pensando respuesta pericial...</div>
-        </div>
-      `);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-
-      try {
-        const isLit = currentEngineMode === 'literature';
-        const items = isLit ? allRetrievedLiterature : allRetrievedPatents;
-        const q = document.getElementById('query-input').value.trim();
-        const ws = getActiveWorkspace();
-
-        const res = await fetch('/api/agent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            provider: cfgAiProvider,
-            apiKey: cfgAiKey,
-            model: cfgAiModel,
-            workspaceName: ws ? ws.name : 'General',
-            query: q,
-            patents: isLit ? [] : (items ? items.slice(0, 8) : []),
-            literature: isLit ? (items ? items.slice(0, 8) : []) : [],
-            userMessage: text
-          })
-        });
-        const data = await res.json();
-
-        const loader = document.getElementById(loadingId);
-        if (loader) loader.remove();
-
-        const replyFormatted = formatearRespuestaAgente(data.reply);
-
-        chatContainer.insertAdjacentHTML('beforeend', `
-          <div class="ai-msg ai-msg-assistant">
-            <div class="ai-msg-bubble">${replyFormatted}</div>
-          </div>
-        `);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-
-      } catch (err) {
-        const loader = document.getElementById(loadingId);
-        if (loader) loader.remove();
-        chatContainer.insertAdjacentHTML('beforeend', `
-          <div class="ai-msg ai-msg-assistant">
-            <div class="ai-msg-bubble" style="color: var(--status-danger);">Error: ${err.message}</div>
-          </div>
-        `);
+          `;
+        }
       }
     }
 
     function preguntarAlAgente(pregunta) {
-      const input = document.getElementById('ai-chat-input');
+      const input = document.getElementById('query-input');
       if (input) {
         input.value = pregunta;
-        enviarMensajeAgente();
       }
+      consultarAgenteIA(pregunta, allRetrievedPatents, false, pregunta);
+    }
+
+    // CONSULTA PERICIAL DE PATENTE ESPECÍFICA [BOTÓN ROBOT + ?]
+    function consultarPatenteAgente(idx, event) {
+      if (event) event.stopPropagation();
+      const p = currentRenderedPatents[idx];
+      if (!p) return;
+
+      // 1. Abrir en el panel de inspección de la derecha
+      abrirSidebarPatente(idx);
+
+      // 2. Formular consulta precisa al agente con contexto activo
+      const pubNum = p.publication_number || 'N/A';
+      const promptText = `Explícame en detalle la invención ${pubNum}: "${p.title || ''}". ¿Qué reivindica técnicamente, cuál es su novedad frente a antecedentes y cuál es su situación legal de Libertad de Operación (FTO)?`;
+
+      const input = document.getElementById('query-input');
+      if (input) input.value = `Consultando patente ${pubNum}...`;
+
+      consultarAgenteIA(promptText, allRetrievedPatents, false, promptText);
+    }
+
+    // CONSULTA PERICIAL DE LITERATURA ESPECÍFICA [BOTÓN ROBOT + ?]
+    function consultarLiteraturaAgente(idx, event) {
+      if (event) event.stopPropagation();
+      const w = currentRenderedLiterature[idx];
+      if (!w) return;
+
+      abrirSidebarLiteratura(idx);
+
+      const promptText = `Analiza pericialmente este artículo científico: "${w.title}". ¿Cuáles son sus principales aportes metodológicos, limitaciones experimentales y aplicaciones tecnológicas en propiedad intelectual?`;
+
+      const input = document.getElementById('query-input');
+      if (input) input.value = `Consultando paper: ${w.title.substring(0, 40)}...`;
+
+      consultarAgenteIA(promptText, allRetrievedLiterature, false, promptText);
+    }
     }
 
     function renderizarLiteratura(works) {
       currentRenderedLiterature = works || [];
       const container = document.getElementById('view-cards');
       if (!works || works.length === 0) {
-        container.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; padding: 40px; text-align: center;">No se encontraron artículos o papers científicos para esta búsqueda. Intente con términos en inglés como "piezoelectric energy harvesting".</div>`;
+        container.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; padding: 40px; text-align: center;">No se encontraron artículos o papers científicos para esta búsqueda. Intente con términos en inglés como "solid state battery" o "biomechanical sensor".</div>`;
         return;
       }
 
@@ -5223,8 +5358,8 @@
         const pdfUrl = w.pdf_url;
 
         let oaHtml = isOA 
-          ? `<span class="oa-badge oa-open" title="Documento accesible sin muro de pago">🔓 Acceso Abierto (${oaStatus})</span>` 
-          : `<span class="oa-badge oa-closed" title="Publicación bajo suscripción">🔒 Requiere Acceso / Suscripción</span>`;
+          ? `<span class="oa-badge oa-open" title="Documento accesible sin muro de pago">Acceso Abierto (${oaStatus})</span>` 
+          : `<span class="oa-badge oa-closed" title="Publicación bajo suscripción">Requiere Suscripción</span>`;
 
         let conceptsHtml = '';
         if (concepts.length > 0) {
@@ -5236,16 +5371,29 @@
           `;
         }
 
-        let linksHtml = `
-          <a href="javascript:void(0)" onclick="abrirSidebarLiteratura(${idx})" style="font-weight: 600; color: var(--brand-primary);">
-            📖 Ver Ficha Académica &rarr;
-          </a>
-          <a href="${doiUrl}" target="_blank" rel="noopener">
-            🔗 DOI Oficial &nearr;
-          </a>
+                let linksHtml = `
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <button class="btn-ask-patent" onclick="consultarLiteraturaAgente(${idx}, event)" title="Consultar análisis pericial al Agente sobre este paper">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="12" x="3" y="8" rx="2"/>
+                <path d="M12 2v6"/>
+                <path d="M12 18v4"/>
+                <circle cx="9" cy="14" r="1"/>
+                <circle cx="15" cy="14" r="1"/>
+              </svg>
+              <span style="font-weight: 700; color: var(--brand-primary); margin-left: 1px;">?</span>
+              <span>Consultar</span>
+            </button>
+            <a href="javascript:void(0)" onclick="abrirSidebarLiteratura(${idx})" style="font-weight: 600; color: var(--brand-primary);">
+              Ver Ficha Académica &rarr;
+            </a>
+            <a href="${doiUrl}" target="_blank" rel="noopener">
+              DOI Oficial &nearr;
+            </a>
+            ${pdfUrl ? `<a href="${pdfUrl}" target="_blank" rel="noopener" class="pdf-link">Descargar PDF &rarr;</a>` : ''}
+          </div>
         `;
-        if (pdfUrl) {
-          linksHtml += `<a href="${pdfUrl}" target="_blank" rel="noopener" class="pdf-link">📥 Descargar PDF Abierto &rarr;</a>`;
+" target="_blank" rel="noopener" class="pdf-link"> Descargar PDF Abierto &rarr;</a>`;
         }
 
         return `
@@ -5256,11 +5404,11 @@
                   <div class="patent-header-left">
                     <span class="source-tag source-openalex">[OpenAlex (Literatura Científica)]</span>
                     ${oaHtml}
-                    <span class="patent-status-badge badge-pending">📅 ${year}</span>
-                    ${cits > 0 ? `<span class="patent-citations-badge" title="${cits} publicaciones científicas citan este artículo">⭐ ${cits} citas académicas</span>` : ''}
+                    <span class="patent-status-badge badge-pending">${year}</span>
+                    ${cits > 0 ? `<span class="patent-citations-badge" title="${cits} publicaciones científicas citan este artículo">Citas: ${cits} académicas</span>` : ''}
                   </div>
                   <div class="patent-dates-text">
-                    🏛️ ${journal}
+                    ${journal}
                   </div>
                 </div>
 
@@ -5286,7 +5434,7 @@
                     <div class="abstract-header">
                       <span class="abstract-label">Resumen / Abstract Científico</span>
                       <button class="btn-translate" id="trans-btn-lit-${idx}" onclick="toggleTraduccionLit(${idx}, '${escapeHtml(snippet)}')">
-                        <span>🌐 Traducir al Español</span>
+                        <span>Traducir al Español</span>
                       </button>
                     </div>
                     <div id="abstract-text-lit-${idx}">${snippet}</div>
@@ -5300,7 +5448,7 @@
 
               <div class="patent-thumbnail-col">
                 <div class="no-thumb-box" style="border-color: rgba(16, 185, 129, 0.3);">
-                  <span style="font-size: 20px; margin-bottom: 2px;">📚</span>
+                  <span style="font-size: 20px; margin-bottom: 2px;"></span>
                   <span style="font-size: 10px; color: var(--src-openalex); font-weight: 600;">Paper Arbitrado</span>
                   <span style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">${year}</span>
                 </div>
@@ -5317,7 +5465,7 @@
       if (btn.dataset.translated === "true") {
         textElem.textContent = originalText;
         btn.dataset.translated = "false";
-        btn.innerHTML = `<span>🌐 Traducir al Español</span>`;
+        btn.innerHTML = `<span>Traducir al Español</span>`;
         return;
       }
       if (translationCache[originalText]) {
@@ -5358,14 +5506,14 @@
       const isOA = w.is_oa;
       const oaStatus = (w.oa_status || 'closed').toUpperCase();
       let oaHtml = isOA 
-        ? `<span class="oa-badge oa-open">🔓 Acceso Abierto (${oaStatus})</span>` 
-        : `<span class="oa-badge oa-closed">🔒 Suscripción / Pago</span>`;
+        ? `<span class="oa-badge oa-open">Acceso Abierto (${oaStatus})</span>` 
+        : `<span class="oa-badge oa-closed">Requiere Suscripción</span>`;
 
       document.getElementById('sidebar-header-left').innerHTML = `
         <span class="source-tag source-openalex">[OpenAlex Literatura]</span>
         ${oaHtml}
-        <span class="patent-status-badge badge-pending">📅 ${w.publication_year || 'N/A'}</span>
-        ${w.cited_by_count > 0 ? `<span class="patent-citations-badge">⭐ ${w.cited_by_count} citas</span>` : ''}
+        <span class="patent-status-badge badge-pending">${w.publication_year || 'N/A'}</span>
+        ${w.cited_by_count > 0 ? `<span class="patent-citations-badge">Citas: ${w.cited_by_count}</span>` : ''}
       `;
 
       document.getElementById('sidebar-ext-btn').href = w.doi_url || w.landing_url || '#';
@@ -5376,7 +5524,7 @@
           <div style="margin-bottom: 14px;">
             <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Tópicos de Investigación</div>
             <div class="classif-row">
-              ${w.concepts.map(c => `<span class="classif-pill" onclick="cerrarSidebar(); buscar('${c.name}')">🏷️ ${c.name} (${c.score}%)</span>`).join('')}
+              ${w.concepts.map(c => `<span class="classif-pill" onclick="cerrarSidebar(); buscar('${c.name}')">${c.name} (${c.score}%)</span>`).join('')}
             </div>
           </div>
         `;
@@ -5412,15 +5560,15 @@
           <div class="abstract-header">
             <span class="abstract-label">Resumen / Abstract Científico</span>
             <button class="btn-translate" id="sidebar-trans-abstract-btn" onclick="toggleTraduccionSidebarAbstract('${escapeHtml(w.snippet)}')">
-              <span>🌐 Traducir al Español</span>
+              <span>Traducir al Español</span>
             </button>
           </div>
           <div id="sidebar-abstract-text">${w.snippet || 'Sin resumen registrado'}</div>
         </div>
 
         <div style="display: flex; gap: 10px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--border-color);">
-          ${w.pdf_url ? `<a href="${w.pdf_url}" target="_blank" class="btn-ghost" style="color: var(--status-success); font-weight: 600; text-decoration: none;">📥 Descargar PDF Abierto (OA)</a>` : ''}
-          <a href="${w.doi_url || w.landing_url}" target="_blank" class="btn-ghost" style="color: var(--brand-primary); font-weight: 600; text-decoration: none;">🔗 Ver en Repositorio Oficial (DOI) &nearr;</a>
+          ${w.pdf_url ? `<a href="${w.pdf_url}" target="_blank" class="btn-ghost" style="color: var(--status-success); font-weight: 600; text-decoration: none;"> Descargar PDF Abierto (OA)</a>` : ''}
+          <a href="${w.doi_url || w.landing_url}" target="_blank" class="btn-ghost" style="color: var(--brand-primary); font-weight: 600; text-decoration: none;"> Ver en Repositorio Oficial (DOI) &nearr;</a>
         </div>
       `;
 
@@ -5453,8 +5601,8 @@
         const active = isPatentActive(p);
         let statusClass = active ? 'badge-ok' : 'fto-public-domain';
         let statusText = active 
-          ? (p.legal_status || '🟢 Vigente') 
-          : '⚪ Dominio Público (FTO)';
+          ? (p.legal_status || 'Vigente') 
+          : 'Dominio Público (FTO)';
         let statusTitle = active
           ? 'Patente con derechos vigentes: requiere licenciamiento o diseño alternativo.'
           : 'Libertad de Operación (Freedom to Operate): Patente en dominio público. Se puede fabricar, adaptar y comercializar libremente sin regalías.';
@@ -5466,14 +5614,14 @@
           thumbHtml = `
             <div class="patent-thumbnail-col">
               <img src="${p.thumbnail}" alt="Fig. Patente" class="patent-thumb-img" onclick="abrirModal('${p.thumbnail}', '${pubNum}')" title="Ver figura técnica en grande">
-              <span style="font-size: 10.5px; color: var(--text-muted); font-weight: 500;">📐 Fig. Técnica</span>
+              <span style="font-size: 10.5px; color: var(--text-muted); font-weight: 500;">Figura Técnica</span>
             </div>
           `;
         } else {
           thumbHtml = `
             <div class="patent-thumbnail-col">
               <div class="no-thumb-box">
-                <span style="font-size: 18px; margin-bottom: 2px;">📄</span>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 <span>Sin lámina registrada</span>
               </div>
             </div>
@@ -5497,15 +5645,15 @@
           friendlySummaryHtml = `
             <div class="friendly-summary-box">
               <div class="friendly-summary-title" style="display: flex; justify-content: space-between; align-items: center;">
-                <span>💡 Resumen Tecnológico en Lenguaje Sencillo:</span>
+                <span>Resumen Tecnológico en Lenguaje Sencillo:</span>
                 <button class="btn-translate" id="friendly-trans-btn-${idx}" onclick="toggleTraduccionFriendly(${idx}, '${escapeHtml(p.one_sentence_summary)}')">
-                  <span>🌐 Traducir</span>
+                  <span>Traducir</span>
                 </button>
               </div>
               <div id="friendly-text-${idx}">${p.one_sentence_summary}</div>
               ${p.industry_tags && p.industry_tags.length ? `
                 <div class="industry-tags-row">
-                  ${p.industry_tags.map(tag => `<span class="badge-industry">🏷️ ${tag.replace('_', ' ')}</span>`).join('')}
+                  ${p.industry_tags.map(tag => `<span class="badge-industry">${tag.replace('_', ' ')}</span>`).join('')}
                 </div>
               ` : ''}
             </div>
@@ -5515,7 +5663,7 @@
         // Enlace que abre la Ficha e Inspección Técnica
         let dynamicLinkHtml = `
           <a href="javascript:void(0)" onclick="abrirSidebarPatente(${idx})" style="font-weight: 600; color: var(--brand-primary);">
-            📖 Ficha e Inspección &rarr;
+            Ficha e Inspección &rarr;
           </a>
         `;
         if (sourceBadge === 'google') {
@@ -5537,7 +5685,7 @@
                     <span class="jurisdiction-badge">${getJurisdictionFlag(pubNum)}</span>
                     <span class="patent-id-badge">${pubNum}</span>
                     <span class="patent-status-badge ${statusClass}" title="${statusTitle}">${statusText}</span>
-                    ${cits > 0 ? `<span class="patent-citations-badge" title="${cits} patentes posteriores citan esta invención">⭐ ${cits} citas</span>` : ''}
+                    ${cits > 0 ? `<span class="patent-citations-badge" title="${cits} patentes posteriores citan esta invención">Citas: ${cits}</span>` : ''}
                   </div>
                   <div class="patent-dates-text">
                     ${filingDate ? `Solicitud: ${filingDate} &bull; ` : ''}Publicación: ${pubDate}
@@ -5563,7 +5711,7 @@
                     <div class="abstract-header">
                       <span class="abstract-label">Resumen / Abstract Oficial</span>
                       <button class="btn-translate" id="trans-btn-${idx}" onclick="toggleTraduccion(${idx}, '${escapeHtml(snippet)}')">
-                        <span>🌐 Traducir al Español</span>
+                        <span>Traducir al Español</span>
                       </button>
                     </div>
                     <div id="abstract-text-${idx}">${snippet}</div>
@@ -5572,20 +5720,31 @@
 
                 <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                   <div class="dynamic-source-dropdown">
-                    <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">🌐 Ver Registro en:</span>
+                    <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Ver Registro Oficial en:</span>
                     <select class="source-select-dropdown" onchange="if(this.value) window.open(this.value, '_blank')">
                       <option value="">Seleccionar plataforma oficial...</option>
-                      ${p.patent_link ? `<option value="${p.patent_link}">🔎 Google Patents (Red Mundial)</option>` : ''}
-                      <option value="https://worldwide.espacenet.com/patent/search?q=${pubNum}">🇪🇺 Espacenet / EPO (DOCDB)</option>
-                      ${pubNum.startsWith('US') ? `<option value="https://patentsview.org/patent/${pubNum.replace('US','')}">🇺🇸 USPTO PatentsView (EE.UU.)</option>` : ''}
-                      ${p.one_sentence_summary ? `<option value="https://patents.google.com/patent/${pubNum}/en">💡 PatentBrief</option>` : ''}
+                      ${p.patent_link ? `<option value="${p.patent_link}">Google Patents (Red Mundial)</option>` : ''}
+                      <option value="https://worldwide.espacenet.com/patent/search?q=${pubNum}">[EP] Espacenet / EPO (DOCDB)</option>
+                      ${pubNum.startsWith('US') ? `<option value="https://patentsview.org/patent/${pubNum.replace('US','')}">[US] USPTO PatentsView (EE.UU.)</option>` : ''}
+                      ${p.one_sentence_summary ? `<option value="https://patents.google.com/patent/${pubNum}/en">PatentBrief</option>` : ''}
                     </select>
                   </div>
 
-                  <div style="display: flex; gap: 6px; align-items: center;">
-                    ${p.pdf ? `<button class="btn-copy-pdf" onclick="copiarEnlacePdf('${p.pdf}', this)" title="Copiar enlace directo al archivo PDF">📋 Copiar PDF</button>` : ''}
+                  <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                    <button class="btn-ask-patent" onclick="consultarPatenteAgente(${idx}, event)" title="Consultar análisis pericial al Agente sobre esta patente">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="18" height="12" x="3" y="8" rx="2"/>
+                        <path d="M12 2v6"/>
+                        <path d="M12 18v4"/>
+                        <circle cx="9" cy="14" r="1"/>
+                        <circle cx="15" cy="14" r="1"/>
+                      </svg>
+                      <span style="font-weight: 700; color: var(--brand-primary); margin-left: 1px;">?</span>
+                      <span>Consultar</span>
+                    </button>
+                    ${p.pdf ? `<button class="btn-copy-pdf" onclick="copiarEnlacePdf('${p.pdf}', this)" title="Copiar enlace directo al archivo PDF">Copiar PDF</button>` : ''}
                     <button class="btn-ghost" onclick="abrirSidebarPatente(${idx})" style="font-size: 11px; font-weight: 600; color: var(--brand-primary);">
-                      📖 Ficha &rarr;
+                      Ficha &rarr;
                     </button>
                   </div>
                 </div>
@@ -5606,7 +5765,7 @@
       if (btn.dataset.translated === "true") {
         textElem.textContent = originalText;
         btn.dataset.translated = "false";
-        btn.innerHTML = `<span>🌐 Traducir al Español</span>`;
+        btn.innerHTML = `<span>Traducir al Español</span>`;
         return;
       }
 
