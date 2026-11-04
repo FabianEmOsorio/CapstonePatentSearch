@@ -448,12 +448,17 @@ Para el prototipo de calzado piezoeléctrico, se recomienda utilizar como base d
                 })
                 return
 
+            ws_name = req_data.get('workspaceName', 'General')
             # Si hay API key de Gemini
             if provider == 'gemini':
                 sel_model = model or 'gemini-3.5-flash'
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{sel_model}:generateContent?key={api_key}"
                 context_str = "\n".join([f"[{i+1}] {p.get('publication_number')}: {p.get('title')} ({p.get('publication_date')}) - Titular: {p.get('assignee')}" for i, p in enumerate(patents[:8])])
-                prompt = f"Eres un perito de patentes del proyecto Capstone Awake / Céntrika. Con base en estas patentes encontradas para '{query}':\n{context_str}\n\nResponde conciso al usuario: {user_msg or 'Haz un dictamen pericial de FTO y oportunidades.'}"
+                if context_str:
+                    prompt = f"Eres el Agente Pericial de Vigilancia Tecnológica, Inteligencia Competitiva y Patentes (Proyecto: {ws_name}). Con base en estos documentos encontrados para '{query}':\n{context_str}\n\nResponde conciso al usuario: {user_msg or 'Haz un dictamen pericial de FTO, antecedentes y vacíos tecnológicos.'}\nSi recomiendas una búsqueda o CPC, incluye etiquetas [ACTION:SEARCH query=\"...\"] o [ACTION:FILTER_CPC code=\"...\"]."
+                else:
+                    prompt = f"Eres el Agente Pericial de Vigilancia Tecnológica, Inteligencia Competitiva y Patentes (Proyecto: {ws_name}). Responde a esta consulta del usuario con rigor técnico, claridad y pedagogía: {user_msg or 'Preséntate y explica en qué puedes asistir.'}\nSi recomiendas una búsqueda de patentes o literatura, incluye la acción [ACTION:SEARCH query=\"...\"] o [ACTION:MODE mode=\"patents|literature\"]."
+
                 req = urllib.request.Request(url, headers={'Content-Type': 'application/json'}, data=json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode('utf-8'))
                 with urllib.request.urlopen(req, timeout=12) as resp:
                     data = json.loads(resp.read().decode('utf-8'))

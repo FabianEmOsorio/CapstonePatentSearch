@@ -294,22 +294,31 @@
 
     .workspace-tri-column {
       display: grid;
-      grid-template-columns: 360px 1fr 390px;
+      grid-template-columns: minmax(290px, 340px) 1fr minmax(310px, 380px);
       gap: 16px;
       align-items: start;
       margin-top: 14px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    @media (max-width: 1400px) {
+    .workspace-tri-column.mode-dialog {
+      grid-template-columns: 1fr;
+    }
+    .workspace-tri-column.mode-dialog .col-ai-chat,
+    .workspace-tri-column.mode-dialog .col-inspection {
+      display: none;
+    }
+
+    @media (max-width: 1200px) {
       .workspace-tri-column {
-        grid-template-columns: 340px 1fr;
+        grid-template-columns: 320px 1fr;
       }
       .col-inspection {
         display: none;
       }
     }
 
-    @media (max-width: 960px) {
+    @media (max-width: 900px) {
       .workspace-tri-column {
         grid-template-columns: 1fr;
       }
@@ -321,19 +330,20 @@
       }
     }
 
-    /* COLUMNA IZQUIERDA: AGENTE DE IA CONVERSACIONAL */
+    /* COLUMNA IZQUIERDA: AGENTE DE IA CONVERSACIONAL (STICKY AL VIEWPORT) */
     .col-ai-chat {
       background-color: var(--bg-surface);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 180px);
-      min-height: 600px;
+      height: calc(100vh - 120px);
+      max-height: calc(100vh - 120px);
       position: sticky;
       top: 14px;
       overflow: hidden;
       box-shadow: var(--card-shadow);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .ai-chat-header {
@@ -343,6 +353,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-shrink: 0;
     }
 
     .ai-chat-title {
@@ -355,18 +366,12 @@
     }
 
     .ai-provider-badge {
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 12px;
-      background-color: rgba(0, 145, 255, 0.15);
-      color: var(--brand-primary);
-      border: 1px solid rgba(0, 145, 255, 0.3);
-      cursor: pointer;
+      display: none;
     }
 
     .ai-chat-messages {
-      flex: 1;
+      flex: 1 1 auto;
+      min-height: 0;
       overflow-y: auto;
       padding: 14px;
       display: flex;
@@ -435,11 +440,15 @@
     }
 
     .ai-chat-footer {
+      flex-shrink: 0;
+      position: sticky;
+      bottom: 0;
       padding: 10px 12px;
       border-top: 1px solid var(--border-color);
       background-color: var(--bg-subtle);
       display: flex;
       gap: 6px;
+      z-index: 5;
     }
 
     .ai-chat-input {
@@ -468,6 +477,99 @@
       font-weight: 600;
     }
 
+    /* BOTONES DE ACCIÓN INTERACTIVA DEL AGENTE */
+    .ai-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: rgba(0, 145, 255, 0.12);
+      border: 1px solid rgba(0, 145, 255, 0.35);
+      color: var(--brand-primary);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 4px 4px 4px 0;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .ai-action-btn:hover {
+      background-color: var(--brand-primary);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 145, 255, 0.3);
+    }
+
+    /* TARJETA SELECCIONADA EN INSPECCIÓN */
+    .patent-card.active-inspected-card {
+      border-color: var(--brand-primary) !important;
+      box-shadow: 0 0 0 2px rgba(0, 145, 255, 0.3) !important;
+    }
+
+    /* ZERO STATE / HUB DE BIENVENIDA */
+    .zero-state-container {
+      padding: 30px 16px;
+      text-align: center;
+    }
+    .zero-state-hero {
+      max-width: 660px;
+      margin: 0 auto 24px auto;
+    }
+    .zero-state-icon {
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
+    .zero-state-title {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text-high);
+      margin-bottom: 8px;
+    }
+    .zero-state-subtitle {
+      font-size: 12.5px;
+      color: var(--text-medium);
+      line-height: 1.55;
+    }
+    .zero-state-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 12px;
+      max-width: 880px;
+      margin: 0 auto;
+    }
+    .zero-state-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: var(--card-shadow);
+    }
+    .zero-state-card:hover {
+      border-color: var(--brand-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 145, 255, 0.15);
+    }
+    .zero-card-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--brand-primary);
+      margin-bottom: 5px;
+    }
+    .zero-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-high);
+      margin-bottom: 4px;
+    }
+    .zero-card-desc {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
     /* COLUMNA CENTRAL: RESULTADOS */
     .col-search-results {
       min-width: 0;
@@ -478,14 +580,15 @@
       background-color: var(--bg-surface);
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      height: calc(100vh - 180px);
-      min-height: 600px;
+      height: calc(100vh - 120px);
+      max-height: calc(100vh - 120px);
       position: sticky;
       top: 14px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
       box-shadow: var(--card-shadow);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .inspection-header {
@@ -495,10 +598,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-shrink: 0;
     }
 
     .inspection-body {
-      flex: 1;
+      flex: 1 1 auto;
+      min-height: 0;
       overflow-y: auto;
       padding: 14px;
     }
@@ -2173,8 +2278,8 @@
         id="query-input" 
         class="ag-prompt-input" 
         rows="2" 
-        placeholder="Escribe conceptos técnicos, palabras clave o ecuaciones de patente (ej. piezoelectric footwear)..."
-      >piezoelectric footwear</textarea>
+        placeholder="Escribe conceptos técnicos, palabras clave, ecuaciones de patente o haz una pregunta directa al Agente Pericial..."
+      ></textarea>
 
       <div class="ag-prompt-toolbar">
         <!-- Izquierda: Selector de Fuentes estilo Model Selector -->
@@ -2230,62 +2335,21 @@
             </div>
           </div>
 
-          <!-- Submenú Lateral de Salud y Uptime (Imagen 5 de Antigravity) -->
+          <!-- Submenú Lateral de Salud y Consumo de APIs (Dinámico) -->
           <div class="ag-health-submenu" id="health-submenu">
-            <div class="ag-menu-header" style="padding: 0 0 8px 0; color: var(--text-muted); border-bottom: 1px solid var(--border-color); margin-bottom: 8px;">
-              <span>Disponibilidad y Conectividad</span>
+            <div class="ag-menu-header" style="display: flex; justify-content: space-between; align-items: center; padding: 0 0 8px 0; color: var(--text-muted); border-bottom: 1px solid var(--border-color); margin-bottom: 8px;">
+              <span>Disponibilidad & Cuotas</span>
+              <button class="btn-ghost" onclick="abrirAsistenteConectarApi()" style="font-size: 11px; padding: 2px 6px; color: var(--brand-primary);" title="Conectar nueva API con el Agente">+ Conectar</button>
             </div>
 
-            <div class="ag-health-row">
-              <div class="ag-health-info">
-                <span class="ag-health-name">Google Patents</span>
-                <span class="ag-health-desc">Motor Híbrido Directo</span>
-              </div>
-              <div class="ag-health-val">
-                <span class="ag-health-pct">100%</span>
-                <svg class="circular-ring" viewBox="0 0 36 36">
-                  <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                  <path class="circular-ring-fill" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                </svg>
-              </div>
+            <div id="dynamic-health-rows-container">
+              <!-- Renderizado dinámico vía renderDynamicApisHealth() -->
             </div>
 
-            <div class="ag-health-row">
-              <div class="ag-health-info">
-                <span class="ag-health-name">Europe PMC (EPO/WIPO)</span>
-                <span class="ag-health-desc">API Abierta EMBL-EBI</span>
-              </div>
-              <div class="ag-health-val">
-                <span class="ag-health-pct">100%</span>
-                <svg class="circular-ring" viewBox="0 0 36 36">
-                  <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                  <path class="circular-ring-fill" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                </svg>
-              </div>
-            </div>
-
-            <div class="ag-health-row">
-              <div class="ag-health-info">
-                <span class="ag-health-name">PatentBrief</span>
-                <span class="ag-health-desc">API Tecnológica Amigable</span>
-              </div>
-              <div class="ag-health-val">
-                <span class="ag-health-pct">100%</span>
-                <svg class="circular-ring" viewBox="0 0 36 36">
-                  <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                  <path class="circular-ring-fill" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                </svg>
-              </div>
-            </div>
-
-            <div class="ag-health-row" style="opacity: 0.6;">
-              <div class="ag-health-info">
-                <span class="ag-health-name">EPO OPS Oficial</span>
-                <span class="ag-health-desc">En validación Ref: 46581</span>
-              </div>
-              <div class="ag-health-val">
-                <span style="font-size: 11px; color: var(--status-warning); font-family: monospace;">Pendiente</span>
-              </div>
+            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-color); text-align: center;">
+              <button class="btn-ghost" onclick="abrirAsistenteConectarApi()" style="font-size: 11px; color: var(--brand-primary); width: 100%;">
+                🤖 Conectar Nueva API con el Asistente
+              </button>
             </div>
           </div>
         </div>
@@ -2437,17 +2501,15 @@
             <span>🤖</span>
             <span>Agente Pericial de Vigilancia</span>
           </div>
-          <span class="ai-provider-badge" id="ai-active-badge" onclick="abrirSettingsModal()" title="Hacer clic para cambiar proveedor de IA">
-            ⚡ Gemini / Groq
-          </span>
+          <button class="btn-ghost" onclick="abrirSettingsModal()" title="Configuración de Modelos y APIs" style="font-size: 13px; padding: 2px 6px;">⚙️</button>
         </div>
 
         <div class="ai-chat-messages" id="ai-chat-messages">
           <div class="ai-msg ai-msg-assistant">
             <div class="ai-msg-bubble">
-              👋 <strong>¡Hola! Soy tu Agente Autónomo de Vigilancia Tecnológica.</strong>
+              👋 <strong>¡Hola! Soy tu Agente Autónomo de Vigilancia Tecnológica & Patentes.</strong>
               <p style="margin-top: 6px; font-size: 12px; color: var(--text-medium);">
-                Escribe tu consulta o pregunta en la barra superior. Analizaré automáticamente los documentos recuperados de las oficinas oficiales de patentes y literatura para darte un <strong>dictamen de Libertad de Operación (FTO)</strong> y detectar <strong>oportunidades de diseño</strong> para Awake.
+                Escribe tu consulta en la barra superior o pregúntame directamente aquí abajo. Evaluaré <strong>Libertad de Operación (FTO)</strong>, antecedentes técnicos y oportunidades de diseño para tu proyecto.
               </p>
             </div>
           </div>
@@ -2511,9 +2573,10 @@
             <span>📋</span>
             <span>Inspección Técnica</span>
           </div>
-          <div class="sidebar-tabs-bar" style="padding: 0; background: transparent; border: none;">
+          <div class="sidebar-tabs-bar" style="padding: 0; background: transparent; border: none; display: flex; align-items: center; gap: 4px;">
             <button id="ins-tab-dossier" class="sb-tab-btn active" onclick="cambiarInspectionTab('dossier')">Ficha</button>
             <button id="ins-tab-pdf" class="sb-tab-btn" onclick="cambiarInspectionTab('pdf')">PDF Oficial</button>
+            <button class="btn-ghost" onclick="maximizarInspeccionModal()" title="Ver en pantalla completa" style="font-size: 12px; padding: 3px 6px;">⛶</button>
           </div>
         </div>
 
@@ -2654,6 +2717,50 @@
       </div>
 
       <div class="dossier-sheet" id="dossier-sheet-print">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Crear Nuevo Proyecto / Workspace (Sin nombres por defecto) -->
+  <div id="modal-nuevo-proyecto" class="modal-overlay" onclick="cerrarModalNuevoProyecto(event)">
+    <div class="modal-content" style="max-width: 480px; width: 92%;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div style="font-weight: 700; font-size: 15px; color: var(--text-high); display: flex; align-items: center; gap: 8px;">
+          <span>📂</span> <span>Nuevo Proyecto / Espacio de Trabajo</span>
+        </div>
+        <button class="btn-close-modal" onclick="cerrarModalNuevoProyecto()">&times;</button>
+      </div>
+      <div style="padding: 16px 0;">
+        <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-medium); margin-bottom: 6px;">
+          Nombre del Proyecto:
+        </label>
+        <input type="text" id="input-nuevo-proyecto-nombre" class="settings-input" placeholder="Ej: Sensores Biomecánicos, Calzado Inteligente, Materiales..." style="width: 100%; margin-bottom: 14px; background: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; color: var(--text-high);">
+        
+        <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-medium); margin-bottom: 6px;">
+          Ecuación o palabras clave base (Opcional):
+        </label>
+        <input type="text" id="input-nuevo-proyecto-query" class="settings-input" placeholder="Opcional: puedes dejarlo en blanco" style="width: 100%; background: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; color: var(--text-high);">
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 12px;">
+        <button class="btn-ghost" onclick="cerrarModalNuevoProyecto()">Cancelar</button>
+        <button class="btn-dossier-export" onclick="confirmarCrearNuevoProyecto()" style="padding: 6px 14px;">
+          Crear Proyecto
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Pantalla Completa de Inspección Técnica -->
+  <div id="modal-inspeccion-fullscreen" class="modal-overlay" onclick="cerrarInspeccionModal(event)">
+    <div class="modal-content" style="max-width: 900px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;" id="modal-fullscreen-title">
+          <span>📋</span> <span style="font-weight: 700;">Inspección Técnica en Pantalla Completa</span>
+        </div>
+        <button class="btn-close-modal" onclick="cerrarInspeccionModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-fullscreen-body" style="flex: 1; overflow-y: auto; padding: 18px;">
         <!-- Injected via JS -->
       </div>
     </div>
@@ -3104,7 +3211,11 @@
       if (menu) menu.classList.remove('show');
 
       isShowingOnlyPinned = false;
-      buscar();
+      if (ws.query && ws.query.trim()) {
+        buscar();
+      } else {
+        mostrarZeroState();
+      }
     }
 
     function actualizarContadorPinned() {
@@ -3149,18 +3260,43 @@
     }
 
     function crearNuevoWorkspaceModal() {
-      const nombre = prompt('Ingresa el nombre del nuevo espacio de trabajo (ej. Proyecto Baterías Awake):');
-      if (!nombre || !nombre.trim()) return;
-      const query = prompt('Ecuación o consulta base para este proyecto:', 'energy harvesting materials');
+      const modal = document.getElementById('modal-nuevo-proyecto');
+      const inputNombre = document.getElementById('input-nuevo-proyecto-nombre');
+      const inputQuery = document.getElementById('input-nuevo-proyecto-query');
+      if (inputNombre) inputNombre.value = '';
+      if (inputQuery) inputQuery.value = '';
+      if (modal) {
+        modal.classList.add('open');
+        setTimeout(() => inputNombre && inputNombre.focus(), 80);
+      }
+    }
+
+    function cerrarModalNuevoProyecto(e) {
+      if (e && e.target && e.target !== e.currentTarget && !e.target.classList.contains('btn-close-modal')) return;
+      const modal = document.getElementById('modal-nuevo-proyecto');
+      if (modal) modal.classList.remove('open');
+    }
+
+    function confirmarCrearNuevoProyecto() {
+      const inputNombre = document.getElementById('input-nuevo-proyecto-nombre');
+      const inputQuery = document.getElementById('input-nuevo-proyecto-query');
+      const nombre = inputNombre ? inputNombre.value.trim() : '';
+      if (!nombre) {
+        alert('Por favor ingresa un nombre para el nuevo proyecto.');
+        if (inputNombre) inputNombre.focus();
+        return;
+      }
+      const query = inputQuery ? inputQuery.value.trim() : '';
       const newWs = {
         id: 'ws_' + Date.now(),
-        name: nombre.trim(),
-        query: query ? query.trim() : '',
+        name: nombre,
+        query: query,
         pinned: []
       };
       workspaces.push(newWs);
       guardarWorkspacesState();
       seleccionarWorkspace(newWs.id);
+      cerrarModalNuevoProyecto();
     }
 
     function exportarWorkspaceActual() {
@@ -3396,17 +3532,48 @@
       document.getElementById('view-raw').style.display = tab === 'raw' ? 'block' : 'none';
     }
 
-        async function buscar(customQuery) {
+    async function buscar(customQuery) {
       if (customQuery) {
         document.getElementById('query-input').value = customQuery;
       }
       const q = document.getElementById('query-input').value.trim();
-      if (!q) return;
+      if (!q) {
+        mostrarZeroState();
+        return;
+      }
 
       const btn = document.getElementById('ag-search-btn');
       const cardsContainer = document.getElementById('view-cards');
       const rawOutput = document.getElementById('raw-output');
       const intelDropdown = document.getElementById('intel-dropdown');
+
+      // 1. Detectar si la entrada es una pregunta conceptual o diálogo con el agente
+      if (esPreguntaConversacional(q)) {
+        btn.disabled = true;
+        const triCol = document.querySelector('.workspace-tri-column');
+        if (triCol) triCol.classList.add('mode-dialog');
+
+        cardsContainer.innerHTML = `
+          <div style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; text-align: left; max-width: 820px; margin: 12px auto; box-shadow: var(--card-shadow);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+              <div style="display:flex; align-items:center; gap:8px; font-weight:700; font-size:14px; color:var(--brand-primary);">
+                <span>🤖 Consulta Pericial:</span>
+                <span style="color:var(--text-high); font-weight:600;">"${escapeHtml(q)}"</span>
+              </div>
+              <button class="btn-ghost" onclick="restaurarModoTriColumna()" style="font-size:11px;">✕ Modo Normal</button>
+            </div>
+            <div id="central-dialog-response-area" style="font-size:13.5px; color:var(--text-high); line-height:1.65;">
+              <span style="opacity:0.8; font-style:italic;">Analizando y consultando al Agente Pericial de Vigilancia...</span>
+            </div>
+          </div>
+        `;
+        consultarAgenteIA(q, [], true);
+        btn.disabled = false;
+        return;
+      }
+
+      // Si es búsqueda técnica de patentes o literatura, restauramos la vista tri-columna
+      restaurarModoTriColumna();
 
       btn.disabled = true;
 
@@ -4015,6 +4182,12 @@
       const p = currentRenderedPatents[idx];
       if (!p) return;
       currentActivePatentData = p;
+
+      // Resaltar tarjeta activa en el centro
+      document.querySelectorAll('.patent-card').forEach(c => c.classList.remove('active-inspected-card'));
+      const activeCard = document.getElementById('card-pat-' + idx);
+      if (activeCard) activeCard.classList.add('active-inspected-card');
+
       cambiarSidebarTab('dossier');
       const standbyView = document.getElementById('inspection-standby-view');
       const activeView = document.getElementById('inspection-active-view');
@@ -4037,16 +4210,20 @@
       const cits = p.forwardCitationCount || 0;
       const patentLink = p.patent_link || `https://patents.google.com/patent/${pubNum}/en`;
 
-      // Header
-      document.getElementById('sidebar-header-left').innerHTML = `
-        <span class="source-tag source-${sourceBadge}">[${sourceName}]</span>
-        <span class="jurisdiction-badge">${getJurisdictionFlag(pubNum)}</span>
-        <span style="font-family: monospace; font-size: 14px; font-weight: 700; color: var(--text-high);">${pubNum}</span>
-        <span class="patent-status-badge ${active ? 'badge-ok' : 'fto-public-domain'}" title="${active ? 'Patente vigente' : 'Libertad de Operación (FTO) en dominio público'}">${active ? (p.legal_status || '🟢 Vigente') : '⚪ Dominio Público (FTO)'}</span>
-        ${cits > 0 ? `<span class="patent-citations-badge">⭐ ${cits} citas</span>` : ''}
-      `;
+      // Header de la barra lateral (si se abre en móvil)
+      const sbHeader = document.getElementById('sidebar-header-left');
+      if (sbHeader) {
+        sbHeader.innerHTML = `
+          <span class="source-tag source-${sourceBadge}">[${sourceName}]</span>
+          <span class="jurisdiction-badge">${getJurisdictionFlag(pubNum)}</span>
+          <span style="font-family: monospace; font-size: 14px; font-weight: 700; color: var(--text-high);">${pubNum}</span>
+          <span class="patent-status-badge ${active ? 'badge-ok' : 'fto-public-domain'}" title="${active ? 'Patente vigente' : 'Libertad de Operación (FTO) en dominio público'}">${active ? (p.legal_status || '🟢 Vigente') : '⚪ Dominio Público (FTO)'}</span>
+          ${cits > 0 ? `<span class="patent-citations-badge">⭐ ${cits} citas</span>` : ''}
+        `;
+      }
 
-      document.getElementById('sidebar-ext-btn').href = patentLink;
+      const extBtn = document.getElementById('sidebar-ext-btn');
+      if (extBtn) extBtn.href = patentLink;
 
       // Body con dossier completo
       let figsHtml = '';
@@ -4150,8 +4327,11 @@
         </div>
       `;
 
-      document.getElementById('patent-sidebar').classList.add('open');
-      document.getElementById('sidebar-backdrop').classList.add('open');
+      // Solo abrir el drawer superpuesto en dispositivos móviles estrechos donde no cabe la 3a columna
+      if (window.innerWidth < 900) {
+        document.getElementById('patent-sidebar').classList.add('open');
+        document.getElementById('sidebar-backdrop').classList.add('open');
+      }
     }
 
     
@@ -4632,20 +4812,248 @@
     let currentRenderedLiterature = [];
 
     
-    // AGENTE DE IA PERICIAL Y CONVERSACIONAL (COLUMNA IZQUIERDA)
-    async function consultarAgenteIA(query, results) {
+    // DETECCIÓN DE PREGUNTAS CONVERSACIONALES vs BÚSQUEDA DE PATENTES
+    function esPreguntaConversacional(q) {
+      if (!q) return false;
+      const qLower = q.toLowerCase().trim();
+      if (qLower.startsWith('¿') || qLower.startsWith('?') || qLower.endsWith('?')) return true;
+      const patrones = [
+        /^hola\b/,
+        /^buenos d[ií]as\b/,
+        /^buenas\b/,
+        /^qu[eé]\s+(es|significa|diferencia|requisitos|haces|puedes)\b/,
+        /^expl[ií]came\b/,
+        /^c[oó]mo\b/,
+        /^cu[aá]l\b/,
+        /^qu[ií]en\b/,
+        /^ay[uú]dame\b/,
+        /^a[ñn]ade\b/,
+        /^conecta\b/,
+        /^agrega\b/,
+        /^puedes\b/
+      ];
+      return patrones.some(p => p.test(qLower));
+    }
+
+    function restaurarModoTriColumna() {
+      const triCol = document.querySelector('.workspace-tri-column');
+      if (triCol) triCol.classList.remove('mode-dialog');
+    }
+
+    // FORMATEADOR DE RESPUESTAS DEL AGENTE CON BOTONES DE ACCIÓN SOBRE PANTALLA
+    function formatearRespuestaAgente(text) {
+      if (!text) return 'Sin respuesta del agente.';
+      
+      // Parsear acción de búsqueda: [ACTION:SEARCH query="..."]
+      let formatted = text.replace(/\[ACTION:SEARCH\s+query=["'](.*?)["']\]/gi, (match, q) => {
+        return `<div style="margin: 6px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('search', '${escapeHtml(q).replace(/'/g, "\\'")}')">🔍 Ejecutar búsqueda en panel: "<strong>${escapeHtml(q)}</strong>"</button></div>`;
+      });
+
+      // Parsear acción de filtrado CPC: [ACTION:FILTER_CPC code="..."]
+      formatted = formatted.replace(/\[ACTION:FILTER_CPC\s+code=["'](.*?)["']\]/gi, (match, code) => {
+        return `<div style="margin: 6px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('filter_cpc', '${escapeHtml(code).replace(/'/g, "\\'")}')">⚡ Refinar por CPC: <strong>${escapeHtml(code)}</strong></button></div>`;
+      });
+
+      // Parsear acción de modo de motor: [ACTION:MODE mode="..."]
+      formatted = formatted.replace(/\[ACTION:MODE\s+mode=["'](.*?)["']\]/gi, (match, mode) => {
+        return `<div style="margin: 6px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('mode', '${escapeHtml(mode).replace(/'/g, "\\'")}')">📚 Cambiar a modo: <strong>${escapeHtml(mode)}</strong></button></div>`;
+      });
+
+      // Formato Markdown esencial
+      formatted = formatted
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/\n/g, '<br>');
+
+      return formatted;
+    }
+
+    function ejecutarAccionAgente(action, val) {
+      if (action === 'search') {
+        const input = document.getElementById('query-input');
+        if (input) input.value = val;
+        buscar(val);
+      } else if (action === 'filter_cpc') {
+        refinarConCPC(val);
+      } else if (action === 'mode') {
+        setEngineMode(val);
+      }
+    }
+
+    // ZERO STATE HUB INTERACTIVO
+    function mostrarZeroState() {
+      const container = document.getElementById('view-cards');
+      if (!container) return;
+      const countBadge = document.getElementById('results-count-badge');
+      if (countBadge) countBadge.textContent = '0';
+      const ws = getActiveWorkspace();
+      const wsName = ws ? ws.name : 'Awake';
+
+      container.innerHTML = `
+        <div class="zero-state-container" id="zero-state-hub">
+          <div class="zero-state-hero">
+            <div class="zero-state-icon">🔬</div>
+            <h2 class="zero-state-title">Vigilancia Tecnológica, Inteligencia de Patentes & Literatura</h2>
+            <p class="zero-state-subtitle">
+              Proyecto activo: <strong>${escapeHtml(wsName)}</strong>. Búsqueda y auditoría legal en EPO, USPTO, WIPO, Google Patents y OpenAlex.
+            </p>
+          </div>
+          <div class="zero-state-grid">
+            <div class="zero-state-card" onclick="ejecutarAccionAgente('search', 'piezoelectric footwear energy harvesting')">
+              <div class="zero-card-tag">👟 Awake &bull; Calzado Piezoeléctrico</div>
+              <div class="zero-card-title">Cosecha de Energía en Suela</div>
+              <div class="zero-card-desc">Explorar patentes de plantillas biomecánicas, transductores y amortiguación adaptativa.</div>
+            </div>
+            <div class="zero-state-card" onclick="ejecutarAccionAgente('search', 'smart fabrics biomechanical pressure sensor')">
+              <div class="zero-card-tag">🧵 Céntrika &bull; Textiles Inteligentes</div>
+              <div class="zero-card-title">Sensores Textiles & Bioseñales</div>
+              <div class="zero-card-desc">Auditar telas conductoras con sensores piezoeléctricos de presión y movimiento.</div>
+            </div>
+            <div class="zero-state-card" onclick="preguntarAlAgente('¿Cómo se evalúa la Libertad de Operación (FTO) según normas PCT para evitar infracción de patentes?')">
+              <div class="zero-card-tag">⚖️ Marco Legal &bull; Peritaje FTO</div>
+              <div class="zero-card-title">Dictamen de Libertad de Operación</div>
+              <div class="zero-card-desc">Consultar al perito cómo distinguir invenciones en dominio público de patentes vigentes.</div>
+            </div>
+            <div class="zero-state-card" onclick="setEngineMode('literature'); ejecutarAccionAgente('search', 'biomechanical energy harvesting shoe review')">
+              <div class="zero-card-tag">📚 OpenAlex &bull; Artículos y Papers</div>
+              <div class="zero-card-title">Literatura Científica Abierta</div>
+              <div class="zero-card-desc">Acceder a 250M+ artículos de investigación con PDF descargable y revisión por pares.</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // GESTOR DINÁMICO DE APIS Y DISPONIBILIDAD DE CUOTAS
+    function getRegisteredApis() {
+      const defaultApis = [
+        { id: 'google', name: 'Google Patents', desc: 'Red Mundial Oficial (120M+)', type: 'Patentes', pct: 100, quotaText: 'Ilimitada / Pública', status: 'ok' },
+        { id: 'europepmc', name: 'Europe PMC (EPO/WIPO)', desc: 'Oficina Europea y Tratado PCT', type: 'Patentes', pct: 100, quotaText: 'Abierta EMBL-EBI', status: 'ok' },
+        { id: 'patentbrief', name: 'PatentBrief', desc: 'API Tecnológica Amigable', type: 'Patentes', pct: 100, quotaText: 'Gratuita', status: 'ok' },
+        { id: 'openalex', name: 'OpenAlex', desc: 'Papers y Literatura Científica', type: 'Literatura', pct: 100, quotaText: '100,000 req/día', status: 'ok' },
+        { 
+          id: 'epo_ops', 
+          name: 'EPO OPS Oficial', 
+          desc: 'API Apigee Developers EPO', 
+          type: 'Patentes', 
+          pct: cfgEpoKey ? 100 : 70, 
+          quotaText: cfgEpoKey ? 'Conectada / 4GB sem.' : 'Clave pendiente', 
+          status: cfgEpoKey ? 'ok' : 'pending' 
+        }
+      ];
+
+      try {
+        const savedCustom = JSON.parse(localStorage.getItem('capstone_custom_apis') || '[]');
+        return [...defaultApis, ...savedCustom];
+      } catch (e) {
+        return defaultApis;
+      }
+    }
+
+    function renderDynamicApisHealth() {
+      const container = document.getElementById('dynamic-health-rows-container');
+      if (!container) return;
+      const apis = getRegisteredApis();
+
+      container.innerHTML = apis.map(api => `
+        <div class="ag-health-row">
+          <div class="ag-health-info">
+            <span class="ag-health-name">${escapeHtml(api.name)}</span>
+            <span class="ag-health-desc">${escapeHtml(api.desc)} &bull; <small style="color:var(--text-muted);">${api.quotaText}</small></span>
+          </div>
+          <div class="ag-health-val">
+            <span class="ag-health-pct" style="color: ${api.status === 'ok' ? '#22c55e' : '#eab308'};">${api.pct}%</span>
+            <svg class="circular-ring" viewBox="0 0 36 36">
+              <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              <path class="circular-ring-fill" stroke="${api.status === 'ok' ? '#22c55e' : '#eab308'}" stroke-dasharray="${api.pct}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            </svg>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function abrirAsistenteConectarApi() {
+      const chatInput = document.getElementById('ai-chat-input');
+      if (chatInput) {
+        chatInput.value = 'Quiero conectar una nueva API (The Lens / SerpApi / EPO OPS / LLM). Guíame para configurarla, probarla y registrarla.';
+        enviarMensajeAgente();
+      }
+      const submenu = document.getElementById('health-submenu');
+      if (submenu) submenu.style.display = 'none';
+      const sourceMenu = document.getElementById('source-popup-menu');
+      if (sourceMenu) sourceMenu.classList.remove('show');
+    }
+
+    // MODAL DE INSPECCIÓN FULLSCREEN
+    function maximizarInspeccionModal() {
+      const modal = document.getElementById('modal-inspeccion-fullscreen');
+      const modalBody = document.getElementById('modal-fullscreen-body');
+      const p = currentActivePatentData;
+      if (!modal || !modalBody || !p) return;
+
+      const title = p.title || 'Sin título';
+      const pubNum = p.publication_number || 'N/A';
+      const assignee = p.assignee || 'No especificado';
+      const pubDate = p.publication_date || 'N/A';
+      const act = isPatentActive(p);
+      const snippet = p.snippet || '';
+
+      modalBody.innerHTML = `
+        <div style="font-size: 12px; font-weight: 700; color: var(--brand-primary); margin-bottom: 4px;">${pubNum}</div>
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-high); line-height: 1.35; margin-bottom: 12px;">${title}</h2>
+        
+        <div style="background-color: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-size: 13px; margin-bottom: 16px;">
+          <div><strong>Titular / Solicitante:</strong> ${assignee}</div>
+          <div><strong>Fecha de Publicación:</strong> ${pubDate}</div>
+          <div><strong>Estado FTO:</strong> ${act ? '<span style="color:#22c55e; font-weight:700;">🟢 Vigente (Protección activa)</span>' : '<span style="color:#38bdf8; font-weight:700;">⚪ Dominio Público (Libre Operación)</span>'}</div>
+        </div>
+
+        ${p.pdf ? `
+          <div style="margin-bottom: 18px;">
+            <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Documento PDF Oficial:</div>
+            <iframe src="${p.pdf}#view=FitH" style="width: 100%; height: 550px; border: 1px solid var(--border-color); border-radius: 8px;" title="PDF"></iframe>
+          </div>
+        ` : ''}
+
+        ${p.figures && p.figures.length ? `
+          <div style="margin-bottom: 16px;">
+            <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Galería Técnica de Figuras:</div>
+            <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px;">
+              ${p.figures.map(f => `<img src="${f}" style="height: 180px; border: 1px solid var(--border-color); border-radius: 6px; background:#fff; cursor:pointer;" onclick="abrirModal('${f}', '${pubNum}')">`).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Resumen / Abstract Técnico:</div>
+        <div style="font-size: 13px; line-height: 1.6; color: var(--text-medium); background-color: var(--bg-canvas); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+          ${snippet || 'Sin resumen disponible.'}
+        </div>
+      `;
+
+      modal.classList.add('open');
+    }
+
+    function cerrarInspeccionModal(e) {
+      if (e && e.target && e.target !== e.currentTarget && !e.target.classList.contains('btn-close-modal')) return;
+      const modal = document.getElementById('modal-inspeccion-fullscreen');
+      if (modal) modal.classList.remove('open');
+    }
+
+    // AGENTE DE IA PERICIAL Y CONVERSACIONAL (COLUMNA IZQUIERDA Y CENTRAL)
+    async function consultarAgenteIA(query, results, isCentralDialog = false) {
       const chatContainer = document.getElementById('ai-chat-messages');
       if (!chatContainer) return;
 
       const isLit = currentEngineMode === 'literature';
       const count = results ? results.length : 0;
+      const ws = getActiveWorkspace();
 
-      // Burbuja de pensamiento
+      // Burbuja de pensamiento en el chat
       const loadingId = 'ai-loading-' + Date.now();
       const loadingHtml = `
         <div class="ai-msg ai-msg-assistant" id="${loadingId}">
           <div class="ai-msg-bubble" style="opacity: 0.8; font-style: italic;">
-            🤖 Auditando ${count} documentos recuperados y generando dictamen pericial FTO...
+            🤖 ${count > 0 ? `Auditando ${count} documentos recuperados y generando dictamen FTO...` : 'Procesando consulta pericial...'}
           </div>
         </div>
       `;
@@ -4657,10 +5065,13 @@
           provider: cfgAiProvider,
           apiKey: cfgAiKey,
           model: cfgAiModel,
+          workspaceName: ws ? ws.name : 'General',
           query: query,
-          patents: isLit ? [] : results.slice(0, 8),
-          literature: isLit ? results.slice(0, 8) : [],
-          userMessage: `Dictamen de libertad de operación (FTO) y análisis técnico de la consulta "${query}".`
+          patents: isLit ? [] : (results ? results.slice(0, 8) : []),
+          literature: isLit ? (results ? results.slice(0, 8) : []) : [],
+          userMessage: count > 0 
+            ? `Dictamen de libertad de operación (FTO), antecedentes cercanos y oportunidades técnicas para la consulta "${query}".`
+            : query
         };
 
         const res = await fetch('/api/agent', {
@@ -4673,9 +5084,15 @@
         const loader = document.getElementById(loadingId);
         if (loader) loader.remove();
 
-        const replyFormatted = (data.reply || 'Sin respuesta del agente.')
-          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-          .replace(/\n/g, '<br>');
+        const replyFormatted = formatearRespuestaAgente(data.reply);
+
+        // Si es diálogo centralizado, actualizar también el panel central
+        if (isCentralDialog) {
+          const centralArea = document.getElementById('central-dialog-response-area');
+          if (centralArea) {
+            centralArea.innerHTML = replyFormatted;
+          }
+        }
 
         const assistantMsgHtml = `
           <div class="ai-msg ai-msg-assistant">
@@ -4735,6 +5152,7 @@
         const isLit = currentEngineMode === 'literature';
         const items = isLit ? allRetrievedLiterature : allRetrievedPatents;
         const q = document.getElementById('query-input').value.trim();
+        const ws = getActiveWorkspace();
 
         const res = await fetch('/api/agent', {
           method: 'POST',
@@ -4743,9 +5161,10 @@
             provider: cfgAiProvider,
             apiKey: cfgAiKey,
             model: cfgAiModel,
+            workspaceName: ws ? ws.name : 'General',
             query: q,
-            patents: isLit ? [] : items.slice(0, 8),
-            literature: isLit ? items.slice(0, 8) : [],
+            patents: isLit ? [] : (items ? items.slice(0, 8) : []),
+            literature: isLit ? (items ? items.slice(0, 8) : []) : [],
             userMessage: text
           })
         });
@@ -4754,9 +5173,7 @@
         const loader = document.getElementById(loadingId);
         if (loader) loader.remove();
 
-        const replyFormatted = (data.reply || 'Sin respuesta.')
-          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-          .replace(/\n/g, '<br>');
+        const replyFormatted = formatearRespuestaAgente(data.reply);
 
         chatContainer.insertAdjacentHTML('beforeend', `
           <div class="ai-msg ai-msg-assistant">
@@ -4777,8 +5194,11 @@
     }
 
     function preguntarAlAgente(pregunta) {
-      document.getElementById('ai-chat-input').value = pregunta;
-      enviarMensajeAgente();
+      const input = document.getElementById('ai-chat-input');
+      if (input) {
+        input.value = pregunta;
+        enviarMensajeAgente();
+      }
     }
 
     function renderizarLiteratura(works) {
@@ -4829,7 +5249,7 @@
         }
 
         return `
-          <div class="patent-card">
+          <div class="patent-card" id="card-lit-${idx}">
             <div class="patent-card-layout">
               <div class="patent-main-content">
                 <div class="patent-header">
@@ -5004,8 +5424,11 @@
         </div>
       `;
 
-      document.getElementById('patent-sidebar').classList.add('open');
-      document.getElementById('sidebar-backdrop').classList.add('open');
+      // Solo abrir el drawer superpuesto en dispositivos móviles estrechos donde no cabe la 3a columna
+      if (window.innerWidth < 900) {
+        document.getElementById('patent-sidebar').classList.add('open');
+        document.getElementById('sidebar-backdrop').classList.add('open');
+      }
     }
 
     function renderizarPatentes(patents) {
@@ -5089,10 +5512,10 @@
           `;
         }
 
-        // Enlace que abre la Ficha Lateral (Sidebar Drawer) sin salir de la página
+        // Enlace que abre la Ficha e Inspección Técnica
         let dynamicLinkHtml = `
           <a href="javascript:void(0)" onclick="abrirSidebarPatente(${idx})" style="font-weight: 600; color: var(--brand-primary);">
-            📖 Ver Ficha en Panel Lateral &rarr;
+            📖 Ficha e Inspección &rarr;
           </a>
         `;
         if (sourceBadge === 'google') {
@@ -5105,7 +5528,7 @@
         }
 
         return `
-          <div class="patent-card">
+          <div class="patent-card" id="card-pat-${idx}">
             <div class="patent-card-layout">
               <div class="patent-main-content">
                 <div class="patent-header">
@@ -5253,8 +5676,13 @@
       actualizarEstadoShuffle();
       actualizarEstadoCountryShuffle();
       const wsInit = getActiveWorkspace();
-      if (wsInit) { document.getElementById("current-workspace-label").textContent = `Proyecto: ${wsInit.name}`; actualizarContadorPinned(); }
-      buscar();
+      if (wsInit) { 
+        document.getElementById("current-workspace-label").textContent = `Proyecto: ${wsInit.name}`; 
+        actualizarContadorPinned(); 
+      }
+      // Zero-State inicial (cero consumo de peticiones no solicitadas)
+      mostrarZeroState();
+      renderDynamicApisHealth();
     });
   </script>
 

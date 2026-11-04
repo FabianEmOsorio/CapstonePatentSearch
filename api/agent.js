@@ -51,15 +51,32 @@ export default async function handler(req, res) {
       `[${i+1}] "${w.title}" (${w.publication_year || 'N/A'}) | Autores: ${w.primary_author || 'N/A'} | Revista: ${w.journal || 'N/A'} | Citas: ${w.cited_by_count || 0} | Acceso: ${w.is_oa ? 'Abierto' : 'Suscripción'} | Resumen: ${(w.snippet || '').slice(0, 280)}`
     ).join('\n');
 
-    const systemPrompt = `Eres el Agente Pericial de Vigilancia Tecnológica, Inteligencia Competitiva y Patentes para el proyecto Capstone de la Universidad del Rosario, Céntrika y Awake (especializado en calzado biomecánico, materiales y recolección de energía piezoeléctrica).
-Tu rol es analizar con rigor técnico y legal las patentes y artículos científicos recuperados.
-REGLAS:
-1. Basa tus argumentos estrictamente en los documentos recuperados. Cita los números de patente (ej. US11304827) o autores.
-2. Evalúa Libertad de Operación (Freedom to Operate - FTO): distingue qué tecnologías están en dominio público (expiradas/inactivas) y se pueden fabricar sin pagar regalías, y cuáles están vigentes.
-3. Detecta "Océanos Azules" / Vacíos Tecnológicos: qué características no están protegidas en Colombia o en el mundo.
-4. Responde con tono profesional, conciso y estructurado con emojis y viñetas claras.`;
+    const wsName = req.body.workspaceName || 'Vigilancia Tecnológica';
+    const isDocSearch = (patents && patents.length > 0) || (literature && literature.length > 0);
 
-    const fullPrompt = `${systemPrompt}\n\nDocumentos recuperados para la consulta "${query}":\n${contextItems}\n\nPregunta / Instrucción del usuario:\n${userMessage || 'Realiza un dictamen pericial ejecutivo de los resultados encontrados, evaluando riesgo de infracción FTO y oportunidades tecnológicas.'}`;
+    const systemPrompt = `Eres el Agente Pericial de Vigilancia Tecnológica, Inteligencia Competitiva y Patentes para la plataforma de investigación académica y empresarial de la Universidad del Rosario, Céntrika y Awake.
+Entorno / Proyecto activo: "${wsName}".
+Tu función es brindar asesoría técnica, legal y pericial en patentes oficiales globales (EPO, USPTO, WIPO, Google Patents), literatura científica (OpenAlex) y estrategia de propiedad intelectual (Normas PCT).
+
+CAPACIDADES Y REGLAS DE RESPUESTA:
+1. DIÁLOGO Y PEDAGOGÍA:
+   • Si el usuario te hace una pregunta general, conceptual o de diálogo (ej. qué es FTO, cómo redactar reivindicaciones conforme al Reglamento del Tratado PCT Reglas 11 a 13, diferencias entre novedad y actividad inventiva, o cómo conectar APIs), responde de forma didáctica, rigurosa y adaptada al proyecto activo, sin asumir de manera forzada un tema que el usuario no preguntó.
+2. AUDITORÍA PERICIAL DE DOCUMENTOS (Si se adjuntan patentes o literatura recuperada):
+   • ⚖️ Libertad de Operación (FTO): Distingue con precisión qué tecnologías están en dominio público (expiradas/inactivas) y cuáles están vigentes.
+   • 🔬 Análisis Técnico y Antecedentes Cercanos: Cita documentos específicos por su número (ej. US11304827B2) o autores, comparando elementos reivindicados.
+   • 🌐 Océanos Azules y Nichos de Mercado: Detecta qué aspectos no están protegidos o en qué países no hay cobertura.
+   • ❓ Preguntas de Autocrítica ("¿Qué fortalecer? ¿Qué corregir?"): Formula 2 o 3 preguntas reflexivas para que el equipo diferencie técnicamente su desarrollo.
+3. INTERACCIÓN Y ACCIÓN SOBRE LA PANTALLA:
+   • Si recomiendas o el usuario te pide ejecutar una búsqueda, incluye el comando: [ACTION:SEARCH query="término"]
+   • Si recomiendas una clase técnica CPC: [ACTION:FILTER_CPC code="código CPC"]
+   • Si recomiendas pasar a literatura científica: [ACTION:MODE mode="literature"]
+4. GESTIÓN CONVERSACIONAL DE APIs:
+   • Si el usuario te pide añadir o conectar una API (ej. The Lens, SerpApi, EPO OPS, Groq, DeepSeek, Claude), guíalo paso a paso solicitando los datos necesarios y explicando cómo el sistema la integrará.
+5. Formato: Markdown estructurado, limpio, con viñetas y emojis técnicos profesionales.`;
+
+    const fullPrompt = isDocSearch
+      ? `${systemPrompt}\n\nDocumentos recuperados para la consulta "${query}":\n${contextItems}\n\nPregunta / Instrucción del usuario:\n${userMessage || 'Realiza un dictamen pericial ejecutivo de los resultados encontrados, evaluando riesgo de infracción FTO, análisis de antecedentes y oportunidades tecnológicas.'}`
+      : `${systemPrompt}\n\nPregunta o mensaje del usuario:\n${userMessage || 'Preséntate como Agente Pericial de Vigilancia Tecnológica y explica brevemente cómo puedes asistir al proyecto.'}`;
 
     // 1. Google Gemini API
     if (effectiveProvider === 'gemini') {
@@ -175,27 +192,52 @@ REGLAS:
 
 function generateHeuristicPeritoReport(query, patents, literature, userMsg) {
   const isLit = literature && literature.length > 0;
-  const count = isLit ? literature.length : patents.length;
+  const count = isLit ? literature.length : (patents ? patents.length : 0);
+
+  if (count === 0) {
+    return {
+      fto_verdict: 'Asistente de Inteligencia de Patentes & Literatura',
+      reply: `👋 **¡Hola! Soy tu Agente Autónomo de Vigilancia Tecnológica, Inteligencia de Patentes & Literatura Científica.**
+
+Estoy preparado para asistirte en:
+• ⚖️ **Libertad de Operación (FTO)**: Analizar si una solución tecnológica está libre de infracción o en dominio público.
+• 🔬 **Estado del Arte Multifuente**: Recuperar patentes oficiales (EPO, USPTO, WIPO, Google Patents) y artículos académicos de acceso abierto (OpenAlex).
+• 📜 **Alineación Normativa PCT (Reglas 11 a 13)**: Evaluación de novedad, actividad inventiva y redacción técnica de reivindicaciones.
+• 🔌 **Gestión Conversacional de APIs**: Guiarte para conectar y validar nuevas fuentes como The Lens, EPO OPS, SerpApi, o modelos LLM adicionales.
+
+Ingresa términos técnicos en la barra superior o hazme una consulta pericial directa.`,
+      key_findings: [
+        'Conexión activa con Google Patents, Europe PMC, PatentBrief y OpenAlex',
+        'Soporte multi-modelo de IA (Gemini, Groq, DeepSeek, OpenAI, Claude)'
+      ],
+      white_spaces: 'Indica el campo tecnológico de tu proyecto para mapear nichos y vacíos.',
+      follow_ups: [
+        '¿Cómo evaluar la Libertad de Operación (FTO)?',
+        '¿Qué requisitos exige la Regla 11 del PCT?',
+        '¿Cómo conectar una nueva API en el sistema?'
+      ]
+    };
+  }
 
   if (isLit) {
     const oaCount = literature.filter(w => w.is_oa).length;
     const topJournals = [...new Set(literature.map(w => w.journal).filter(Boolean))].slice(0, 3);
     return {
       fto_verdict: 'Estado del Arte en Literatura Científica',
-      reply: `He analizado **${count} artículos académicos** en OpenAlex para *"**${query}**"*.
+      reply: `He analizado **${count} artículos académicos** en OpenAlex para *"**${query || 'la consulta'}**"*.
 
 📚 **Hallazgos del Estado del Arte:**
 • **${oaCount} de ${count} publicaciones** (${Math.round((oaCount/count)*100)}%) están en **Acceso Abierto (Open Access)** con texto completo y PDF descargable libremente.
-• Los núcleos de investigación dominantes están concentrados en: *${topJournals.join(', ') || 'Revistas de Ingeniería de Materiales'}*.
-• Se observan avances significativos en transductores piezoeléctricos flexibles integrados en calzado para recolección biomecánica.
+• Los núcleos de investigación dominantes están concentrados en: *${topJournals.join(', ') || 'Revistas indexadas del área'}*.
+• Se observan desarrollos recientes con alta citación académica y metodologías experimentales replicables.
 
-💡 *Para activar el razonamiento conversacional continuo y análisis de hipótesis con modelos avanzados (Gemini, Groq, Claude, DeepSeek), configura tu API Key en el menú de ajustes ⚙️.*`,
-      key_findings: ['Alta densidad de papers en acceso abierto', 'Enfoque en polímeros electroactivos y transductores piezoeléctricos'],
-      white_spaces: 'Pocos estudios abordan la durabilidad mecánica a más de 500,000 ciclos de impacto continuo.',
+💡 *Para activar el razonamiento pericial continuo con modelos avanzados (Gemini, Groq, Claude, DeepSeek), puedes configurar tu API Key en el menú de ajustes ⚙️.*`,
+      key_findings: ['Alta disponibilidad de artículos en acceso abierto', 'Autores y revistas indexadas identificadas'],
+      white_spaces: 'Revisa las conclusiones de los artículos para detectar limitaciones experimentales u oportunidades de transferencia tecnológica.',
       follow_ups: [
-        '¿Cuáles papers tienen el PDF completo disponible?',
-        '¿Qué autores son los más citados en este nicho?',
-        '¿Cómo podemos integrar estos hallazgos en la patente de Awake?'
+        '¿Cuáles publicaciones tienen PDF completo de acceso abierto?',
+        '¿Qué autores lideran este campo de investigación?',
+        '¿Cómo podemos citar estos antecedentes en la memoria técnica?'
       ]
     };
   }
@@ -210,24 +252,24 @@ function generateHeuristicPeritoReport(query, patents, literature, userMsg) {
 
   return {
     fto_verdict: `${publicDomainCount} de ${count} invenciones en Dominio Público (Libre Operación)`,
-    reply: `He auditado pericialmente las **${count} patentes oficiales** recuperadas para *"**${query}**"*.
+    reply: `He auditado pericialmente las **${count} patentes oficiales** recuperadas para *"**${query || 'la consulta'}**"*.
 
 ⚖️ **Dictamen de Libertad de Operación (FTO):**
-• **${publicDomainCount} invenciones (${Math.round((publicDomainCount/count)*100)}%)** se encuentran en **Dominio Público (FTO Libre)**: sus derechos de exclusividad expiraron o no están vigentes, permitiendo que sus mecanismos sean fabricados o adaptados sin pago de regalías.
-• **${activeCount} invenciones** mantienen protección activa (concedidas o en trámite), principalmente de titulares corporativos como: *${topAssignees.join(', ') || 'Corporaciones de calzado y robótica'}*.
+• **${publicDomainCount} invenciones (${count > 0 ? Math.round((publicDomainCount/count)*100) : 0}%)** se encuentran en **Dominio Público (FTO Libre)**: sus derechos de exclusividad expiraron o no están vigentes, permitiendo que sus mecanismos sean fabricados o adaptados sin pago de regalías.
+• **${activeCount} invenciones** mantienen protección activa (concedidas o en trámite), principalmente de titulares como: *${topAssignees.join(', ') || 'Corporaciones del sector'}*.
 
-🛡️ **Recomendación Estratégica para Awake:**
-Para el prototipo de calzado piezoeléctrico, se recomienda utilizar como base de diseño los principios mecánicos de las patentes en dominio público y formular reivindicaciones novedosas enfocadas en la disposición específica de los transductores y la electrónica de recolección en Colombia (donde la mayoría de patentes US no tienen extensión nacional concedida).
+🛡️ **Estrategia Recomendada:**
+Se sugiere tomar como base los principios mecánicos de las patentes en dominio público y formular reivindicaciones novedosas enfocadas en características diferenciadoras no reivindicadas en los antecedentes.
 
 💡 *Conecta tu API Key de Gemini o Groq en el botón ⚙️ superior para profundizar en cualquier patente o chatear libremente.*`,
     key_findings: [
       `${publicDomainCount} patentes libres de regalías`,
-      `Titulares líderes: ${topAssignees.join(', ') || 'Nike, Dephy, biomecánica'}`
+      `Titulares principales: ${topAssignees.join(', ') || 'Titulares identificados'}`
     ],
-    white_spaces: 'Cero solicitudes nacionales vigentes detectadas en territorio colombiano (SIC) para este nicho exacto.',
+    white_spaces: 'Analizar cobertura territorial para determinar libre explotación en países sin extensión concedida.',
     follow_ups: [
-      '¿Cuáles patentes están en dominio público y puedo fabricar ya?',
-      '¿Qué patentes de Nike tienen protección activa?',
+      '¿Cuáles patentes están en dominio público y se pueden fabricar libremente?',
+      '¿Qué patentes mantienen protección activa?',
       '¿Cómo diseño un mecanismo alternativo (Design Around)?'
     ]
   };
