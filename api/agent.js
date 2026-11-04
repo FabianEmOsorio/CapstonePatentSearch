@@ -22,8 +22,12 @@ export default async function handler(req, res) {
     chatHistory = []
   } = req.body;
 
-  // Si no se provee API Key, se retorna análisis pericial heurístico estructurado
-  if (!apiKey) {
+  // Priorizar clave enviada por cliente o variable de entorno de Vercel (Security by Design)
+  const effectiveApiKey = apiKey || process.env.GEMINI_API_KEY || process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
+  const effectiveProvider = (!apiKey && !process.env.GEMINI_API_KEY && process.env.GROQ_API_KEY) ? 'groq' : provider;
+
+  // Si no hay API Key en ningún lado, se retorna análisis pericial heurístico estructurado
+  if (!effectiveApiKey) {
     const analysis = generateHeuristicPeritoReport(query, patents, literature, userMessage);
     return res.status(200).json({
       provider: 'heuristic',
@@ -58,36 +62,50 @@ REGLAS:
     const fullPrompt = `${systemPrompt}\n\nDocumentos recuperados para la consulta "${query}":\n${contextItems}\n\nPregunta / Instrucción del usuario:\n${userMessage || 'Realiza un dictamen pericial ejecutivo de los resultados encontrados, evaluando riesgo de infracción FTO y oportunidades tecnológicas.'}`;
 
     // 1. Google Gemini API
-    if (provider === 'gemini') {
-      const selectedModel = model || 'gemini-1.5-flash';
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
-      const gResp = await fetch(geminiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: fullPrompt }] }],
-          generationConfig: { temperature: 0.3, maxOutputTokens: 1200 }
-        })
-      });
-      const gData = await gResp.json();
-      if (gData.error) throw new Error(gData.error.message || 'Error en Gemini API');
-      replyText = gData.candidates?.[0]?.content?.parts?.[0]?.text || 'No se obtuvo respuesta de Gemini.';
+    if (effectiveProvider === 'gemini') {
+      const candidateModels = [model, 'gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'].filter(Boolean);
+      let lastError = null;
+
+      for (const m of candidateModels) {
+        try {
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${effectiveApiKey}`;
+          const gResp = await fetch(geminiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: fullPrompt }] }],
+              generationConfig: { temperature: 0.3, maxOutputTokens: 1200 }
+            })
+          });
+          const gData = await gResp.json();
+          if (gData.error) {
+            lastError = gData.error.message || `Error en modelo ${m}`;
+            continue;
+          }
+          replyText = gData.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (replyText) break;
+        } catch (e) {
+          lastError = e.message;
+        }
+      }
+
+      if (!replyText) throw new Error(lastError || 'No se pudo obtener respuesta de Gemini.');
 
     // 2. Proveedores con protocolo OpenAI-Compatible (Groq, DeepSeek, OpenAI, Perplexity, xAI Grok)
-    } else if (['groq', 'openai', 'deepseek', 'perplexity', 'grok'].includes(provider)) {
+    } else if (['groq', 'openai', 'deepseek', 'perplexity', 'grok'].includes(effectiveProvider)) {
       let endpoint = 'https://api.openai.com/v1/chat/completions';
       let defaultModel = 'gpt-4o-mini';
 
-      if (provider === 'groq') {
+      if (effectiveProvider === 'groq') {
         endpoint = 'https://api.groq.com/openai/v1/chat/completions';
         defaultModel = 'llama-3.3-70b-versatile';
-      } else if (provider === 'deepseek') {
+      } else if (effectiveProvider === 'deepseek') {
         endpoint = 'https://api.deepseek.com/chat/completions';
         defaultModel = 'deepseek-chat';
-      } else if (provider === 'perplexity') {
+      } else if (effectiveProvider === 'perplexity') {
         endpoint = 'https://api.perplexity.ai/chat/completions';
         defaultModel = 'sonar';
-      } else if (provider === 'grok') {
+      } else if (effectiveProvider === 'grok') {
         endpoint = 'https://api.x.ai/v1/chat/completions';
         defaultModel = 'grok-beta';
       }
@@ -96,7 +114,7 @@ REGLAS:
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+          'Authorization': `Bearer ${effectiveApiKey}`
         },
         body: JSON.stringify({
           model: model || defaultModel,
@@ -108,16 +126,16 @@ REGLAS:
         })
       });
       const oData = await oResp.json();
-      if (oData.error) throw new Error(oData.error.message || `Error en ${provider}`);
+      if (oData.error) throw new Error(oData.error.message || `Error en ${effectiveProvider}`);
       replyText = oData.choices?.[0]?.message?.content || 'No se obtuvo respuesta del modelo.';
 
     // 3. Anthropic Claude
-    } else if (provider === 'claude') {
+    } else if (effectiveProvider === 'claude') {
       const cResp = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': apiKey,
+          'x-api-key': effectiveApiKey,
           'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
@@ -131,7 +149,7 @@ REGLAS:
       if (cData.error) throw new Error(cData.error.message || 'Error en Claude');
       replyText = cData.content?.[0]?.text || 'No se obtuvo respuesta de Claude.';
     } else {
-      throw new Error(`Proveedor "${provider}" no reconocido.`);
+      throw new Error(`Proveedor "${effectiveProvider}" no reconocido.`);
     }
 
     return res.status(200).json({

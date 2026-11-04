@@ -207,6 +207,81 @@
     }
 
     
+    
+    /* =========================================================
+       BARRA DE ESPACIOS DE TRABAJO (WORKSPACES ESTILO ANTIGRAVITY)
+       ========================================================= */
+    .workspace-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding: 0 4px;
+      position: relative;
+    }
+
+    .workspace-selector-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-high);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+
+    .workspace-selector-pill:hover {
+      background-color: var(--bg-subtle);
+      border-color: var(--border-focus);
+    }
+
+    .workspace-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-ws-pinned {
+      background-color: rgba(168, 85, 247, 0.12);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: 16px;
+      padding: 4px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-ws-pinned:hover {
+      background-color: rgba(168, 85, 247, 0.25);
+    }
+
+    .btn-pin-patent {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-pin-patent:hover, .btn-pin-patent.pinned {
+      background-color: rgba(168, 85, 247, 0.2);
+      border-color: #a855f7;
+      color: #c084fc;
+    }
+
     /* =========================================================
        WORKSPACE TRI-COLUMNA (LAYOUT DE CHAT DE IA + RESULTADOS + INSPECCIÓN)
        ========================================================= */
@@ -2060,6 +2135,39 @@
     <!-- =========================================================
          BARRA DE BÚSQUEDA / PROMPT BOX ESTILO ANTIGRAVITY
          ========================================================= -->
+        <!-- BARRA DE ESPACIOS DE TRABAJO (WORKSPACES ESTILO ANTIGRAVITY) -->
+    <div class="workspace-bar">
+      <div class="workspace-selector-pill" onclick="toggleWorkspaceMenu(event)" id="workspace-pill-btn">
+        <span style="font-size: 13px;">📂</span>
+        <span id="current-workspace-label">Proyecto: Awake (Calzado Piezoeléctrico)</span>
+        <span class="ag-pill-caret" id="workspace-caret">▼</span>
+      </div>
+
+      <!-- Menú Flotante de Proyectos -->
+      <div class="ag-popup-menu" id="workspace-popup-menu" style="left: 0; top: calc(100% + 4px); min-width: 290px;">
+        <div class="ag-menu-header">Espacios de Trabajo / Investigaciones</div>
+        <div id="workspace-list-items">
+          <!-- Injected via JS -->
+        </div>
+        <div class="ag-menu-divider"></div>
+        <div class="ag-menu-item" onclick="crearNuevoWorkspaceModal()">
+          <span>➕ Crear Nuevo Espacio de Trabajo...</span>
+        </div>
+        <div class="ag-menu-item" onclick="exportarWorkspaceActual()">
+          <span>💾 Exportar Memoria de este Proyecto (.json)</span>
+        </div>
+      </div>
+
+      <div class="workspace-actions">
+        <button class="btn-ws-pinned" onclick="togglePinnedPatentsView()" id="btn-pinned-count" title="Ver patentes fijadas en este proyecto">
+          <span>📌</span> <span id="pinned-count-label">0 Guardadas</span>
+        </button>
+        <button class="btn-ghost" onclick="crearNuevoWorkspaceModal()" style="font-size: 11px; padding: 4px 8px;">
+          <span>+</span> Proyecto
+        </button>
+      </div>
+    </div>
+
     <div class="ag-prompt-container">
       <textarea 
         id="query-input" 
@@ -2927,6 +3035,145 @@
       }
     }
 
+    
+    // =========================================================
+    // GESTIÓN DE WORKSPACES / ESPACIOS DE TRABAJO DE VIGILANCIA
+    // =========================================================
+    const defaultWorkspaces = [
+      { id: 'awake', name: 'Awake (Calzado Piezoeléctrico)', query: 'piezoelectric footwear', pinned: [] },
+      { id: 'centrika', name: 'Céntrika (Sensores & Telas Inteligentes)', query: 'smart fabrics pressure sensors', pinned: [] },
+      { id: 'competencia', name: 'Benchmarking (Nike / Dephy)', query: 'adaptive cushioning shoe sole', pinned: [] }
+    ];
+
+    let workspaces = [];
+    try {
+      const savedWs = localStorage.getItem('capstone-workspaces');
+      workspaces = savedWs ? JSON.parse(savedWs) : defaultWorkspaces;
+    } catch (e) {
+      workspaces = defaultWorkspaces;
+    }
+
+    let activeWorkspaceId = localStorage.getItem('capstone-active-ws') || 'awake';
+    let isShowingOnlyPinned = false;
+
+    function getActiveWorkspace() {
+      return workspaces.find(w => w.id === activeWorkspaceId) || workspaces[0];
+    }
+
+    function toggleWorkspaceMenu(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById('workspace-popup-menu');
+      const caret = document.getElementById('workspace-caret');
+      const isOpen = menu.classList.contains('show');
+      if (isOpen) {
+        menu.classList.remove('show');
+        if (caret) caret.style.transform = 'rotate(0deg)';
+      } else {
+        renderWorkspaceMenuItems();
+        menu.classList.add('show');
+        if (caret) caret.style.transform = 'rotate(180deg)';
+      }
+    }
+
+    function renderWorkspaceMenuItems() {
+      const container = document.getElementById('workspace-list-items');
+      if (!container) return;
+      container.innerHTML = workspaces.map(w => `
+        <div class="ag-menu-item ${w.id === activeWorkspaceId ? 'selected' : ''}" onclick="seleccionarWorkspace('${w.id}')">
+          <div>
+            <div>📂 ${w.name}</div>
+            <div class="ag-item-desc">${w.pinned ? w.pinned.length : 0} patentes fijadas &bull; "${w.query}"</div>
+          </div>
+          <span class="ag-item-check" style="${w.id === activeWorkspaceId ? 'display:inline;' : 'display:none;'}">✓</span>
+        </div>
+      `).join('');
+    }
+
+    function seleccionarWorkspace(wsId) {
+      activeWorkspaceId = wsId;
+      try {
+        localStorage.setItem('capstone-active-ws', wsId);
+      } catch (e) {}
+
+      const ws = getActiveWorkspace();
+      document.getElementById('current-workspace-label').textContent = `Proyecto: ${ws.name}`;
+      document.getElementById('query-input').value = ws.query;
+      actualizarContadorPinned();
+
+      const menu = document.getElementById('workspace-popup-menu');
+      if (menu) menu.classList.remove('show');
+
+      isShowingOnlyPinned = false;
+      buscar();
+    }
+
+    function actualizarContadorPinned() {
+      const ws = getActiveWorkspace();
+      const count = ws.pinned ? ws.pinned.length : 0;
+      const label = document.getElementById('pinned-count-label');
+      if (label) label.textContent = `${count} Guardadas`;
+    }
+
+    function togglePinPatent(pubNum, e) {
+      if (e) e.stopPropagation();
+      const ws = getActiveWorkspace();
+      if (!ws.pinned) ws.pinned = [];
+      const idx = ws.pinned.indexOf(pubNum);
+      if (idx > -1) {
+        ws.pinned.splice(idx, 1);
+      } else {
+        ws.pinned.push(pubNum);
+      }
+      guardarWorkspacesState();
+      actualizarContadorPinned();
+      applyFiltersAndRender();
+    }
+
+    function guardarWorkspacesState() {
+      try {
+        localStorage.setItem('capstone-workspaces', JSON.stringify(workspaces));
+      } catch (e) {}
+    }
+
+    function togglePinnedPatentsView() {
+      isShowingOnlyPinned = !isShowingOnlyPinned;
+      const btn = document.getElementById('btn-pinned-count');
+      if (isShowingOnlyPinned) {
+        btn.style.backgroundColor = '#a855f7';
+        btn.style.color = '#fff';
+      } else {
+        btn.style.backgroundColor = 'rgba(168, 85, 247, 0.12)';
+        btn.style.color = '#c084fc';
+      }
+      applyFiltersAndRender();
+    }
+
+    function crearNuevoWorkspaceModal() {
+      const nombre = prompt('Ingresa el nombre del nuevo espacio de trabajo (ej. Proyecto Baterías Awake):');
+      if (!nombre || !nombre.trim()) return;
+      const query = prompt('Ecuación o consulta base para este proyecto:', 'energy harvesting materials');
+      const newWs = {
+        id: 'ws_' + Date.now(),
+        name: nombre.trim(),
+        query: query ? query.trim() : '',
+        pinned: []
+      };
+      workspaces.push(newWs);
+      guardarWorkspacesState();
+      seleccionarWorkspace(newWs.id);
+    }
+
+    function exportarWorkspaceActual() {
+      const ws = getActiveWorkspace();
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(ws, null, 2));
+      const a = document.createElement('a');
+      a.href = dataStr;
+      a.download = `Workspace_${ws.name.replace(/\s+/g, '_')}_Memoria.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
     function setEngineMode(mode) {
       currentEngineMode = mode;
       const btnPatents = document.getElementById('engine-btn-patents');
@@ -3076,6 +3323,12 @@
     }
 
     document.addEventListener('click', (e) => {
+            if (!e.target.closest('#workspace-pill-btn') && !e.target.closest('#workspace-popup-menu')) {
+        const menu = document.getElementById('workspace-popup-menu');
+        const caret = document.getElementById('workspace-caret');
+        if (menu) menu.classList.remove('show');
+        if (caret) caret.style.transform = 'rotate(0deg)';
+      }
       if (!e.target.closest('#source-pill-btn') && !e.target.closest('#source-popup-menu') && !e.target.closest('#health-submenu')) {
         cerrarMenuFuentes();
       }
@@ -4999,6 +5252,8 @@
       } catch (e) {}
       actualizarEstadoShuffle();
       actualizarEstadoCountryShuffle();
+      const wsInit = getActiveWorkspace();
+      if (wsInit) { document.getElementById("current-workspace-label").textContent = `Proyecto: ${wsInit.name}`; actualizarContadorPinned(); }
       buscar();
     });
   </script>

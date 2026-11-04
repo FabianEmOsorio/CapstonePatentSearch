@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 .DS_Store
 test_lens.py
+.env
+.env.local
+.env.*.local
+*.log

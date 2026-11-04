@@ -402,8 +402,8 @@ class PatentSearchHandler(http.server.SimpleHTTPRequestHandler):
         post_body = self.rfile.read(content_len)
         try:
             req_data = json.loads(post_body.decode('utf-8'))
-            provider = req_data.get('provider', 'heuristic')
-            api_key = req_data.get('apiKey', '').strip()
+            provider = req_data.get('provider', 'gemini' if os.environ.get('GEMINI_API_KEY') else 'heuristic')
+            api_key = req_data.get('apiKey', '').strip() or os.environ.get('GEMINI_API_KEY', '').strip() or os.environ.get('GROQ_API_KEY', '').strip()
             model = req_data.get('model', '')
             query = req_data.get('query', '')
             patents = req_data.get('patents', [])
