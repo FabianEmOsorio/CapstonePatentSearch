@@ -159,8 +159,16 @@ REGLAS:
     });
 
   } catch (err) {
-    return res.status(500).json({
-      error: `Error procesando solicitud con ${provider}: ${err.message}`
+    console.error("Error en proveedor de IA:", err.message);
+    const fallback = generateHeuristicPeritoReport(query, patents, literature, userMessage);
+    return res.status(200).json({
+      provider: 'heuristic_fallback',
+      model: 'Perito Heurístico (Reserva)',
+      reply: `⚠️ *(Nota: Motor de reserva local activado - ${err.message})*\n\n${fallback.reply}`,
+      fto_verdict: fallback.fto_verdict,
+      key_findings: fallback.key_findings,
+      white_spaces: fallback.white_spaces,
+      follow_ups: fallback.follow_ups
     });
   }
 }
