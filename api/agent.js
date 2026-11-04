@@ -63,7 +63,7 @@ REGLAS:
 
     // 1. Google Gemini API
     if (effectiveProvider === 'gemini') {
-      const candidateModels = [model, 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro'].filter(Boolean);
+      const candidateModels = [model, 'gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-latest'].filter(Boolean);
       let lastError = null;
 
       for (const m of candidateModels) {

@@ -450,7 +450,7 @@ Para el prototipo de calzado piezoeléctrico, se recomienda utilizar como base d
 
             # Si hay API key de Gemini
             if provider == 'gemini':
-                sel_model = model or 'gemini-1.5-flash'
+                sel_model = model or 'gemini-3.5-flash'
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{sel_model}:generateContent?key={api_key}"
                 context_str = "\n".join([f"[{i+1}] {p.get('publication_number')}: {p.get('title')} ({p.get('publication_date')}) - Titular: {p.get('assignee')}" for i, p in enumerate(patents[:8])])
                 prompt = f"Eres un perito de patentes del proyecto Capstone Awake / Céntrika. Con base en estas patentes encontradas para '{query}':\n{context_str}\n\nResponde conciso al usuario: {user_msg or 'Haz un dictamen pericial de FTO y oportunidades.'}"
