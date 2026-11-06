@@ -305,44 +305,18 @@
       grid-template-columns: 1fr;
     }
     .workspace-tri-column.mode-dialog .col-inspection {
-      display: none;
-    }
-
-    @media (max-width: 1100px) {
-      .workspace-tri-column {
-        grid-template-columns: 1fr;
-      }
-      .col-inspection {
-        display: none;
-      }
-    }
-
-    /* PADDING INFERIOR PARA QUE LA BARRA FLOTANTE NUNCA TAPE EL CONTENIDO */
-    body {
-      padding-bottom: 160px;
-    }
-
-    /* PANEL UNIFICADO DE ASESORÍA Y DICTAMEN DE IA EN EL FEED */
-    .ai-unified-panel {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 18px 20px;
-      margin-bottom: 18px;
-      box-shadow: var(--card-shadow);
-      display: none;
-      transition: all 0.25s ease;
-    }
-    .ai-unified-panel.active {
-      display: block;
-    }
-    .ai-unified-header {
+      background-color: transparent;
+      border-left: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 0 16px 32px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid var(--border-color);
       padding-bottom: 12px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    [data-theme="light"] .ai-unified-header {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
     .ai-unified-title-wrap {
       display: flex;
@@ -1044,65 +1018,184 @@
       left: 295px;
     }
     /* Estilos de Historial de Chat (Últimos 2 mensajes + Desplegable superior) y Citas Cliqueables */
+    /* HISTORIAL DE CHAT LIMPIO (ESTILO ANTIGRAVITY: BURBUJA DE USUARIO + FLUJO LIBRE DEL ASISTENTE) */
     .chat-history-toggle-btn {
-      width: 100%;
-      background-color: var(--bg-subtle);
-      border: 1px dashed var(--border-color);
-      color: var(--brand-primary);
-      border-radius: 8px;
-      padding: 7px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      color: var(--text-muted);
+      border-radius: 9999px;
+      padding: 7px 18px;
       font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
+      font-weight: 500;
+      margin: 8px auto 20px auto;
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 6px;
-      margin-bottom: 12px;
-      font-family: inherit;
-      transition: all 0.15s ease;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
     .chat-history-toggle-btn:hover {
-      background-color: rgba(0, 145, 255, 0.1);
-      border-color: var(--brand-primary);
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text-high);
+      border-color: rgba(255, 255, 255, 0.15);
     }
-    .chat-turn-card {
-      border-radius: 10px;
-      padding: 12px 14px;
-      margin-bottom: 10px;
-      border: 1px solid var(--border-color);
+    [data-theme="light"] .chat-history-toggle-btn {
+      background: rgba(0, 0, 0, 0.03);
+      border-color: rgba(0, 0, 0, 0.08);
+      color: var(--text-medium);
     }
-    .chat-turn-user {
-      background-color: rgba(0, 145, 255, 0.08);
-      border-color: rgba(0, 145, 255, 0.28);
-    }
-    .chat-turn-assistant {
-      background-color: var(--bg-canvas);
-      border-color: var(--border-color);
-    }
-    .chat-turn-meta {
+
+    /* Mensaje del usuario: burbuja flotante redondeada a la derecha */
+    .chat-turn-user-wrap {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
+      flex-direction: column;
+      align-items: flex-end;
+      margin: 20px 0 16px 0;
+      width: 100%;
     }
+    .chat-turn-user-bubble {
+      background-color: #1a1e27;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #f0f6fc;
+      border-radius: 18px;
+      padding: 12px 18px;
+      max-width: 82%;
+      font-size: 14.5px;
+      line-height: 1.6;
+      word-break: break-word;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+    [data-theme="light"] .chat-turn-user-bubble {
+      background-color: #f1f5f9;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      color: #0f172a;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .chat-turn-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      margin-right: 6px;
+      opacity: 0.65;
+    }
+
+    /* Mensaje del agente: texto libre y fluido sobre el fondo sin caja restrictiva */
+    .chat-turn-assistant-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin: 12px 0 26px 0;
+      width: 100%;
+    }
+    .ai-compiled-markdown.antigravity-flow {
+      width: 100%;
+      font-size: 14.5px;
+      line-height: 1.75;
+      color: var(--text-high);
+      letter-spacing: 0.005em;
+    }
+    .ai-compiled-markdown.antigravity-flow p {
+      margin-bottom: 16px;
+    }
+    .ai-compiled-markdown.antigravity-flow h1,
+    .ai-compiled-markdown.antigravity-flow h2,
+    .ai-compiled-markdown.antigravity-flow h3,
+    .ai-compiled-markdown.antigravity-flow h4 {
+      color: var(--text-high);
+      font-weight: 700;
+      margin-top: 24px;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    .ai-compiled-markdown.antigravity-flow ul,
+    .ai-compiled-markdown.antigravity-flow ol {
+      margin-bottom: 16px;
+      padding-left: 22px;
+    }
+    .ai-compiled-markdown.antigravity-flow li {
+      margin-bottom: 8px;
+      line-height: 1.7;
+    }
+    .ai-compiled-markdown.antigravity-flow strong {
+      color: #ffffff;
+      font-weight: 600;
+    }
+    [data-theme="light"] .ai-compiled-markdown.antigravity-flow strong {
+      color: #0f172a;
+    }
+    .ai-compiled-markdown.antigravity-flow table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-size: 13.5px;
+    }
+    .ai-compiled-markdown.antigravity-flow th {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    [data-theme="light"] .ai-compiled-markdown.antigravity-flow th {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    }
+    .ai-compiled-markdown.antigravity-flow td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 10px 14px;
+      line-height: 1.5;
+    }
+    [data-theme="light"] .ai-compiled-markdown.antigravity-flow td {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    /* Toggle minimalista de traza ("Worked for Xs >") */
+    .antigravity-thinking-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #58a6ff;
+      background: transparent;
+      transition: background 0.15s ease, opacity 0.15s ease;
+      margin-bottom: 12px;
+      user-select: none;
+    }
+    .antigravity-thinking-bar:hover {
+      background: rgba(88, 166, 255, 0.08);
+    }
+    .antigravity-thinking-bar.completed {
+      color: var(--text-muted);
+    }
+    .antigravity-thinking-bar.completed:hover {
+      color: var(--text-high);
+    }
+    .antigravity-thinking-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 4px 0 12px 14px;
+      margin-bottom: 14px;
+      border-left: 2px solid rgba(88, 166, 255, 0.2);
+    }
+    [data-theme="light"] .antigravity-thinking-steps {
+      border-left-color: rgba(0, 112, 243, 0.25);
+    }
+
     .ai-cite-chip {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      background-color: rgba(0, 145, 255, 0.12);
-      border: 1px solid rgba(0, 145, 255, 0.35);
-      color: var(--brand-primary);
-      border-radius: 5px;
+      background-color: rgba(0, 145, 255, 0.1);
+      border: 1px solid rgba(0, 145, 255, 0.25);
+      color: #38bdf8;
+      border-radius: 6px;
       padding: 1px 7px;
       font-size: 11.5px;
       font-family: SFMono-Regular, Consolas, monospace;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
       margin: 0 2px;
       vertical-align: baseline;
@@ -1111,8 +1204,9 @@
     .ai-cite-chip:hover {
       background-color: var(--brand-primary);
       color: #ffffff;
+      border-color: var(--brand-primary);
     }
-    .ag-menu-item.selected {
+    .ag-menu-item.selected {.ag-menu-item.selected {
       color: var(--brand-primary);
       font-weight: 600;
     }
@@ -1385,15 +1479,26 @@
     }
 
     .patent-card {
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 16px;
-      background-color: var(--bg-surface);
-      box-shadow: var(--card-shadow);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 20px 24px;
+      background-color: rgba(255, 255, 255, 0.02);
+      box-shadow: none;
+      margin-bottom: 16px;
+      transition: background 0.2s ease, border-color 0.2s ease;
     }
     .patent-card:hover {
-      border-color: var(--border-hover);
-      box-shadow: var(--card-shadow-hover);
+      background-color: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    [data-theme="light"] .patent-card {
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      background-color: rgba(0, 0, 0, 0.015);
+      box-shadow: none;
+    }
+    [data-theme="light"] .patent-card:hover {
+      background-color: rgba(0, 0, 0, 0.035);
+      border-color: rgba(0, 0, 0, 0.12);
     }
     .patent-card-layout {
       display: flex;
@@ -3473,8 +3578,7 @@
     let cfgLensToken = localStorage.getItem('capstone-lens-token') || '';
 
     // =========================================================
-    // IDENTIDAD UNICA DE USUARIO Y AISLAMIENTO DE WORKSPACES
-    // =========================================================
+    // IDENTIDAD UNICA DE USUARIO Y AISLAMIENTO DE WORKSPACES (CERO PROYECTOS PREARMADOS / CERO PROYECTOS FANTASMA)
     let userUuid = localStorage.getItem('capstone_user_uuid');
     if (!userUuid) {
       userUuid = 'u_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
@@ -3485,15 +3589,45 @@
     const USER_WS_STORAGE_KEY = 'capstone_workspaces_' + userUuid;
     const USER_ACTIVE_WS_KEY = 'capstone_active_ws_' + userUuid;
 
+    // Purga proactiva de claves heredadas o proyectos huérfanos / autogenerados por consultas
+    try {
+      localStorage.removeItem('capstone-workspaces');
+      localStorage.removeItem('capstone-active-ws');
+    } catch (e) {}
+
     let workspaces = [];
     try {
       const savedWs = localStorage.getItem(USER_WS_STORAGE_KEY);
-      workspaces = savedWs ? JSON.parse(savedWs) : [];
+      if (savedWs) {
+        const parsed = JSON.parse(savedWs);
+        // Filtrar estrictamente proyectos prefabricados viejos ('principal', 'emergentes', 'benchmarking')
+        // o proyectos creados por accidente con texto de mensajes ('hola,', 'Proyecto Principal')
+        workspaces = (Array.isArray(parsed) ? parsed : []).filter(w => {
+          if (!w || !w.id || typeof w.name !== 'string') return false;
+          const lowerId = w.id.toLowerCase();
+          const lowerName = w.name.toLowerCase();
+          if (['principal', 'emergentes', 'benchmarking'].includes(lowerId)) return false;
+          if (lowerName.startsWith('hola') || lowerName.startsWith('proyecto principal') || lowerName === 'principal') return false;
+          return true;
+        });
+        localStorage.setItem(USER_WS_STORAGE_KEY, JSON.stringify(workspaces));
+      } else {
+        workspaces = [];
+      }
     } catch (e) {
       workspaces = [];
     }
 
-    let activeWorkspaceId = localStorage.getItem(USER_ACTIVE_WS_KEY) || (workspaces.length > 0 ? workspaces[0].id : null);
+    let activeWorkspaceId = localStorage.getItem(USER_ACTIVE_WS_KEY);
+    if (activeWorkspaceId && !workspaces.some(w => w.id === activeWorkspaceId)) {
+      activeWorkspaceId = workspaces.length > 0 ? workspaces[0].id : null;
+      try {
+        if (activeWorkspaceId) localStorage.setItem(USER_ACTIVE_WS_KEY, activeWorkspaceId);
+        else localStorage.removeItem(USER_ACTIVE_WS_KEY);
+      } catch (e) {}
+    }
+
+    let sessionChatHistory = []; // Memoria de chat temporal cuando el usuario opera sin proyecto activo
     let isShowingOnlyPinned = false;
 
     function getActiveWorkspace() {
@@ -4183,25 +4317,13 @@
         return;
       }
 
-      // Si no hay proyecto creado, crear uno automáticamente para el usuario
+      // Si hay proyecto activo seleccionado por el usuario, actualizamos su consulta
       let ws = getActiveWorkspace();
-      if (!ws) {
-        ws = {
-          id: 'ws_' + Date.now(),
-          name: q.length > 25 ? q.substring(0, 25) + '...' : q,
-          query: q,
-          pinned: [],
-          chatHistory: []
-        };
-        workspaces.push(ws);
-        activeWorkspaceId = ws.id;
-        guardarWorkspacesState();
-        const lbl = document.getElementById('current-workspace-label');
-        if (lbl) lbl.textContent = `Proyecto: ${ws.name}`;
-      } else {
+      if (ws) {
         ws.query = q;
         guardarWorkspacesState();
       }
+      // Si no hay proyecto activo (ws es null), el sistema opera en modo sesión libre limpia sin crear proyectos fantasma en localStorage.
 
       // Vaciado inmediato del campo de texto y actualización del chip de consulta activa
       lastExecutedQuery = q;
@@ -5552,11 +5674,13 @@
         const headerTitle = document.getElementById('thinking-header-title');
         const timerBadge = document.getElementById('thinking-timer-badge');
         const spinner = document.getElementById('thinking-spinner-icon');
+        const pill = document.getElementById('thinking-bar-pill');
 
-        if (headerTitle) headerTitle.textContent = 'Razonamiento y traza pericial completada';
+        if (headerTitle) headerTitle.textContent = 'Razonamiento pericial completado';
         if (timerBadge) timerBadge.textContent = `${totalTime}s total`;
+        if (pill) pill.classList.add('completed');
         if (spinner) {
-          spinner.outerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+          spinner.outerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
         }
         this.renderBodyOnly();
       },
@@ -5573,21 +5697,14 @@
         const slot = document.getElementById('agent-activity-slot');
         if (!slot) return;
         slot.innerHTML = `
-          <div class="agent-thinking-tray" id="agent-thinking-tray">
-            <div class="thinking-tray-header" onclick="AgentActivityTree.toggle()">
-              <div class="thinking-header-left">
-                <span class="thinking-spinner" id="thinking-spinner-icon"></span>
-                <span id="thinking-header-title">Razonando y analizando antecedentes...</span>
-                <span class="thinking-timer-badge" id="thinking-timer-badge"><span id="thinking-timer-val">0.0s</span></span>
-              </div>
-              <div class="thinking-toggle-btn">
-                <span id="thinking-caret">▾</span>
-                <span>Traza del agente</span>
-              </div>
-            </div>
-            <div class="thinking-tray-body" id="thinking-tray-body">
-              ${this.getStepsHtml()}
-            </div>
+          <div class="antigravity-thinking-bar" id="thinking-bar-pill" onclick="AgentActivityTree.toggle()">
+            <span class="thinking-spinner" id="thinking-spinner-icon"></span>
+            <span id="thinking-header-title">Razonando y analizando antecedentes...</span>
+            <span id="thinking-timer-badge" style="font-family: monospace; font-size: 11px; opacity: 0.85;"><span id="thinking-timer-val">0.0s</span></span>
+            <span id="thinking-caret" style="font-size: 13px;">&#8250;</span>
+          </div>
+          <div class="antigravity-thinking-steps" id="thinking-tray-body" style="display: ${this.isCollapsed ? 'none' : 'flex'};">
+            ${this.getStepsHtml()}
           </div>
         `;
       },
@@ -5634,20 +5751,20 @@
       const recentSlot = document.getElementById('ai-history-recent-slot');
       if (!olderSlot || !recentSlot) return;
 
-      if (!ws || !ws.chatHistory || ws.chatHistory.length === 0) {
+      const history = ws ? (ws.chatHistory || []) : sessionChatHistory;
+
+      if (!history || history.length === 0) {
         olderSlot.innerHTML = '';
         recentSlot.innerHTML = `
-          <div style="color: var(--text-muted); font-size: 12.5px; padding: 12px 0;">
-            El chat pericial esta listo. Puedes hacer preguntas tecnicas, evaluar ecuaciones o consultar el estado de libertad de operacion.
+          <div style="color: var(--text-muted); font-size: 13px; padding: 10px 0; line-height: 1.6;">
+            El chat pericial está listo. Escribe cualquier consulta técnica o ecuación en la barra inferior para iniciar el análisis.
           </div>
         `;
         return;
       }
 
-      const history = ws.chatHistory;
       const totalMessages = history.length;
 
-      // Si hay mas de 2 mensajes, separamos en older (los anteriores) y recent (los ultimos 2)
       if (totalMessages > 2) {
         const olderCount = totalMessages - 2;
         const olderMessages = history.slice(0, totalMessages - 2);
@@ -5657,34 +5774,33 @@
           <button class="chat-history-toggle-btn" onclick="toggleChatHistoryOlder()" id="btn-toggle-chat-history">
             <span>${isShowingOlderChatHistory ? '&#9660; Colapsar historial anterior' : '&#9650; Desplegar historial anterior'} (${olderCount} mensajes previos)</span>
           </button>
-          <div id="ai-older-messages-list" style="display: ${isShowingOlderChatHistory ? 'flex' : 'none'}; flex-direction: column; gap: 12px; margin-bottom: 14px;">
+          <div id="ai-older-messages-list" style="display: ${isShowingOlderChatHistory ? 'flex' : 'none'}; flex-direction: column; gap: 14px; margin-bottom: 20px;">
             ${olderMessages.map(m => renderizarMensajeHistorialHtml(m)).join('')}
           </div>
         `;
 
         recentSlot.innerHTML = `
-          <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; flex-direction: column; gap: 14px;">
             ${recentMessages.map(m => renderizarMensajeHistorialHtml(m)).join('')}
           </div>
         `;
       } else {
         olderSlot.innerHTML = '';
         recentSlot.innerHTML = `
-          <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; flex-direction: column; gap: 14px;">
             ${history.map(m => renderizarMensajeHistorialHtml(m)).join('')}
           </div>
         `;
       }
 
-      // Recompilar LaTeX y formulas en los mensajes renderizados
       if (typeof renderMathInElement !== 'undefined') {
         try {
           renderMathInElement(recentSlot, {
             delimiters: [
               { left: '$$', right: '$$', display: true },
               { left: '$', right: '$', display: false },
-              { left: '\\(', right: '\\)', display: false },
-              { left: '\\[', right: '\\]', display: true }
+              { left: '\(', right: '\)', display: false },
+              { left: '\[', right: '\]', display: true }
             ],
             throwOnError: false
           });
@@ -5694,34 +5810,30 @@
 
     function renderizarMensajeHistorialHtml(msg) {
       const isUser = msg.role === 'user';
-      const timeStr = msg.timestamp ? `<span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">${msg.timestamp}</span>` : '';
+      const timeStr = msg.timestamp ? `<span class="chat-turn-time">${escapeHtml(msg.timestamp)}</span>` : '';
 
       if (isUser) {
         return `
-          <div class="chat-turn-card user-turn">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <span class="chat-role-label user">Investigador</span>
-              ${timeStr}
+          <div class="chat-turn-user-wrap">
+            <div class="chat-turn-user-bubble">
+              ${escapeHtml(maskSensitiveTokens(msg.content))}
             </div>
-            <div style="font-size: 13.5px; color: var(--text-high); line-height: 1.5; white-space: pre-wrap;">${escapeHtml(maskSensitiveTokens(msg.content))}</div>
+            ${timeStr}
           </div>
         `;
       }
 
-      // Mensaje del Asistente / Agente Pericial
+      // Turno del Asistente (Flujo limpio Antigravity sin bordes de caja)
       const formattedContent = formatearTextoConCitasYAcciones(msg.content);
+      const verdictHtml = msg.fto_verdict ? `<div style="display:inline-flex; align-items:center; gap:6px; margin-bottom:10px; padding:4px 10px; background:rgba(0,112,243,0.08); border-radius:6px; font-size:12px; color:var(--brand-primary); font-weight:600;"><span>Dictamen FTO:</span> <span>${escapeHtml(msg.fto_verdict)}</span></div>` : '';
+
       return `
-        <div class="chat-turn-card assistant-turn">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span class="chat-role-label assistant">Agente Pericial</span>
-              ${msg.fto_verdict ? `<span class="patent-status-badge fto-public-domain" style="font-size: 10.5px;">${escapeHtml(msg.fto_verdict)}</span>` : ''}
-            </div>
-            ${timeStr}
-          </div>
-          <div class="ai-compiled-markdown" style="font-size: 13px; color: var(--text-high); line-height: 1.6;">
+        <div class="chat-turn-assistant-wrap">
+          ${verdictHtml}
+          <div class="ai-compiled-markdown antigravity-flow">
             ${formattedContent}
           </div>
+          ${timeStr ? `<div style="font-size:11px; color:var(--text-muted); margin-top:8px; opacity:0.6;">${timeStr}</div>` : ''}
         </div>
       `;
     }
@@ -5890,17 +6002,20 @@
       const ws = getActiveWorkspace();
       const userText = explicitUserMsg || query;
 
-      // Agregar pregunta del usuario al historial del workspace
+      // Registrar mensaje en el historial del proyecto o en la sesión libre
+      const userTurnObj = {
+        role: 'user',
+        content: userText,
+        timestamp: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })
+      };
       if (ws) {
         if (!ws.chatHistory) ws.chatHistory = [];
-        ws.chatHistory.push({
-          role: 'user',
-          content: userText,
-          timestamp: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })
-        });
+        ws.chatHistory.push(userTurnObj);
         guardarWorkspacesState();
-        renderizarHistorialChatActual();
+      } else {
+        sessionChatHistory.push(userTurnObj);
       }
+      renderizarHistorialChatActual();
 
       // Preparar estado de la UI y estadisticas de los resultados para el prompt
       const uiState = {
@@ -5957,18 +6072,21 @@
           }, 200);
         }
 
-        // Guardar respuesta del asistente en el historial
+        // Guardar respuesta del perito en el proyecto o en la sesión libre
+        const assistantTurnObj = {
+          role: 'assistant',
+          content: data.reply || 'Sin respuesta devuelta.',
+          fto_verdict: data.fto_verdict || null,
+          trace_steps: data.trace_steps || [],
+          timestamp: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })
+        };
         if (ws) {
-          ws.chatHistory.push({
-            role: 'assistant',
-            content: data.reply || 'Sin respuesta devuelta.',
-            fto_verdict: data.fto_verdict || null,
-            trace_steps: data.trace_steps || [],
-            timestamp: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })
-          });
+          ws.chatHistory.push(assistantTurnObj);
           guardarWorkspacesState();
-          renderizarHistorialChatActual();
+        } else {
+          sessionChatHistory.push(assistantTurnObj);
         }
+        renderizarHistorialChatActual();
 
         if (data.follow_ups && data.follow_ups.length && followupsElem) {
           followupsElem.innerHTML = `
@@ -6614,11 +6732,11 @@
       const wsLabel = document.getElementById('current-workspace-label');
       if (ws) {
         if (wsLabel) wsLabel.textContent = `Proyecto: ${ws.name}`;
-        actualizarContadorPinned();
-        renderizarHistorialChatActual();
       } else {
         if (wsLabel) wsLabel.textContent = 'Sin Proyecto';
       }
+      actualizarContadorPinned();
+      renderizarHistorialChatActual();
 
       mostrarZeroState();
     });

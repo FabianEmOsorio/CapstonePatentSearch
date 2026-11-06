@@ -9,14 +9,14 @@ La plataforma centraliza la vigilancia tecnológica, inteligencia competitiva y 
 
 ## 2. Flujos Paso a Paso
 
-### 2.1. Inicio y Aislamiento por Usuario (Zero-State Hub & Onboarding)
-1. **Qué hace el usuario**: Ingresa por primera vez a la plataforma.
+### 2.1. Inicio y Aislamiento por Usuario (Zero-State Hub & Cero Proyectos Fantasma)
+1. **Qué hace el usuario**: Ingresa a la plataforma o recarga la página.
 2. **Qué procesa el sistema**:
    - Genera una identidad única de usuario (`capstone_user_uuid`) almacenada en su navegador (`localStorage`), asegurando que sus proyectos, historial de chat y patentes guardadas sean 100% independientes y no visibles por otros usuarios.
-   - Si es su primera visita, el sistema inicia sin proyectos prearmados (`workspaces = []`).
+   - Si es su primera visita, el sistema inicia sin proyectos prearmados (`workspaces = []`). Se purgan automáticamente proyectos heredados o accidentales (`principal`, `emergentes`, etc.).
+   - **Cero Proyectos Fantasma**: Si el usuario realiza consultas o chatea sin haber creado un proyecto, el sistema opera limpiamente en **Modo Sesión Libre Temporal** sin auto-crear proyectos con el texto de sus preguntas. Los proyectos solo se crean mediante acción explícita del usuario (`+ Proyecto` o el botón del Onboarding).
 3. **Qué se muestra en pantalla**:
-   - Una tarjeta de bienvenida intuitiva que solicita crear su primer **Proyecto de Vigilancia Tecnológica**.
-   - Si el usuario decide escribir directamente en la barra inferior sin crear el proyecto manualmente, el sistema inicializa automáticamente su proyecto y procesa su consulta sin fricción.
+   - Si no hay proyectos creados, el selector superior muestra `Sin Proyecto` y el centro exhibe la tarjeta de bienvenida para crear su primer proyecto de vigilancia.
    - En el menú de proyectos, el usuario puede cambiar de proyecto, exportar su memoria o **eliminar proyectos** con confirmación.
 
 ### 2.2. Búsqueda Multifuente, Responsividad Inmediata y Traza de Razonamiento
@@ -24,21 +24,20 @@ La plataforma centraliza la vigilancia tecnológica, inteligencia competitiva y 
 2. **Qué procesa el sistema**:
    - **Vaciado Inmediato**: El campo de texto (`#query-input`) se limpia al instante y desactiva el botón de búsqueda para sentirse responsivo. La consulta enviada se proyecta en el chip `#active-query-pill` (*Consulta: "..."*).
    - **Prioridad del Mensaje sobre los Botones**: Si el usuario escribe una directiva explícita (ej. *"busca solo patentes de EPO"*, *"solo vigentes"* o *"solo con PDF"*), el sistema actualiza de inmediato los filtros de la interfaz dando prioridad a la intención del usuario sobre el estado anterior de los botones.
-   - **Traza Dinámica Real (`AgentActivityTree`)**: Elimina timers o textos simulados. Registra en tiempo real la conexión con los registros oficiales, la cantidad exacta de documentos recuperados, el modelo de IA invocado (`gemini-3.5-flash-lite` por defecto) y los pasos emitidos por el servidor.
+   - **Traza Dinámica Real (`AgentActivityTree`)**: Estilo Antigravity minimalista (`Worked for Xs ›`). Registra en tiempo real la conexión con los registros oficiales, la cantidad exacta de documentos recuperados, el modelo de IA invocado (`gemini-3.5-flash-lite` por defecto) y los pasos emitidos por el servidor, desplegables con un clic sin cajas pesadas.
    - **Cálculo Estadístico (`statsSummary`)**: Calcula en tiempo real métricas clave del JSON (total de patentes, % vigentes vs. % dominio público, top titulares, top clasificaciones CPC y rango de años) y las remite al Agente Pericial para fundamentar su análisis con datos numéricos exactos.
 3. **Qué se muestra en pantalla**:
-   - El árbol de razonamiento con cronómetro en vivo y pasos auditables.
-   - Tarjetas de patentes o literatura científica con diseño compacto, resúmenes amigables, clasificaciones CPC y badges de estado FTO.
+   - El toggle de razonamiento minimalista.
+   - Tarjetas de patentes o literatura científica con diseño limpio, respirable y sin bordes toscos.
 
-### 2.3. Historial de Chat Pericial por Proyecto (Últimos 2 Mensajes + Despliegue Superior)
+### 2.3. Historial de Chat Pericial con Filosofía Antigravity (Limpio, Sin Bordes ni Cajas)
 1. **Qué hace el usuario**: Formula preguntas sucesivas o solicita análisis de patentes al Agente Pericial.
-2. **Qué procesa el sistema**: Almacena en `ws.chatHistory` cada turno conversacional, enmascarando cualquier token o clave sensible (`maskSensitiveTokens`).
+2. **Qué procesa el sistema**: Almacena en el proyecto activo (o en memoria de sesión si no hay proyecto) cada turno conversacional, enmascarando cualquier token o clave sensible (`maskSensitiveTokens`).
 3. **Qué se muestra en pantalla**:
-   - Por defecto se muestran en pantalla los **últimos 2 mensajes** (la última pregunta del investigador y la última respuesta del perito).
-   - Si existen más de 2 mensajes, aparece arriba el botón desplegable:
-     `[ ▲ Desplegar historial anterior (N mensajes previos) ]`
-   - Al hacer clic, se expanden todos los mensajes anteriores ordenados cronológicamente por encima de los dos últimos (como en chats profesionales) y el botón cambia a `[ ▼ Colapsar historial anterior ]`.
-   - Se dispone además del botón `Limpiar Chat` para resetear el historial del proyecto cuando sea necesario.
+   - **Sin Cajas ni Bordes Pesados**: Las respuestas del perito fluyen naturalmente sobre el fondo del lienzo (canvas) con tipografía amplia (`line-height: 1.75; font-size: 14.5px`), encabezados claros y espaciado generoso, eliminando marcos o cajas rectangulares apretadas.
+   - **Mensajes del Usuario**: Se presentan como burbujas redondeadas flotantes (`border-radius: 18px`) alineadas a la derecha, con fondo suave y separación visual natural.
+   - **Despliegue Superior Colapsable**: Por defecto se muestran los últimos 2 mensajes; si existen mensajes previos, el botón flotante `[ ▲ Desplegar historial anterior (N mensajes previos) ]` los expande ordenadamente por encima.
+   - **Filosofía Extendida al Resto del Proyecto**: Tarjetas de patentes con bordes ultrafinos y fondos translúcidos suaves (`rgba(255,255,255,0.02)`), columna de inspección transparente y sin dobles marcos, creando un entorno de lectura descansado y profesional.
 
 ### 2.4. Gobierno de APIs y Modelos Exclusivo del Agente
 1. **Qué hace el usuario**: Hace clic en el botón de configuración de APIs o le pide al Agente Pericial añadir, configurar o remover una fuente o modelo.
@@ -54,12 +53,12 @@ La plataforma centraliza la vigilancia tecnológica, inteligencia competitiva y 
    - El chat muestra la respuesta estructurada y el banner informativo: `[↗ Desplegando en barra lateral: PUB_NUM]`.
    - La barra lateral derecha se abre automáticamente mostrando el título, láminas técnicas, resumen oficial traducible, titular, clasificación CPC y visor del PDF oficial.
 
-### 2.5. Citas de Patentes Clicables e Interacción con el Panel de Inspección
+### 2.6. Citas de Patentes Clicables e Interacción con el Panel de Inspección
 1. **Qué hace el usuario**: Lee el dictamen pericial donde el agente cita números de publicación (ej. `[DOC:US6195698]` o menciones directas a patentes).
 2. **Qué procesa el sistema**: Compila estas citas como chips de acción interactivos: `[↗ US6195698 · Ver Ficha]`.
 3. **Qué se muestra en pantalla**: Al hacer clic en el chip de cita, se despliega y enfoca automáticamente la columna derecha de inspección (`#col-inspection` / `#patent-sidebar`) con la ficha completa y el visor de PDF de dicha patente.
 
-### 2.6. Modos de Visualización, Menús Dropup y Botón de Restaurar Chat
+### 2.7. Modos de Visualización, Menús Dropup y Botón de Restaurar Chat
 1. **Modo Claro / Oscuro**: La barra flotante de búsqueda y chat adopta coherentemente la paleta luminosa en `[data-theme="light"]`.
 2. **Menús Dropup**: Los menús desplegables de la barra inferior (`#source-popup-menu` y `#filter-popup-menu`) se despliegan **hacia arriba** (`bottom: calc(100% + 12px); top: auto;`) evitando desbordamientos inferiores.
 3. **Restaurar Chat Oculto**: Al minimizar el panel del Agente Pericial con `X Ocultar`, se exhibe en la barra de pestañas el botón interactivo `#btn-restore-ai-panel` (`Mostrar Chat del Agente`), permitiendo reabrirlo con un solo clic.
@@ -77,10 +76,12 @@ La plataforma centraliza la vigilancia tecnológica, inteligencia competitiva y 
 ## 4. Criterios de Aceptación
 - [x] JTBD alineado a la definición oficial del proyecto.
 - [x] Cada usuario tiene espacios de trabajo independientes sin proyectos prefabricados en su primera visita.
+- [x] Cero proyectos fantasma creados por consultas de chat al recargar la página.
 - [x] Los proyectos pueden crearse y eliminarse de forma persistente.
 - [x] Al enviar una consulta con `Enter`, el campo de texto se vacía de inmediato y la consulta activa se muestra en un chip descriptivo.
-- [x] El historial de chat muestra los últimos 2 mensajes y despliega los mensajes anteriores arriba mediante un botón toggle.
-- [x] La traza del razonamiento (`AgentActivityTree`) es dinámica y refleja la actividad y tiempos reales.
+- [x] El historial de chat aplica la filosofía Antigravity: sin marcos ni bordes visuales pesados, texto fluido con line-height 1.75 y burbuja de usuario redondeada a la derecha.
+- [x] La traza del razonamiento (`AgentActivityTree`) es minimalista (`Worked for Xs ›`) y refleja la actividad y tiempos reales.
+- [x] Despliegue 100% autónomo de la barra lateral de inspección cuando el agente recomienda o analiza una patente.
 - [x] Las citas periciales `[DOC:...]` son botones clicables que abren la ficha de inspección lateral.
 - [x] El mensaje del usuario tiene prioridad sobre el estado previo de los botones de filtro.
 - [x] Los menús de la barra de búsqueda se abren hacia arriba (dropup anti-desbordamiento).
