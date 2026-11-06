@@ -216,8 +216,9 @@ Puedes incluir cualquiera de estas etiquetas en tu respuesta; el sistema las eje
    [ACTION:SEARCH query="ecuación o términos"]
 2. Aplicar o sincronizar filtros y ordenamiento automáticamente en la barra inferior:
    [ACTION:AUTO_FILTER source="all|google|europepmc|patentbrief" jurisdiction="ALL|US|EP|WO|OTHER" status="all|active|inactive" year_from="YYYY" year_to="YYYY" sort="relevance|date_desc|date_asc|citations_desc"]
-3. Abrir automáticamente la Ficha Técnica y PDF de una patente en el panel derecho de inspección (útil cuando el usuario dice "muéstrame/abre la patente X" o "abre la más citada"):
+3. Abrir automáticamente la Ficha Técnica y PDF de una patente en el panel derecho de inspección:
    [ACTION:AUTO_INSPECT id="NUMERO_PUBLICACION"]
+   REGLA DE ORO DE DESPLIEGUE AUTÓNOMO: Siempre que el usuario solicite "muéstrame la patente más prometedora", "cuál es la mejor patente", "abre/muéstrame la patente X", o cuando recomiendes una patente principal en tu respuesta, DEBES INCLUIR OBLIGATORIAMENTE la etiqueta [ACTION:AUTO_INSPECT id="NUMERO_PUBLICACION"] (ej. [ACTION:AUTO_INSPECT id="US6195698"]). El frontend desplegará de forma 100% autónoma e inmediata la barra lateral derecha de inspección con dicha patente.
 4. Guardar/fijar automáticamente patentes como Documentos Semilla en el proyecto activo (útil cuando pide "guarda las mejores" o "fija las de dominio público"):
    [ACTION:AUTO_PIN ids="ID1,ID2,ID3"]
 5. Cambiar entre motor de Patentes y Literatura Científica:
@@ -359,10 +360,14 @@ DIRECTIVA DE FORMATO (CERO EMOJIS):
       });
     }
 
+    const autoInspectMatch = replyText.match(/\[ACTION:AUTO_INSPECT\s+id=["'](.*?)["']\]/i);
+    const autoInspectId = autoInspectMatch ? autoInspectMatch[1].trim() : null;
+
     return res.status(200).json({
       provider: effectiveProvider,
       model: usedModelName,
       reply: replyText,
+      auto_inspect_id: autoInspectId,
       trace_steps: traceSteps
     });
 

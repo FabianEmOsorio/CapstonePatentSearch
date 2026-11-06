@@ -479,6 +479,7 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes y cada botón de la
 - Fuentes integradas: Google Patents, Europe PMC (EPO/WIPO), PatentBrief, OpenAlex, EPO OPS y The Lens.
 - Botones de la interfaz (explicar solo si preguntan): Conmutador Patentes/Literatura, Barra de Proyectos (Guardadas, + Proyecto, Eliminar Proyecto, APIs & IA), Ruta JTBD (1. Ecuación E-T-S, 2. Autocrítica PCT, 3. Dictamen FTO, 4. Mapa Competitivo), Pestañas Resultados/JSON en Crudo, Exportar CSV, Dossier FTO, Ficha lateral con PDF, y Barra Inferior (+ Todas las fuentes, Shuffle APIs, Shuffle Países, Relevancia/Filtros).
 - Prioridad al mensaje del usuario sobre botones de filtro: Si el usuario pide resultados de una fuente, fecha o estado distinto al filtro activo en UI, prioriza su mensaje y emite [ACTION:AUTO_FILTER source="all|google|europepmc|patentbrief" jurisdiction="ALL|US|EP|WO|OTHER" status="all|active|inactive" year_from="YYYY" year_to="YYYY" sort="relevance|date_desc|date_asc|citations_desc"].
+- Despliegue autónomo de barra lateral: Si el usuario pide "muéstrame la patente más prometedora", "cuál es la mejor patente" o pide ver una patente, incluye [ACTION:AUTO_INSPECT id="NUMERO_PUBLICACION"] para que la interfaz abra de inmediato la barra lateral.
 - Citas cliqueables: Cita las patentes por su código oficial (ej. [DOC:US6195698]) para que el usuario abra su ficha lateral con un clic.
 - Gestión exclusiva de APIs: Eres el único que añade o quita APIs mediante [ACTION:ADD_API id="..." name="..." desc="..." quota="..." key="..."], [ACTION:REMOVE_API id="..."] o [ACTION:SET_AI provider="..." model="..." key="..."].
 {ui_str}{stats_str}{hist_str}"""
@@ -491,7 +492,9 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes y cada botón de la
                 with urllib.request.urlopen(req, timeout=15) as resp:
                     data = json.loads(resp.read().decode('utf-8'))
                     text = data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', 'Sin respuesta')
-                    self.send_json(200, {"provider": provider, "model": sel_model, "reply": text, "trace_steps": [{"step": f"Inferencia completada con {sel_model}", "time": "1.2"}]})
+                    aim = re.search(r'\[ACTION:AUTO_INSPECT\s+id=[\'"](.*?)[\'"]\]', text)
+                    auto_id = aim.group(1).strip() if aim else None
+                    self.send_json(200, {"provider": provider, "model": sel_model, "reply": text, "auto_inspect_id": auto_id, "trace_steps": [{"step": f"Inferencia completada con {sel_model}", "time": "1.2"}]})
             else:
                 # OpenAI-compatible (Groq, OpenAI, DeepSeek, etc.)
                 endpoint = "https://api.openai.com/v1/chat/completions"

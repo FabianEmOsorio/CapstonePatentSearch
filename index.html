@@ -2484,6 +2484,27 @@
       font-family: monospace;
     }
 
+    .ai-auto-inspect-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+      padding: 6px 12px;
+      background: rgba(0, 112, 243, 0.08);
+      border: 1px solid rgba(0, 112, 243, 0.28);
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--brand-primary);
+      flex-wrap: wrap;
+    }
+    .pulse-highlight {
+      animation: colHighlightPulse 1.5s ease-out;
+    }
+    @keyframes colHighlightPulse {
+      0% { box-shadow: 0 0 0 0 rgba(0, 112, 243, 0.7); }
+      50% { box-shadow: 0 0 0 8px rgba(0, 112, 243, 0.2); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 112, 243, 0); }
+    }
   </style>
   <!-- Motor LaTeX Math (KaTeX) y Markdown (Marked) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -4199,10 +4220,22 @@
       // Sincronizar filtros si la consulta contiene directivas explícitas
       sincronizarFiltrosConMensajeUsuario(q);
 
-      // Si es pregunta puramente conversacional o diálogo con el agente
+      // Si es pregunta conversacional pero pide buscar o ver patentes y aun no hay patentes cargadas:
       if (esPreguntaConversacional(q)) {
-        consultarAgenteIA(q, allRetrievedPatents, false, q);
-        return;
+        const needsSearchFirst = allRetrievedPatents.length === 0 && /(patente|inven|tecnolog|prometedor|mejor|papers)/i.test(q);
+        if (needsSearchFirst) {
+          let cleanTopic = q
+            .replace(/[¿?]/g, '')
+            .replace(/\b(cu[aá]l es|cu[aá]les son|mue[s|z]tra|mue[s|z]trame|busca|encuentra|la|el|las|los|de|sobre|patente|patentes|m[aá]s prometedora|mejor|mejores)\b/gi, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          if (!cleanTopic || cleanTopic.length < 3) cleanTopic = q;
+          // Dejamos que el flujo continue hacia la busqueda en APIs con cleanTopic, preservando la instruccion del usuario
+          customSearchTopic = cleanTopic;
+        } else {
+          consultarAgenteIA(q, allRetrievedPatents, false, q);
+          return;
+        }
       }
 
       restaurarModoTriColumna();
@@ -4244,7 +4277,8 @@
       cardsContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; padding: 30px; text-align: center;"><span class="thinking-spinner" style="margin-right:8px;"></span>Consultando patentes en las redes oficiales conectadas (Google Patents, Europe PMC, PatentBrief)...</div>';
 
       try {
-        const res = await fetch(`/api/patents?q=${encodeURIComponent(q)}&source=${encodeURIComponent(currentSource)}`);
+        const apiQuery = typeof customSearchTopic !== 'undefined' && customSearchTopic ? customSearchTopic : q;
+      const res = await fetch(`/api/patents?q=${encodeURIComponent(apiQuery)}&source=${encodeURIComponent(currentSource)}`);
         const data = await res.json();
 
         rawJsonData = data;
@@ -4913,25 +4947,103 @@
     function inspeccionarPatentePorId(pubNum) {
       if (!pubNum) return;
       const cleanId = pubNum.trim().toUpperCase();
+
+      // 1. Buscar en patentes renderizadas
       let idx = currentRenderedPatents.findIndex(p => (p.publication_number || '').toUpperCase().trim() === cleanId);
       if (idx > -1) {
         abrirSidebarPatente(idx);
-      } else {
-        // Si no esta en la pagina actual pero esta en allRetrievedPatents
-        idx = allRetrievedPatents.findIndex(p => (p.publication_number || '').toUpperCase().trim() === cleanId);
-        if (idx > -1) {
-          currentActivePatentData = { ...allRetrievedPatents[idx], isLiterature: false };
-          const standbyView = document.getElementById('inspection-standby-view');
-          const activeView = document.getElementById('inspection-active-view');
-          if (standbyView && activeView) {
-            standbyView.style.display = 'none';
-            activeView.style.display = 'block';
-            cambiarInspectionTab('dossier');
-          }
-        } else {
-          // Abrir en Google Patents si no existe en la sesion
-          window.open(`https://patents.google.com/patent/${cleanId}/en`, '_blank');
-        }
+        resaltarColumnaInspeccion();
+        return;
+      }
+
+      // 2. Buscar en todas las patentes recuperadas en la sesion
+      idx = allRetrievedPatents.findIndex(p => (p.publication_number || '').toUpperCase().trim() === cleanId);
+      if (idx > -1) {
+        currentActivePatentData = { ...allRetrievedPatents[idx], isLiterature: false };
+        actualizarVistasInspeccion(currentActivePatentData);
+        resaltarColumnaInspeccion();
+        return;
+      }
+
+      // 3. Buscar en literatura (por DOI o ID)
+      let litIdx = currentRenderedLiterature.findIndex(w => (w.doi || w.id || '').toUpperCase().trim() === cleanId);
+      if (litIdx === -1) {
+        litIdx = allRetrievedLiterature.findIndex(w => (w.doi || w.id || '').toUpperCase().trim() === cleanId);
+      }
+      if (litIdx > -1) {
+        abrirSidebarLiteratura(litIdx);
+        resaltarColumnaInspeccion();
+        return;
+      }
+
+      // 4. Si es una patente citada que no esta en el lote actual, armar ficha tecnica oficial
+      const synthetic = {
+        publication_number: cleanId,
+        title: `Patente Oficial ${cleanId}`,
+        assignee: 'Expediente Oficial de Patentes',
+        inventor: 'Inventores Oficiales',
+        publication_date: 'Registrada',
+        legal_status: 'Consultar en Gaceta',
+        forwardCitationCount: 0,
+        source: 'Google Patents / EPO',
+        patent_link: `https://patents.google.com/patent/${cleanId}/en`,
+        pdf: null,
+        snippet: `Documento ${cleanId} seleccionado e inspeccionado por el Agente Pericial de Vigilancia Tecnológica. Puedes consultar su expediente completo o visualizar su gaceta oficial directamente a través de los enlaces provistos.`
+      };
+      currentActivePatentData = synthetic;
+      actualizarVistasInspeccion(synthetic);
+      resaltarColumnaInspeccion();
+    }
+
+    function actualizarVistasInspeccion(p) {
+      const standbyView = document.getElementById('inspection-standby-view');
+      const activeView = document.getElementById('inspection-active-view');
+      if (standbyView && activeView) {
+        standbyView.style.display = 'none';
+        activeView.style.display = 'block';
+        cambiarInspectionTab('dossier');
+      }
+
+      cambiarSidebarTab('dossier');
+      const pubNum = p.publication_number || 'N/A';
+      const sourceBadge = p.source_badge || 'google';
+      const sourceName = p.source || 'Google Patents';
+      const active = isPatentActive(p);
+      const cits = p.forwardCitationCount || p.cited_by_count || 0;
+      const patentLink = p.patent_link || `https://patents.google.com/patent/${pubNum}/en`;
+
+      const sbHeader = document.getElementById('sidebar-header-left');
+      if (sbHeader) {
+        sbHeader.innerHTML = `
+          <span class="source-tag source-${sourceBadge}">[${escapeHtml(sourceName)}]</span>
+          <span class="jurisdiction-badge">${getJurisdictionFlag(pubNum)}</span>
+          <span style="font-family: monospace; font-size: 14px; font-weight: 700; color: var(--text-high);">${escapeHtml(pubNum)}</span>
+          <span class="patent-status-badge ${active ? 'badge-ok' : 'fto-public-domain'}">${active ? escapeHtml(p.legal_status || 'Vigente') : 'Dominio Publico (FTO)'}</span>
+          ${cits > 0 ? `<span class="patent-citations-badge">Citas: ${cits}</span>` : ''}
+        `;
+      }
+      const extBtn = document.getElementById('sidebar-ext-btn');
+      if (extBtn) extBtn.href = patentLink;
+
+      const sbDossier = document.getElementById('sidebar-body-dossier');
+      if (sbDossier) {
+        sbDossier.innerHTML = construirDossierHtml(p, true);
+      }
+
+      if (window.innerWidth < 1100) {
+        const sb = document.getElementById('patent-sidebar');
+        const bd = document.getElementById('sidebar-backdrop');
+        if (sb) sb.classList.add('open');
+        if (bd) bd.classList.add('open');
+      }
+    }
+
+    function resaltarColumnaInspeccion() {
+      const col = document.getElementById('col-inspection');
+      if (col) {
+        col.classList.remove('pulse-highlight');
+        void col.offsetWidth;
+        col.classList.add('pulse-highlight');
       }
     }
 
@@ -5637,7 +5749,7 @@
       });
 
       text = text.replace(/\[ACTION:AUTO_INSPECT\s+id=["'](.*?)["']\]/gi, (match, id) => {
-        return `<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="inspeccionarPatentePorId('${escapeJsAttr(id)}')">&#128269; Inspeccionar patente: <strong>${escapeHtml(id)}</strong></button></div>`;
+        return `<div class="ai-auto-inspect-banner"><span style="font-weight:700;">&#8599; Desplegando en barra lateral:</span> <strong>${escapeHtml(id)}</strong> <button class="btn-ghost" onclick="inspeccionarPatentePorId('${escapeJsAttr(id)}')" style="font-size:11px; margin-left:6px; color:var(--brand-primary); text-decoration:underline;">Reabrir Ficha</button></div>`;
       });
 
       text = text.replace(/\[ACTION:AUTO_PIN\s+ids=["'](.*?)["']\]/gi, (match, ids) => {
@@ -5828,6 +5940,22 @@
         const data = await res.json();
 
         AgentActivityTree.finish(data.trace_steps || null);
+
+        // Despliegue autonomo de la barra lateral si el Agente emitio AUTO_INSPECT o el usuario solicito la patente mas prometedora
+        let autoInspectPubNum = data.auto_inspect_id;
+        if (!autoInspectPubNum && data.reply) {
+          const matchAim = data.reply.match(/\[ACTION:AUTO_INSPECT\s+id=["'](.*?)["']\]/i);
+          if (matchAim) autoInspectPubNum = matchAim[1].trim();
+          else if (/(mue[s|z]tra|abre|inspecciona|la m[aá]s prometedora|la mejor patente|cu[aá]l es la patente|patente destacada)/i.test(userText)) {
+            const firstDoc = data.reply.match(/\[DOC:([A-Za-z0-9_-]+)\]/i);
+            if (firstDoc) autoInspectPubNum = firstDoc[1].trim();
+          }
+        }
+        if (autoInspectPubNum) {
+          setTimeout(() => {
+            inspeccionarPatentePorId(autoInspectPubNum);
+          }, 200);
+        }
 
         // Guardar respuesta del asistente en el historial
         if (ws) {

@@ -44,6 +44,16 @@ La plataforma centraliza la vigilancia tecnológica, inteligencia competitiva y 
 1. **Qué hace el usuario**: Hace clic en el botón de configuración de APIs o le pide al Agente Pericial añadir, configurar o remover una fuente o modelo.
 2. **Qué procesa el sistema**: La interfaz gráfica retira los formularios manuales vulnerables. El modal muestra el estado de salud de las APIs y delega al Agente Pericial la configuración y asignación de topes de cuota de forma segura y guiada.
 
+### 2.5. Despliegue Autónomo de la Barra Lateral por el Agente (`AUTO_INSPECT`)
+1. **Qué hace el usuario**: Formula preguntas como *"muéstrame la patente más prometedora sobre tecnología LED"*, *"cuál es la mejor patente"* o *"abre la ficha de US6195698"*.
+2. **Qué procesa el sistema**:
+   - Si no hay patentes previas cargadas, el sistema extrae el término técnico, ejecuta la búsqueda en los registros oficiales (`/api/patents`) y luego entrega los resultados al Agente Pericial.
+   - El Agente analiza las invenciones, evalúa citas, novedad y estado FTO, redacta su dictamen y emite la acción `[ACTION:AUTO_INSPECT id="NUMERO_PUBLICACION"]`.
+   - El frontend detecta la directiva e inmediatamente dispara `inspeccionarPatentePorId(pubNum)`, actualizando `#inspection-active-view` y desplegando la columna lateral derecha con animación de pulso (o abriendo el drawer en móviles) **sin requerir clics manuales del usuario**.
+3. **Qué se muestra en pantalla**:
+   - El chat muestra la respuesta estructurada y el banner informativo: `[↗ Desplegando en barra lateral: PUB_NUM]`.
+   - La barra lateral derecha se abre automáticamente mostrando el título, láminas técnicas, resumen oficial traducible, titular, clasificación CPC y visor del PDF oficial.
+
 ### 2.5. Citas de Patentes Clicables e Interacción con el Panel de Inspección
 1. **Qué hace el usuario**: Lee el dictamen pericial donde el agente cita números de publicación (ej. `[DOC:US6195698]` o menciones directas a patentes).
 2. **Qué procesa el sistema**: Compila estas citas como chips de acción interactivos: `[↗ US6195698 · Ver Ficha]`.
