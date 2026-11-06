@@ -305,9 +305,41 @@
       grid-template-columns: 1fr;
     }
     .workspace-tri-column.mode-dialog .col-inspection {
+      display: none;
+    }
+
+    @media (max-width: 1100px) {
+      .workspace-tri-column {
+        grid-template-columns: 1fr;
+      }
+      .col-inspection {
+        display: none;
+      }
+    }
+
+    /* PADDING INFERIOR PARA QUE LA BARRA FLOTANTE NUNCA TAPE EL CONTENIDO */
+    body {
+      padding-bottom: 160px;
+    }
+
+    /* PANEL UNIFICADO DE ASESORIA Y DICTAMEN DE IA EN EL FEED */
+    .ai-unified-panel {
       background-color: transparent;
-      border-left: 1px solid rgba(255, 255, 255, 0.06);
-      padding: 0 16px 32px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 16px 20px 24px 20px;
+      margin-bottom: 18px;
+      display: none;
+      transition: all 0.25s ease;
+    }
+    [data-theme="light"] .ai-unified-panel {
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      background-color: transparent;
+    }
+    .ai-unified-panel.active {
+      display: block;
+    }
+    .ai-unified-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -1149,6 +1181,26 @@
     }
 
     /* Toggle minimalista de traza ("Worked for Xs >") */
+    .agent-typing-cursor {
+      display: inline-block;
+      width: 7px;
+      height: 15px;
+      background-color: var(--brand-primary);
+      margin-left: 4px;
+      vertical-align: -2px;
+      border-radius: 1px;
+      animation: agentCursorBlink 0.8s infinite ease-in-out;
+    }
+    @keyframes agentCursorBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .thinking-caret {
+      font-size: 13px;
+      margin-left: auto;
+      user-select: none;
+    }
+
     .antigravity-thinking-bar {
       display: inline-flex;
       align-items: center;
@@ -1206,7 +1258,7 @@
       color: #ffffff;
       border-color: var(--brand-primary);
     }
-    .ag-menu-item.selected {.ag-menu-item.selected {
+    .ag-menu-item.selected {
       color: var(--brand-primary);
       font-weight: 600;
     }
@@ -2341,7 +2393,7 @@
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.8);
-      display: none;
+      display: none !important;
       align-items: center;
       justify-content: center;
       z-index: 9999;
@@ -3016,7 +3068,7 @@
     </div>
 
     <!-- Surveillance Intelligence Dropdown (DESPLEGABLE Y COMPACTO) -->
-    <div id="intel-dropdown" class="intel-dropdown">
+    <div id="intel-dropdown" class="intel-dropdown" style="display: none;">
       <button class="intel-header-btn" onclick="toggleIntelBody()">
         <div class="intel-title-left">
           <span>Inteligencia de Clasificaciones Tecnológicas (CPC / IPC)</span>
@@ -3070,12 +3122,15 @@
           <div id="ai-history-older-slot"></div>
           <!-- Últimos 2 mensajes del historial -->
           <div id="ai-history-recent-slot"></div>
-          <!-- Traza de Actividad y Razonamiento en Vivo del Agente -->
-          <div id="agent-activity-slot"></div>
-          <div id="ai-unified-verdict-slot"></div>
-          <div class="ai-unified-content" id="ai-unified-content">
-            <!-- Renderizado dinámico vía Marked + KaTeX -->
+          <!-- Turno Activo del Agente: Traza de Razonamiento ARRIBA, Respuesta mecanografiada ABAJO -->
+          <div id="agent-active-live-container" style="display: none; margin-top: 10px;">
+            <div id="agent-activity-slot"></div>
+            <div id="agent-streaming-reply-wrap" class="chat-turn-assistant-wrap" style="display: none;">
+              <div class="ai-compiled-markdown antigravity-flow" id="agent-streaming-reply-content"></div>
+            </div>
           </div>
+          <div id="ai-unified-verdict-slot" style="display: none;"></div>
+          <div class="ai-unified-content" id="ai-unified-content" style="display: none;"></div>
           <div id="ai-unified-followups" class="ai-chips-suggestions" style="margin-top:14px; padding-top:10px; border-top:1px solid var(--border-color);"></div>
         </div>
         
@@ -5618,12 +5673,24 @@
       steps: [],
 
       start(targetTopic = 'investigacion tecnica') {
+        if (typeof currentTypewriterCancel === 'function' && currentTypewriterCancel) {
+          currentTypewriterCancel();
+          currentTypewriterCancel = null;
+        }
         this.startTime = Date.now();
         this.isCollapsed = false;
         this.steps = [
           { id: 'query_received', label: `Consulta pericial recibida: "${targetTopic.substring(0, 50)}"`, status: 'completed', time: '0.1' },
           { id: 'network_lookup', label: 'Consultando registros y APIs oficiales en tiempo real...', status: 'running', time: 0 }
         ];
+
+        const liveContainer = document.getElementById('agent-active-live-container');
+        if (liveContainer) liveContainer.style.display = 'block';
+
+        const replyWrap = document.getElementById('agent-streaming-reply-wrap');
+        const replyContent = document.getElementById('agent-streaming-reply-content');
+        if (replyWrap) replyWrap.style.display = 'none';
+        if (replyContent) replyContent.innerHTML = '';
 
         const panel = document.getElementById('ai-unified-panel');
         if (panel) panel.classList.add('active');
@@ -5808,6 +5875,85 @@
       }
     }
 
+    // =========================================================
+    // REDACCION FLUIDA PALABRA POR PALABRA (TIPO CHATGPT / AGY)
+    // =========================================================
+    let currentTypewriterCancel = null;
+
+    function typewriterRenderMarkdown(fullText, targetElement, onComplete) {
+      if (currentTypewriterCancel) {
+        currentTypewriterCancel();
+        currentTypewriterCancel = null;
+      }
+
+      if (!targetElement) {
+        if (onComplete) onComplete();
+        return;
+      }
+
+      const text = fullText || '';
+      const tokens = text.match(/\S+|\s+/g) || [text];
+      let tokenIdx = 0;
+      const totalTokens = tokens.length;
+      const tokensPerTick = Math.max(1, Math.min(4, Math.ceil(totalTokens / 80)));
+      const intervalMs = 20;
+
+      let isCancelled = false;
+
+      const intervalId = setInterval(() => {
+        if (isCancelled) {
+          clearInterval(intervalId);
+          return;
+        }
+
+        tokenIdx = Math.min(totalTokens, tokenIdx + tokensPerTick);
+        const currentSlice = tokens.slice(0, tokenIdx).join('');
+
+        let previewHtml = '';
+        if (typeof marked !== 'undefined' && marked.parse) {
+          try {
+            previewHtml = marked.parse(currentSlice);
+          } catch (e) {
+            previewHtml = escapeHtml(currentSlice).replace(/\n/g, '<br>');
+          }
+        } else {
+          previewHtml = escapeHtml(currentSlice).replace(/\n/g, '<br>');
+        }
+
+        targetElement.innerHTML = previewHtml + '<span class="agent-typing-cursor"></span>';
+
+        const panel = document.getElementById('ai-unified-panel');
+        if (panel) {
+          panel.scrollTop = panel.scrollHeight;
+        }
+
+        if (tokenIdx >= totalTokens) {
+          clearInterval(intervalId);
+          currentTypewriterCancel = null;
+          renderMarkdownAndMath(text, targetElement);
+          if (onComplete) onComplete();
+        }
+      }, intervalMs);
+
+      currentTypewriterCancel = () => {
+        isCancelled = true;
+        clearInterval(intervalId);
+        renderMarkdownAndMath(text, targetElement);
+        if (onComplete) onComplete();
+      };
+    }
+
+    function toggleTraceAccordion(barEl) {
+      if (!barEl) return;
+      const stepsTray = barEl.nextElementSibling;
+      const caret = barEl.querySelector('.thinking-caret');
+      if (stepsTray && stepsTray.classList.contains('antigravity-thinking-steps')) {
+        const isHidden = stepsTray.style.display === 'none' || !stepsTray.style.display;
+        stepsTray.style.display = isHidden ? 'flex' : 'none';
+        if (caret) caret.innerHTML = isHidden ? '&#9662;' : '&#8250;';
+      }
+    }
+
     function renderizarMensajeHistorialHtml(msg) {
       const isUser = msg.role === 'user';
       const timeStr = msg.timestamp ? `<span class="chat-turn-time">${escapeHtml(msg.timestamp)}</span>` : '';
@@ -5823,12 +5969,44 @@
         `;
       }
 
-      // Turno del Asistente (Flujo limpio Antigravity sin bordes de caja)
-      const formattedContent = formatearTextoConCitasYAcciones(msg.content);
+      // Turno del Asistente: TRAZA DE RAZONAMIENTO SIEMPRE ARRIBA
+      let traceHtml = '';
+      if (msg.trace_steps && Array.isArray(msg.trace_steps) && msg.trace_steps.length > 0) {
+        const totalTime = msg.total_time || (msg.trace_steps[msg.trace_steps.length - 1] && msg.trace_steps[msg.trace_steps.length - 1].time) || '2.4';
+        const stepsHtml = msg.trace_steps.map(s => `
+          <div class="thinking-step-row completed">
+            <div class="thinking-step-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="thinking-step-text">
+              <span>${escapeHtml(s.label || s.description || s.step || '')}</span>
+              ${s.time ? `<small>(${escapeHtml(String(s.time))}s)</small>` : ''}
+            </div>
+          </div>
+        `).join('');
+
+        traceHtml = `
+          <div class="antigravity-thinking-bar completed" onclick="toggleTraceAccordion(this)" title="Hacer clic para ver detalle de pasos del razonamiento">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Razonamiento y traza pericial completada</span>
+            <span style="font-family: monospace; font-size: 11px; opacity: 0.85;">${escapeHtml(String(totalTime))}s total</span>
+            <span class="thinking-caret">&#8250;</span>
+          </div>
+          <div class="antigravity-thinking-steps" style="display: none;">
+            ${stepsHtml}
+          </div>
+        `;
+      }
+
+      // 2. Dictamen FTO si aplica
       const verdictHtml = msg.fto_verdict ? `<div style="display:inline-flex; align-items:center; gap:6px; margin-bottom:10px; padding:4px 10px; background:rgba(0,112,243,0.08); border-radius:6px; font-size:12px; color:var(--brand-primary); font-weight:600;"><span>Dictamen FTO:</span> <span>${escapeHtml(msg.fto_verdict)}</span></div>` : '';
+
+      // 3. Contenido formateado con citas cliqueables
+      const formattedContent = formatearTextoConCitasYAcciones(msg.content);
 
       return `
         <div class="chat-turn-assistant-wrap">
+          ${traceHtml}
           ${verdictHtml}
           <div class="ai-compiled-markdown antigravity-flow">
             ${formattedContent}
@@ -6056,46 +6234,60 @@
 
         AgentActivityTree.finish(data.trace_steps || null);
 
-        // Despliegue autonomo de la barra lateral si el Agente emitio AUTO_INSPECT o el usuario solicito la patente mas prometedora
-        let autoInspectPubNum = data.auto_inspect_id;
-        if (!autoInspectPubNum && data.reply) {
-          const matchAim = data.reply.match(/\[ACTION:AUTO_INSPECT\s+id=["'](.*?)["']\]/i);
-          if (matchAim) autoInspectPubNum = matchAim[1].trim();
-          else if (/(mue[s|z]tra|abre|inspecciona|la m[aá]s prometedora|la mejor patente|cu[aá]l es la patente|patente destacada)/i.test(userText)) {
-            const firstDoc = data.reply.match(/\[DOC:([A-Za-z0-9_-]+)\]/i);
-            if (firstDoc) autoInspectPubNum = firstDoc[1].trim();
+        // Despliegue de la respuesta palabra por palabra sin explosiones abruptas
+        const replyWrap = document.getElementById('agent-streaming-reply-wrap');
+        const replyContent = document.getElementById('agent-streaming-reply-content');
+        if (replyWrap) replyWrap.style.display = 'flex';
+
+        typewriterRenderMarkdown(data.reply || 'Sin respuesta devuelta.', replyContent, () => {
+          // Despliegue autonomo de la barra lateral si el Agente emitio AUTO_INSPECT o el usuario solicito la patente mas prometedora
+          let autoInspectPubNum = data.auto_inspect_id;
+          if (!autoInspectPubNum && data.reply) {
+            const matchAim = data.reply.match(/\[ACTION:AUTO_INSPECT\s+id=["'](.*?)["']\]/i);
+            if (matchAim) autoInspectPubNum = matchAim[1].trim();
+            else if (/(mue[s|z]tra|abre|inspecciona|la m[aá]s prometedora|la mejor patente|cu[aá]l es la patente|patente destacada)/i.test(userText)) {
+              const firstDoc = data.reply.match(/\[DOC:([A-Za-z0-9_-]+)\]/i);
+              if (firstDoc) autoInspectPubNum = firstDoc[1].trim();
+            }
           }
-        }
-        if (autoInspectPubNum) {
-          setTimeout(() => {
-            inspeccionarPatentePorId(autoInspectPubNum);
-          }, 200);
-        }
+          if (autoInspectPubNum) {
+            setTimeout(() => {
+              inspeccionarPatentePorId(autoInspectPubNum);
+            }, 200);
+          }
 
-        // Guardar respuesta del perito en el proyecto o en la sesión libre
-        const assistantTurnObj = {
-          role: 'assistant',
-          content: data.reply || 'Sin respuesta devuelta.',
-          fto_verdict: data.fto_verdict || null,
-          trace_steps: data.trace_steps || [],
-          timestamp: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })
-        };
-        if (ws) {
-          ws.chatHistory.push(assistantTurnObj);
-          guardarWorkspacesState();
-        } else {
-          sessionChatHistory.push(assistantTurnObj);
-        }
-        renderizarHistorialChatActual();
+          // Guardar respuesta del perito en el proyecto o en la sesion libre
+          const totalElapsed = AgentActivityTree.startTime ? ((Date.now() - AgentActivityTree.startTime) / 1000).toFixed(1) : '2.4';
+          const assistantTurnObj = {
+            role: 'assistant',
+            content: data.reply || 'Sin respuesta devuelta.',
+            fto_verdict: data.fto_verdict || null,
+            trace_steps: (AgentActivityTree.steps && AgentActivityTree.steps.length) ? AgentActivityTree.steps : (data.trace_steps || []),
+            total_time: totalElapsed,
+            timestamp: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })
+          };
+          if (ws) {
+            ws.chatHistory.push(assistantTurnObj);
+            guardarWorkspacesState();
+          } else {
+            sessionChatHistory.push(assistantTurnObj);
+          }
 
-        if (data.follow_ups && data.follow_ups.length && followupsElem) {
-          followupsElem.innerHTML = `
-            <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Preguntas periciales sugeridas:</div>
-            ${data.follow_ups.map(f => `<span class="ai-chip-prompt" onclick="preguntarAlAgente('${escapeJsAttr(f)}')">${escapeHtml(f)}</span>`).join('')}
-          `;
-        }
+          const liveContainer = document.getElementById('agent-active-live-container');
+          if (liveContainer) liveContainer.style.display = 'none';
+          if (replyContent) replyContent.innerHTML = '';
 
-        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          renderizarHistorialChatActual();
+
+          if (data.follow_ups && data.follow_ups.length && followupsElem) {
+            followupsElem.innerHTML = `
+              <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Preguntas periciales sugeridas:</div>
+              ${data.follow_ups.map(f => `<span class="ai-chip-prompt" onclick="preguntarAlAgente('${escapeJsAttr(f)}')">${escapeHtml(f)}</span>`).join('')}
+            `;
+          }
+
+          panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
 
       } catch (err) {
         AgentActivityTree.finish();

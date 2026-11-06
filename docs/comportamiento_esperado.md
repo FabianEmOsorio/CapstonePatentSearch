@@ -34,10 +34,12 @@ La plataforma centraliza la vigilancia tecnológica, inteligencia competitiva y 
 1. **Qué hace el usuario**: Formula preguntas sucesivas o solicita análisis de patentes al Agente Pericial.
 2. **Qué procesa el sistema**: Almacena en el proyecto activo (o en memoria de sesión si no hay proyecto) cada turno conversacional, enmascarando cualquier token o clave sensible (`maskSensitiveTokens`).
 3. **Qué se muestra en pantalla**:
+   - **Traza de Razonamiento SIEMPRE Arriba**: En cada turno del agente, la traza de razonamiento (`Worked for Xs ›` / `Razonamiento y traza pericial completada`) se ubica estrictamente **arriba** de la respuesta textual, nunca al pie. En turnos anteriores se muestra como una píldora minimalista desplegable con un clic, mientras que en el turno activo expone el conteo y progreso de auditoría en vivo.
+   - **Redacción Fluida Palabra por Palabra (Typewriter Effect)**: Las respuestas del asistente se mecanografían de forma progresiva token por token con cursor pulsante (`▍`), evitando apariciones instantáneas tipo "explosión" y brindando una experiencia conversacional moderna y orgánica.
    - **Sin Cajas ni Bordes Pesados**: Las respuestas del perito fluyen naturalmente sobre el fondo del lienzo (canvas) con tipografía amplia (`line-height: 1.75; font-size: 14.5px`), encabezados claros y espaciado generoso, eliminando marcos o cajas rectangulares apretadas.
    - **Mensajes del Usuario**: Se presentan como burbujas redondeadas flotantes (`border-radius: 18px`) alineadas a la derecha, con fondo suave y separación visual natural.
    - **Despliegue Superior Colapsable**: Por defecto se muestran los últimos 2 mensajes; si existen mensajes previos, el botón flotante `[ ▲ Desplegar historial anterior (N mensajes previos) ]` los expande ordenadamente por encima.
-   - **Filosofía Extendida al Resto del Proyecto**: Tarjetas de patentes con bordes ultrafinos y fondos translúcidos suaves (`rgba(255,255,255,0.02)`), columna de inspección transparente y sin dobles marcos, creando un entorno de lectura descansado y profesional.
+   - **Filosofía Extendida al Resto del Proyecto**: Modales estrictamente aislados en capa fija flotante (`display: none !important;`), tarjetas de patentes con bordes ultrafinos y fondos translúcidos suaves (`rgba(255,255,255,0.02)`), columna de inspección transparente y sin dobles marcos, creando un entorno de lectura descansado y profesional.
 
 ### 2.4. Gobierno de APIs y Modelos Exclusivo del Agente
 1. **Qué hace el usuario**: Hace clic en el botón de configuración de APIs o le pide al Agente Pericial añadir, configurar o remover una fuente o modelo.
@@ -80,7 +82,10 @@ La plataforma centraliza la vigilancia tecnológica, inteligencia competitiva y 
 - [x] Los proyectos pueden crearse y eliminarse de forma persistente.
 - [x] Al enviar una consulta con `Enter`, el campo de texto se vacía de inmediato y la consulta activa se muestra en un chip descriptivo.
 - [x] El historial de chat aplica la filosofía Antigravity: sin marcos ni bordes visuales pesados, texto fluido con line-height 1.75 y burbuja de usuario redondeada a la derecha.
-- [x] La traza del razonamiento (`AgentActivityTree`) es minimalista (`Worked for Xs ›`) y refleja la actividad y tiempos reales.
+- [x] La traza de razonamiento pericial (`AgentActivityTree`) se posiciona **arriba** de la respuesta del perito (en vivo e historial).
+- [x] Redacción progresiva palabra por palabra (typewriter effect) con cursor activo, eliminando la aparición súbita de bloques completos.
+- [x] Modales estrictamente ocultos del flujo del documento (`display: none !important;`) y botones estilizados con tokens monocromáticos.
+- [x] Barra de inteligencia CPC inicia oculta (`display: none;`) hasta que existan clasificaciones recuperadas.
 - [x] Despliegue 100% autónomo de la barra lateral de inspección cuando el agente recomienda o analiza una patente.
 - [x] Las citas periciales `[DOC:...]` son botones clicables que abren la ficha de inspección lateral.
 - [x] El mensaje del usuario tiene prioridad sobre el estado previo de los botones de filtro.
