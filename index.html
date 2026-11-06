@@ -1180,6 +1180,64 @@
       border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
 
+    /* Modo Dictado por Voz (Web Speech API) */
+    .ag-pill-btn.voice-btn {
+      transition: all 0.25s ease;
+    }
+    .ag-pill-btn.voice-btn.listening {
+      border-color: #ef4444 !important;
+      color: #ef4444 !important;
+      background: rgba(239, 68, 68, 0.12) !important;
+      animation: voiceGlow 1.2s infinite ease-in-out;
+    }
+    @keyframes voiceGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { box-shadow: 0 0 0 5px rgba(239, 68, 68, 0); }
+    }
+
+    /* Modal Comparador Lado a Lado (Split View / Diff) */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 14px;
+    }
+    @media (max-width: 800px) {
+      .compare-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .compare-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .compare-header {
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+    .compare-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 12px;
+    }
+    .compare-lbl {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .compare-val {
+      color: var(--text-high);
+      line-height: 1.5;
+    }
+
     /* Toggle minimalista de traza ("Worked for Xs >") */
     .agent-typing-cursor {
       display: inline-block;
@@ -2941,6 +2999,12 @@
               </button>
             </div>
           </div>
+
+          <!-- Botón de Dictado por Voz (Web Speech API) -->
+          <div class="ag-pill-btn voice-btn" id="voice-dictate-btn" onclick="toggleVoiceDictation(event)" title="Dictar consulta por voz en español (Web Speech API nativa gratuita)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px; margin-right:3px;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            <span id="voice-dictate-label">Voz</span>
+          </div>
         </div>
 
         <!-- Derecha: Botón Shuffle + Selector de Filtros/Orden + Botón de Búsqueda -->
@@ -3110,7 +3174,7 @@
                 </svg>
                 <span>Agente Pericial & Historial de Conversación</span>
               </div>
-              <span class="ai-model-tag" id="ai-active-model-tag">gemini-3.5-flash-lite</span>
+              <span class="ai-model-tag" id="ai-active-model-tag" onclick="alternarModeloIa()" style="cursor:pointer;" title="Clic para alternar entre Gemini 2.5 Flash y Gemini 2.5 Pro">gemini-2.5-flash</span>
             </div>
             <div style="display:flex; gap:6px; align-items:center;">
               <button class="btn-ghost" onclick="limpiarHistorialChatActual()" style="font-size:11px; padding:3px 8px;" title="Borrar historial de conversación de este proyecto">Limpiar Chat</button>
@@ -3596,7 +3660,23 @@
           </div>
         </div>
       </div>
+    </
+    <!-- MODAL COMPARADOR LADO A LADO DE PATENTES (SPLIT VIEW / DIFF) -->
+    <div id="modal-comparador-patentes" class="modal-overlay" onclick="cerrarComparadorModal(event)">
+      <div class="modal-content" style="max-width: 1100px; width: 95vw; max-height: 90vh; display: flex; flex-direction: column;" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2"><path d="M16 3h5v5"/><path d="M8 21H3v-5"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+            <span style="font-weight:700;">Auditoría Comparativa de Invenciones y Reivindicaciones</span>
+          </div>
+          <button class="btn-close-modal" onclick="cerrarComparadorModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="comparador-modal-body" style="padding: 16px; overflow-y: auto; text-align: left;">
+          <!-- Generado dinámicamente -->
+        </div>
+      </div>
     </div>
+div>
   </div>
 
   <script>
@@ -5807,6 +5887,211 @@
     // =========================================================
     // HISTORIAL DE CHAT COMPLETO (ULTIMOS 2 + BOTON DESPLEGAR ARRIBA)
     // =========================================================
+    
+    // =========================================================
+    // DICTADO POR VOZ (WEB SPEECH API NATIVA Y GRATUITA)
+    // =========================================================
+    let speechRecognizer = null;
+    let isListeningVoice = false;
+
+    function toggleVoiceDictation(e) {
+      if (e) e.preventDefault();
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const btn = document.getElementById('voice-dictate-btn');
+      const label = document.getElementById('voice-dictate-label');
+      const qInput = document.getElementById('query-input');
+
+      if (!SpeechRec) {
+        alert('Tu navegador actual no soporta Web Speech API nativa. Por favor prueba en Google Chrome o Microsoft Edge.');
+        return;
+      }
+
+      if (isListeningVoice) {
+        if (speechRecognizer) {
+          try { speechRecognizer.stop(); } catch(err) {}
+        }
+        isListeningVoice = false;
+        if (btn) btn.classList.remove('listening');
+        if (label) label.textContent = 'Voz';
+        return;
+      }
+
+      try {
+        speechRecognizer = new SpeechRec();
+        speechRecognizer.lang = 'es-CO';
+        speechRecognizer.continuous = false;
+        speechRecognizer.interimResults = true;
+
+        speechRecognizer.onstart = () => {
+          isListeningVoice = true;
+          if (btn) btn.classList.add('listening');
+          if (label) label.textContent = 'Oyendo...';
+        };
+
+        speechRecognizer.onresult = (event) => {
+          let transcript = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+          }
+          if (qInput && transcript) {
+            qInput.value = transcript;
+            const sBtn = document.getElementById('ag-search-btn');
+            if (sBtn) sBtn.classList.add('active');
+          }
+        };
+
+        speechRecognizer.onerror = (err) => {
+          console.warn('Speech error:', err);
+          isListeningVoice = false;
+          if (btn) btn.classList.remove('listening');
+          if (label) label.textContent = 'Voz';
+        };
+
+        speechRecognizer.onend = () => {
+          isListeningVoice = false;
+          if (btn) btn.classList.remove('listening');
+          if (label) label.textContent = 'Voz';
+        };
+
+        speechRecognizer.start();
+      } catch (err) {
+        console.error('Error starting speech:', err);
+        isListeningVoice = false;
+        if (btn) btn.classList.remove('listening');
+        if (label) label.textContent = 'Voz';
+      }
+    }
+
+    // =========================================================
+    // COMPARADOR LADO A LADO DE PATENTES (SPLIT VIEW / DIFF)
+    // =========================================================
+    function abrirComparadorPatentes(id1, id2) {
+      const modal = document.getElementById('modal-comparador-patentes');
+      const body = document.getElementById('comparador-modal-body');
+      if (!modal || !body) return;
+
+      const p1 = (allRetrievedPatents || []).find(p => (p.publication_number || '').toUpperCase() === (id1 || '').toUpperCase()) || { publication_number: id1, title: 'Documento en registro', assignee: 'Asignatario oficial', legal_status: 'Pendiente', snippet: 'Consultar detalles en Google Patents.' };
+      const p2 = (allRetrievedPatents || []).find(p => (p.publication_number || '').toUpperCase() === (id2 || '').toUpperCase()) || { publication_number: id2, title: 'Documento en registro', assignee: 'Asignatario oficial', legal_status: 'Pendiente', snippet: 'Consultar detalles en Google Patents.' };
+
+      const isP1Active = isPatentActive(p1);
+      const isP2Active = isPatentActive(p2);
+
+      body.innerHTML = `
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">
+          Contraste de antecedentes técnicos, titularidad, vigencia legal (FTO) y clasificaciones cooperativas (CPC).
+        </div>
+        <div class="compare-grid">
+          <div class="compare-card">
+            <div class="compare-header">
+              <span class="patent-source-badge src-google" style="font-size:10px;">${escapeHtml(p1.publication_number)}</span>
+              <h3 style="font-size:14px; font-weight:700; color:var(--text-high); margin-top:6px;">${escapeHtml(p1.title || 'Sin título')}</h3>
+            </div>
+            <div class="compare-row">
+              <span class="compare-lbl">Titular / Asignatario:</span>
+              <span class="compare-val"><strong>${escapeHtml(p1.assignee || 'No especificado')}</strong></span>
+            </div>
+            <div class="compare-row">
+              <span class="compare-lbl">Estado Legal FTO:</span>
+              <span class="compare-val">
+                <span class="patent-status-badge ${isP1Active ? 'fto-active' : 'fto-public-domain'}">
+                  ${isP1Active ? 'Vigente (Riesgo FTO)' : 'Dominio Público (FTO Libre)'}
+                </span>
+              </span>
+            </div>
+            <div class="compare-row">
+              <span class="compare-lbl">Publicación / País:</span>
+              <span class="compare-val">${escapeHtml(p1.publication_date || 'N/A')} &bull; ${escapeHtml(p1.country || 'US')}</span>
+            </div>
+            <div class="compare-row">
+              <span class="compare-lbl">Clasificaciones CPC:</span>
+              <span class="compare-val" style="font-family:monospace; font-size:11px;">${(p1.classifications_cpc || []).slice(0, 4).join(', ') || 'G06N, A63F'}</span>
+            </div>
+            <div class="compare-row">
+              <span class="compare-lbl">Resumen / Extracto Técnico:</span>
+              <div class="compare-val" style="font-size:12px; max-height:140px; overflow-y:auto; line-height:1.5;">${escapeHtml(p1.snippet || p1.one_sentence_summary || 'Resumen disponible en expediente oficial.')}</div>
+            </div>
+            <button class="btn-ghost" onclick="cerrarComparadorModal(); inspeccionarPatentePorId('${escapeJsAttr(p1.publication_number)}')" style="margin-top:auto; font-size:11.5px; padding:5px 8px; color:var(--brand-primary); border-color:var(--brand-primary);">
+              Examinar Ficha Completa &bull; ${escapeHtml(p1.publication_number)}
+            </button>
+          </div>
+
+          <div class="compare-card">
+            <div class="compare-header">
+              <span class="patent-source-badge src-google" style="font-size:10px;">${escapeHtml(p2.publication_number)}</span>
+              <h3 style="font-size:14px; font-weight:700; color:var(--text-high); margin-top:6px;">${escapeHtml(p2.title || 'Sin título')}</h3>
+            </div>
+            <div class="compare-row">
+              <span class="compare-lbl">Titular / Asignatario:</span>
+              <span class="compare-val"><strong>${escapeHtml(p2.assignee || 'No especificado')}</strong></span>
+            </div>
+            <div class="compare-row">
+              <span class="compare-lbl">Estado Legal FTO:</span>
+              <span class="compare-val">
+                <span class="patent-status-badge ${isP2Active ? 'fto-active' : 'fto-public-domain'}">
+                  ${isP2Active ? 'Vigente (Riesgo FTO)' : 'Dominio Público (FTO Libre)'}
+                </span>
+              </span>
+            </div>
+            <div class="compare-row">
+              <span class="compare-lbl">Publicación / País:</span>
+              <span class="compare-val">${escapeHtml(p2.publication_date || 'N/A')} &bull; ${escapeHtml(p2.country || 'US')}</span>
+            </div>
+            <div class="compare-row">
+              <span class="compare-lbl">Clasificaciones CPC:</span>
+              <span class="compare-val" style="font-family:monospace; font-size:11px;">${(p2.classifications_cpc || []).slice(0, 4).join(', ') || 'G06N, A63F'}</span>
+            </div>
+            <div class="compare-row">
+              <span class="compare-lbl">Resumen / Extracto Técnico:</span>
+              <div class="compare-val" style="font-size:12px; max-height:140px; overflow-y:auto; line-height:1.5;">${escapeHtml(p2.snippet || p2.one_sentence_summary || 'Resumen disponible en expediente oficial.')}</div>
+            </div>
+            <button class="btn-ghost" onclick="cerrarComparadorModal(); inspeccionarPatentePorId('${escapeJsAttr(p2.publication_number)}')" style="margin-top:auto; font-size:11.5px; padding:5px 8px; color:var(--brand-primary); border-color:var(--brand-primary);">
+              Examinar Ficha Completa &bull; ${escapeHtml(p2.publication_number)}
+            </button>
+          </div>
+        </div>
+      `;
+
+      modal.classList.add('open');
+    }
+
+    function cerrarComparadorModal(e) {
+      if (e && e.target && e.target.id !== 'modal-comparador-patentes' && !e.target.classList.contains('btn-close-modal')) return;
+      const modal = document.getElementById('modal-comparador-patentes');
+      if (modal) modal.classList.remove('open');
+    }
+
+    // =========================================================
+    // ENFOQUE EN LÁMINAS TÉCNICAS (DRAWING MODAL FOCUS)
+    // =========================================================
+    function mostrarFiguraTecnicaPatente(pubNum, figIndex = 1) {
+      const p = (allRetrievedPatents || []).find(item => (item.publication_number || '').toUpperCase() === (pubNum || '').toUpperCase());
+      let imgUrl = null;
+      if (p && p.figures && p.figures.length > 0) {
+        imgUrl = p.figures[figIndex - 1] || p.figures[0];
+      } else if (p && p.thumbnail) {
+        imgUrl = p.thumbnail;
+      }
+      if (!imgUrl) {
+        imgUrl = `https://patentimages.storage.googleapis.com/${pubNum}.png`;
+      }
+      abrirModalImagen(imgUrl, `${pubNum} - Lámina Técnica Fig. ${figIndex}`);
+    }
+
+    // =========================================================
+    // CONMUTADOR RÁPIDO DE MODELO (FLASH vs PRO)
+    // =========================================================
+    function alternarModeloIa() {
+      const isPro = (cfgAiModel || '').includes('pro');
+      cfgAiModel = isPro ? 'gemini-2.5-flash' : 'gemini-2.5-pro';
+      localStorage.setItem('capstone_ai_model', cfgAiModel);
+      const tag = document.getElementById('ai-active-model-tag');
+      if (tag) {
+        tag.textContent = cfgAiModel;
+        tag.title = isPro ? 'Modelo: Gemini 2.5 Flash (Ultra Rápido / 1.500 req/día)' : 'Modelo: Gemini 2.5 Pro (Máximo Razonamiento Pericial / 50 req/día)';
+      }
+      alert(`Modelo conmutado a: ${cfgAiModel}\n${!isPro ? 'Modo de Máximo Razonamiento Pericial activado (análisis profundo de reivindicaciones y FTO).' : 'Modo Flash activado (respuestas instantáneas con cuota de 1.500 peticiones diarias).'}`);
+    }
+
     function toggleChatHistoryOlder() {
       isShowingOlderChatHistory = !isShowingOlderChatHistory;
       renderizarHistorialChatActual();
@@ -6040,6 +6325,18 @@
 
       text = text.replace(/\[ACTION:AUTO_INSPECT\s+id=["'](.*?)["']\]/gi, (match, id) => {
         return `<div class="ai-auto-inspect-banner"><span style="font-weight:700;">&#8599; Desplegando en barra lateral:</span> <strong>${escapeHtml(id)}</strong> <button class="btn-ghost" onclick="inspeccionarPatentePorId('${escapeJsAttr(id)}')" style="font-size:11px; margin-left:6px; color:var(--brand-primary); text-decoration:underline;">Reabrir Ficha</button></div>`;
+      });
+
+      text = text.replace(/\[ACTION:COMPARE\s+ids=["'](.*?)["']\]/gi, (match, ids) => {
+        const parts = ids.split(',').map(s => s.trim());
+        const id1 = parts[0] || '';
+        const id2 = parts[1] || '';
+        return `<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="abrirComparadorPatentes('${escapeJsAttr(id1)}', '${escapeJsAttr(id2)}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><rect x="2" y="3" width="9" height="18" rx="1"/><rect x="13" y="3" width="9" height="18" rx="1"/></svg> Comparar lado a lado: <strong>${escapeHtml(id1)}</strong> vs <strong>${escapeHtml(id2)}</strong></button></div>`;
+      });
+
+      text = text.replace(/\[ACTION:SHOW_FIGURE\s+id=["'](.*?)["'](?:\s+fig=["']?(\d+)["']?)?\]/gi, (match, pubNum, figNum) => {
+        const fig = figNum || '1';
+        return `<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="mostrarFiguraTecnicaPatente('${escapeJsAttr(pubNum)}', ${fig})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg> Ver Lámina Técnica: Fig. ${escapeHtml(fig)} &bull; <strong>${escapeHtml(pubNum)}</strong></button></div>`;
       });
 
       text = text.replace(/\[ACTION:AUTO_PIN\s+ids=["'](.*?)["']\]/gi, (match, ids) => {

@@ -65,6 +65,22 @@ La plataforma centraliza la vigilancia tecnológica, inteligencia competitiva y 
 2. **Menús Dropup**: Los menús desplegables de la barra inferior (`#source-popup-menu` y `#filter-popup-menu`) se despliegan **hacia arriba** (`bottom: calc(100% + 12px); top: auto;`) evitando desbordamientos inferiores.
 3. **Restaurar Chat Oculto**: Al minimizar el panel del Agente Pericial con `X Ocultar`, se exhibe en la barra de pestañas el botón interactivo `#btn-restore-ai-panel` (`Mostrar Chat del Agente`), permitiendo reabrirlo con un solo clic.
 
+### 2.8. Dictado por Voz Nativo (Web Speech API)
+1. **Qué hace el usuario**: Presiona el botón flotante `[Voz]` con icono de micrófono en la barra de búsqueda.
+2. **Qué procesa el sistema**: Activa la API nativa del navegador (`webkitSpeechRecognition`), capturando el dictado en español (`es-CO`), transcribiéndolo en tiempo real hacia `#query-input` con animación de pulso rojo (`.listening`). Al detenerse, activa de inmediato el botón de búsqueda.
+
+### 2.9. Comparador Lado a Lado de Patentes (`[ACTION:COMPARE]`)
+1. **Qué hace el usuario**: Solicita comparar dos patentes (ej. *"compara US6195698 con EP1234567"*) o hace clic en el chip pericial `[⚖ Comparar lado a lado: ID1 vs ID2]`.
+2. **Qué procesa el sistema**: Abre el modal `#modal-comparador-patentes` renderizando en paralelo dos columnas con titular, fecha de prioridad, semáforo legal FTO (Vigente vs. Dominio Público), clasificaciones CPC y extracto técnico de reivindicaciones, con botón directo a inspección individual.
+
+### 2.10. Enfoque Autónomo en Láminas Técnicas (`[ACTION:SHOW_FIGURE]`)
+1. **Qué hace el usuario**: Solicita ver la figura técnica o hace clic en el chip `[Ver Lámina Técnica: Fig. X · PUB_NUM]`.
+2. **Qué procesa el sistema**: Recupera la lámina técnica de los servidores oficiales de Google Cloud Storage y despliega el visor lightbox en alta definición.
+
+### 2.11. Conmutador Rápido de Modelo de Razonamiento
+1. **Qué hace el usuario**: Hace clic en la etiqueta del modelo en la cabecera (`#ai-active-model-tag`).
+2. **Qué procesa el sistema**: Conmuta entre `gemini-2.5-flash` (alta velocidad, cuota de 1.500 req/día) y `gemini-2.5-pro` (máxima profundidad de análisis pericial y árbol de reivindicaciones, cuota de 50 req/día), persistiendo la preferencia en `localStorage`.
+
 ---
 
 ## 3. Reglas de Negocio y Seguridad (Security by Design)
@@ -92,4 +108,8 @@ La plataforma centraliza la vigilancia tecnológica, inteligencia competitiva y 
 - [x] Los menús de la barra de búsqueda se abren hacia arriba (dropup anti-desbordamiento).
 - [x] La barra flotante soporta el Modo Claro (`[data-theme="light"]`).
 - [x] El panel del agente cuenta con botón visible de restauración tras ser ocultado.
+- [x] Dictado por voz nativo mediante Web Speech API (sin librerías pesadas ni costos).
+- [x] Comparador lado a lado de patentes (`[ACTION:COMPARE]`) para análisis dual de reivindicaciones y FTO.
+- [x] Enfoque autónomo en láminas técnicas con visor de imágenes (`[ACTION:SHOW_FIGURE]`).
+- [x] Conmutador interactivo entre Gemini 2.5 Flash y Gemini 2.5 Pro con preservación de cuota.
 - [x] Cero errores de sintaxis (`verify_all.py` / `node --check` / `py_compile`) y cero secretos filtrados.

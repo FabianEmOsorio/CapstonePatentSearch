@@ -219,16 +219,28 @@ Puedes incluir cualquiera de estas etiquetas en tu respuesta; el sistema las eje
 3. Abrir automáticamente la Ficha Técnica y PDF de una patente en el panel derecho de inspección:
    [ACTION:AUTO_INSPECT id="NUMERO_PUBLICACION"]
    REGLA DE ORO DE DESPLIEGUE AUTÓNOMO: Siempre que el usuario solicite "muéstrame la patente más prometedora", "cuál es la mejor patente", "abre/muéstrame la patente X", o cuando recomiendes una patente principal en tu respuesta, DEBES INCLUIR OBLIGATORIAMENTE la etiqueta [ACTION:AUTO_INSPECT id="NUMERO_PUBLICACION"] (ej. [ACTION:AUTO_INSPECT id="US6195698"]). El frontend desplegará de forma 100% autónoma e inmediata la barra lateral derecha de inspección con dicha patente.
-4. Guardar/fijar automáticamente patentes como Documentos Semilla en el proyecto activo (útil cuando pide "guarda las mejores" o "fija las de dominio público"):
+4. Comparar 2 patentes lado a lado en vista dividida (Split-View / Diff):
+   [ACTION:COMPARE ids="NUMERO1,NUMERO2"] (ej. [ACTION:COMPARE ids="US6195698,EP1234567"]). Úsalo siempre que el usuario pida comparar dos invenciones o contrastar reivindicaciones.
+5. Enfocar o desplegar una lámina técnica / figura representativa en el visor de imágenes:
+   [ACTION:SHOW_FIGURE id="NUMERO_PUBLICACION" fig=1]
+6. Guardar/fijar automáticamente patentes como Documentos Semilla en el proyecto activo:
    [ACTION:AUTO_PIN ids="ID1,ID2,ID3"]
-5. Cambiar entre motor de Patentes y Literatura Científica:
+7. Cambiar entre motor de Patentes y Literatura Científica:
    [ACTION:MODE mode="patents|literature"]
-6. Refinar por código de clasificación CPC:
+8. Refinar por código de clasificación CPC:
    [ACTION:FILTER_CPC code="CÓDIGO_CPC"]
-7. Disparar exportación automática de CSV o apertura del Dossier FTO imprimible:
+9. Disparar exportación automática de CSV o apertura del Dossier FTO imprimible:
    [ACTION:AUTO_EXPORT type="csv|dossier"]
-8. Crear un nuevo proyecto/workspace si el usuario lo solicita por chat:
+10. Crear un nuevo proyecto/workspace si el usuario lo solicita por chat:
    [ACTION:CREATE_PROJECT name="Nombre del Proyecto"]
+
+PROTOCOLO PERICIAL DE ANÁLISIS DE PATENTES:
+• Matriz Semáforo de Riesgo FTO:
+  - Riesgo Bajo (FTO Libre / Dominio Público): Patentes con más de 20 años desde solicitud, abandonadas o sin fase nacional en país de interés.
+  - Riesgo Medio (Atención): Solicitudes PCT en trámite o patentes concedidas en otras oficinas con familia activa.
+  - Riesgo Alto (Barrera de Entrada): Patentes vigentes concedidas en territorio objetivo con reivindicaciones directas.
+• Análisis de Océanos Azules (White Space Mapping): Identifica combinaciones de códigos CPC o soluciones técnicas que nadie ha patentado aún en este conjunto, destacando oportunidades de innovación para el proyecto de grado.
+• Regla de Todos los Elementos (All Elements Rule) y Design Around: Para evitar infracción, explica qué elemento técnico de la reivindicación independiente se puede suprimir o sustituir.
 
 DIRECTIVA DE FORMATO (CERO EMOJIS):
 • Prohibido usar emojis. Usa viñetas limpias ("•", "1."), tablas Markdown y fórmulas LaTeX ($...$ o $$...$$) cuando corresponda.`;
@@ -240,9 +252,11 @@ DIRECTIVA DE FORMATO (CERO EMOJIS):
     // 1. Google Gemini API
     if (effectiveProvider === 'gemini') {
       const normalizedModel = (!model || ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.5-flash'].includes(model))
-        ? 'gemini-3.5-flash-lite'
+        ? 'gemini-2.5-flash'
         : model;
-      const candidateModels = [...new Set([normalizedModel, 'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-flash-lite-latest'])].filter(Boolean);
+      const candidateModels = (model && model.includes('pro'))
+        ? ['gemini-2.5-pro', 'gemini-1.5-pro', 'gemini-2.5-flash']
+        : [normalizedModel, 'gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-3.5-flash-lite', 'gemini-2.0-flash'].filter(Boolean);
       let lastError = null;
 
       for (const m of candidateModels) {

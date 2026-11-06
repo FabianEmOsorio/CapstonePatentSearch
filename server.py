@@ -466,7 +466,7 @@ Se sugiere utilizar como base de diseño los principios técnicos en dominio pú
             chat_history = req_data.get('chatHistory', [])
             # Si hay API key de Gemini
             if provider == 'gemini':
-                sel_model = 'gemini-3.5-flash-lite' if (not model or model in ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-1.5-flash', 'gemini-3.5-flash']) else model
+                sel_model = 'gemini-2.5-pro' if (model and 'pro' in model) else ('gemini-2.5-flash' if (not model or model in ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-1.5-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite']) else model)
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{sel_model}:generateContent?key={api_key}"
                 context_str = "\n".join([f"[{i+1}] ID:{p.get('publication_number')} | Título:{p.get('title')} ({p.get('publication_date')}) | Titular:{p.get('assignee')} | Estado:{p.get('legal_status')} | Fuente:{p.get('source')} | Citas:{p.get('forwardCitationCount', 0)}" for i, p in enumerate(patents[:25])])
                 stats_str = f"\nESTADÍSTICAS EXACTAS DEL JSON:\n{json.dumps(stats_summary, ensure_ascii=False)}" if stats_summary else ""
@@ -480,6 +480,9 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes y cada botón de la
 - Botones de la interfaz (explicar solo si preguntan): Conmutador Patentes/Literatura, Barra de Proyectos (Guardadas, + Proyecto, Eliminar Proyecto, APIs & IA), Ruta JTBD (1. Ecuación E-T-S, 2. Autocrítica PCT, 3. Dictamen FTO, 4. Mapa Competitivo), Pestañas Resultados/JSON en Crudo, Exportar CSV, Dossier FTO, Ficha lateral con PDF, y Barra Inferior (+ Todas las fuentes, Shuffle APIs, Shuffle Países, Relevancia/Filtros).
 - Prioridad al mensaje del usuario sobre botones de filtro: Si el usuario pide resultados de una fuente, fecha o estado distinto al filtro activo en UI, prioriza su mensaje y emite [ACTION:AUTO_FILTER source="all|google|europepmc|patentbrief" jurisdiction="ALL|US|EP|WO|OTHER" status="all|active|inactive" year_from="YYYY" year_to="YYYY" sort="relevance|date_desc|date_asc|citations_desc"].
 - Despliegue autónomo de barra lateral: Si el usuario pide "muéstrame la patente más prometedora", "cuál es la mejor patente" o pide ver una patente, incluye [ACTION:AUTO_INSPECT id="NUMERO_PUBLICACION"] para que la interfaz abra de inmediato la barra lateral.
+- Comparación de patentes en paralelo: Incluye [ACTION:COMPARE ids="ID1,ID2"] cuando el usuario pida comparar dos patentes o contrastar reivindicaciones.
+- Enfoque de figura técnica: Incluye [ACTION:SHOW_FIGURE id="NUMERO_PUBLICACION" fig=1] para abrir la lámina técnica de una invención.
+- Protocolo FTO y Océanos Azules: Evalúa semáforo FTO (Bajo/Medio/Alto), detecta Océanos Azules (vacíos tecnológicos entre clases CPC) y aplica la Regla de Todos los Elementos (All Elements Rule) para diseño alternativo.
 - Citas cliqueables: Cita las patentes por su código oficial (ej. [DOC:US6195698]) para que el usuario abra su ficha lateral con un clic.
 - Gestión exclusiva de APIs: Eres el único que añade o quita APIs mediante [ACTION:ADD_API id="..." name="..." desc="..." quota="..." key="..."], [ACTION:REMOVE_API id="..."] o [ACTION:SET_AI provider="..." model="..." key="..."].
 {ui_str}{stats_str}{hist_str}"""
