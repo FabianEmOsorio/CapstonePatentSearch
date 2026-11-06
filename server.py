@@ -463,7 +463,7 @@ Se sugiere utilizar como base de diseño los principios técnicos en dominio pú
             ws_name = req_data.get('workspaceName', 'General')
             # Si hay API key de Gemini
             if provider == 'gemini':
-                sel_model = 'gemini-2.5-flash' if (not model or model in ['gemini-3.5-flash', 'gemini-3.8-flash', 'gemini-1.5-flash']) else model
+                sel_model = 'gemini-3.5-flash' if (not model or model in ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-1.5-flash']) else model
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{sel_model}:generateContent?key={api_key}"
                 context_str = "\n".join([f"[{i+1}] {p.get('publication_number')}: {p.get('title')} ({p.get('publication_date')}) - Titular: {p.get('assignee')}" for i, p in enumerate(patents[:8])])
                 if context_str:

@@ -98,10 +98,10 @@ DIRECTIVAS ESTRICTAS DE ESTILO Y RIGOR:
 
     // 1. Google Gemini API
     if (effectiveProvider === 'gemini') {
-      const normalizedModel = (!model || ['gemini-3.5-flash', 'gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-1.5-flash'].includes(model))
-        ? 'gemini-2.5-flash'
+      const normalizedModel = (!model || ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-3.8-flash', 'gemini-3.7-flash'].includes(model))
+        ? 'gemini-3.5-flash'
         : model;
-      const candidateModels = [...new Set([normalizedModel, 'gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.0-flash'])].filter(Boolean);
+      const candidateModels = [...new Set([normalizedModel, 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-flash-lite-latest'])].filter(Boolean);
       let lastError = null;
 
       for (const m of candidateModels) {
@@ -202,7 +202,7 @@ DIRECTIVAS ESTRICTAS DE ESTILO Y RIGOR:
     return res.status(200).json({
       provider: 'heuristic_fallback',
       model: 'Perito Heurístico (Reserva)',
-      reply: `⚠️ *(Nota: Motor de reserva local activado - ${err.message})*\n\n${fallback.reply}`,
+      reply: `*(Nota: Motor de reserva local activado - ${err.message})*\n\n${fallback.reply}`,
       fto_verdict: fallback.fto_verdict,
       key_findings: fallback.key_findings,
       white_spaces: fallback.white_spaces,
