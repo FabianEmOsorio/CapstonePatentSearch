@@ -466,10 +466,17 @@ Se sugiere utilizar como base de diseño los principios técnicos en dominio pú
                 sel_model = 'gemini-3.5-flash' if (not model or model in ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-1.5-flash']) else model
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{sel_model}:generateContent?key={api_key}"
                 context_str = "\n".join([f"[{i+1}] {p.get('publication_number')}: {p.get('title')} ({p.get('publication_date')}) - Titular: {p.get('assignee')}" for i, p in enumerate(patents[:8])])
+                prompt_pericial_context = """Eres el Agente Pericial de Vigilancia Tecnológica, Inteligencia Competitiva y Patentes (Proyecto: {ws_name}). Prohibido usar emojis.
+Posees pleno conocimiento del Glosario Técnico del proyecto y del origen de tu rol:
+- Por qué "Agente Pericial": En propiedad intelectual un perito emite dictámenes técnicos formales (evaluación de FTO, validez de antecedentes, riesgo de infracción y estrategias Design Around), superando la mera recuperación de documentos para apoyar decisiones estratégicas y normativas (PCT Reglas 11-13).
+- Metodología E-T-S: Entidad - Tecnología - Solución combinada con operadores booleanos y CPC.
+- Filtro Cero: Literatura científica (OpenAlex) previa a patentes comerciales.
+- FTO y Dominio Público: Distinción entre tecnología libre de regalías e invenciones con derechos vigentes.
+"""
                 if context_str:
-                    prompt = f"Eres el Agente Pericial de Vigilancia Tecnológica, Inteligencia Competitiva y Patentes (Proyecto: {ws_name}). Prohibido usar emojis. Con base en estos documentos encontrados para '{query}':\n{context_str}\n\nResponde conciso en Markdown al usuario: {user_msg or 'Haz un dictamen pericial de FTO, antecedentes y vacíos tecnológicos.'}\nSi recomiendas una búsqueda o CPC, incluye etiquetas [ACTION:SEARCH query=\"...\"] o [ACTION:FILTER_CPC code=\"...\"]."
+                    prompt = f"{prompt_pericial_context}\nCon base en estos documentos encontrados para '{query}':\n{context_str}\n\nResponde conciso en Markdown al usuario: {user_msg or 'Haz un dictamen pericial de FTO, antecedentes y vacíos tecnológicos.'}\nSi recomiendas una búsqueda o CPC, incluye etiquetas [ACTION:SEARCH query=\"...\"] o [ACTION:FILTER_CPC code=\"...\"]."
                 else:
-                    prompt = f"Eres el Agente Pericial de Vigilancia Tecnológica, Inteligencia Competitiva y Patentes (Proyecto: {ws_name}). Prohibido usar emojis. Responde en Markdown a esta consulta del usuario con rigor técnico, claridad y pedagogía: {user_msg or 'Preséntate y explica en qué puedes asistir.'}\nSi recomiendas una búsqueda de patentes o literatura, incluye la acción [ACTION:SEARCH query=\"...\"] o [ACTION:MODE mode=\"patents|literature\"]."
+                    prompt = f"{prompt_pericial_context}\nResponde en Markdown a esta consulta del usuario con rigor técnico, claridad y pedagogía: {user_msg or 'Preséntate y explica en qué puedes asistir.'}\nSi recomiendas una búsqueda de patentes o literatura, incluye la acción [ACTION:SEARCH query=\"...\"] o [ACTION:MODE mode=\"patents|literature\"]."
 
                 req = urllib.request.Request(url, headers={'Content-Type': 'application/json'}, data=json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode('utf-8'))
                 with urllib.request.urlopen(req, timeout=15) as resp:
