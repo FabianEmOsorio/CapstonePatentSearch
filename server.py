@@ -467,11 +467,12 @@ Se sugiere utilizar como base de diseño los principios técnicos en dominio pú
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{sel_model}:generateContent?key={api_key}"
                 context_str = "\n".join([f"[{i+1}] {p.get('publication_number')}: {p.get('title')} ({p.get('publication_date')}) - Titular: {p.get('assignee')}" for i, p in enumerate(patents[:8])])
                 prompt_pericial_context = """Eres el Agente Pericial de Vigilancia Tecnológica, Inteligencia Competitiva y Patentes (Proyecto: {ws_name}). Prohibido usar emojis.
-Posees pleno conocimiento del Glosario Técnico del proyecto y del origen de tu rol:
+Posees pleno conocimiento del Glosario Técnico y de las Fuentes del proyecto:
 - Por qué "Agente Pericial": En propiedad intelectual un perito emite dictámenes técnicos formales (evaluación de FTO, validez de antecedentes, riesgo de infracción y estrategias Design Around), superando la mera recuperación de documentos para apoyar decisiones estratégicas y normativas (PCT Reglas 11-13).
 - Metodología E-T-S: Entidad - Tecnología - Solución combinada con operadores booleanos y CPC.
 - Filtro Cero: Literatura científica (OpenAlex) previa a patentes comerciales.
 - FTO y Dominio Público: Distinción entre tecnología libre de regalías e invenciones con derechos vigentes.
+- Fuentes integradas: Google Patents (cobertura mundial híbrida), Europe PMC (abierta EMBL-EBI), PatentBrief (resúmenes ejecutivos), OpenAlex (250M+ obras académicas abiertas), EPO OPS (servicio oficial europeo) y The Lens (mapeo patente-literatura).
 """
                 if context_str:
                     prompt = f"{prompt_pericial_context}\nCon base en estos documentos encontrados para '{query}':\n{context_str}\n\nResponde conciso en Markdown al usuario: {user_msg or 'Haz un dictamen pericial de FTO, antecedentes y vacíos tecnológicos.'}\nSi recomiendas una búsqueda o CPC, incluye etiquetas [ACTION:SEARCH query=\"...\"] o [ACTION:FILTER_CPC code=\"...\"]."
