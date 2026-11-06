@@ -461,21 +461,29 @@ Se sugiere utilizar como base de diseño los principios técnicos en dominio pú
                 return
 
             ws_name = req_data.get('workspaceName', 'General')
+            ui_state = req_data.get('uiState', {})
+            stats_summary = req_data.get('statsSummary', None)
+            chat_history = req_data.get('chatHistory', [])
             # Si hay API key de Gemini
             if provider == 'gemini':
-                sel_model = 'gemini-3.5-flash' if (not model or model in ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-1.5-flash']) else model
+                sel_model = 'gemini-3.5-flash-lite' if (not model or model in ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-1.5-flash', 'gemini-3.5-flash']) else model
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{sel_model}:generateContent?key={api_key}"
-                context_str = "\n".join([f"[{i+1}] {p.get('publication_number')}: {p.get('title')} ({p.get('publication_date')}) - Titular: {p.get('assignee')}" for i, p in enumerate(patents[:8])])
-                prompt_pericial_context = """Eres el Agente Pericial de Vigilancia Tecnológica, Inteligencia Competitiva y Patentes (Proyecto: {ws_name}). Prohibido usar emojis.
-Posees pleno conocimiento del Glosario Técnico y de las Fuentes del proyecto:
-- Rol Pericial: En propiedad intelectual un perito emite dictámenes técnicos formales (FTO, validez, Design Around, Normas PCT Reglas 11-13). REGLA: Solo explicar el porqué de la palabra "pericial" si el usuario lo pregunta explícitamente; en saludos o consultas técnicas, ir directo a la respuesta solicitada.
-- Metodología E-T-S: Entidad - Tecnología - Solución combinada con operadores booleanos y CPC.
-- Filtro Cero: Literatura científica (OpenAlex) previa a patentes comerciales.
-- FTO y Dominio Público: Distinción entre tecnología libre de regalías e invenciones con derechos vigentes.
-- Fuentes integradas: Google Patents (cobertura mundial híbrida), Europe PMC (abierta EMBL-EBI), PatentBrief (resúmenes ejecutivos), OpenAlex (250M+ obras académicas abiertas), EPO OPS (servicio oficial europeo) y The Lens (mapeo patente-literatura).
-"""
+                context_str = "\n".join([f"[{i+1}] ID:{p.get('publication_number')} | Título:{p.get('title')} ({p.get('publication_date')}) | Titular:{p.get('assignee')} | Estado:{p.get('legal_status')} | Fuente:{p.get('source')} | Citas:{p.get('forwardCitationCount', 0)}" for i, p in enumerate(patents[:25])])
+                stats_str = f"\nESTADÍSTICAS EXACTAS DEL JSON:\n{json.dumps(stats_summary, ensure_ascii=False)}" if stats_summary else ""
+                ui_str = f"\nESTADO DE FILTROS UI: {json.dumps(ui_state, ensure_ascii=False)}" if ui_state else ""
+                hist_str = "\nHISTORIAL RECIENTE:\n" + "\n".join([f"{m.get('role','user').upper()}: {str(m.get('text',''))[:400]}" for m in chat_history[-6:]]) if chat_history else ""
+                prompt_pericial_context = f"""Eres el Agente Pericial de Vigilancia Tecnológica, Inteligencia Competitiva y Patentes (Proyecto: {ws_name}). Prohibido usar emojis.
+Posees pleno conocimiento del Glosario Técnico, las Fuentes y cada botón de la interfaz:
+- Rol Pericial: Solo explicar el porqué de la palabra "pericial" si el usuario lo pregunta explícitamente.
+- Metodología E-T-S, Filtro Cero (OpenAlex), FTO y Dominio Público, Normas PCT (Reglas 11-13).
+- Fuentes integradas: Google Patents, Europe PMC (EPO/WIPO), PatentBrief, OpenAlex, EPO OPS y The Lens.
+- Botones de la interfaz (explicar solo si preguntan): Conmutador Patentes/Literatura, Barra de Proyectos (Guardadas, + Proyecto, Eliminar Proyecto, APIs & IA), Ruta JTBD (1. Ecuación E-T-S, 2. Autocrítica PCT, 3. Dictamen FTO, 4. Mapa Competitivo), Pestañas Resultados/JSON en Crudo, Exportar CSV, Dossier FTO, Ficha lateral con PDF, y Barra Inferior (+ Todas las fuentes, Shuffle APIs, Shuffle Países, Relevancia/Filtros).
+- Prioridad al mensaje del usuario sobre botones de filtro: Si el usuario pide resultados de una fuente, fecha o estado distinto al filtro activo en UI, prioriza su mensaje y emite [ACTION:AUTO_FILTER source="all|google|europepmc|patentbrief" jurisdiction="ALL|US|EP|WO|OTHER" status="all|active|inactive" year_from="YYYY" year_to="YYYY" sort="relevance|date_desc|date_asc|citations_desc"].
+- Citas cliqueables: Cita las patentes por su código oficial (ej. [DOC:US6195698]) para que el usuario abra su ficha lateral con un clic.
+- Gestión exclusiva de APIs: Eres el único que añade o quita APIs mediante [ACTION:ADD_API id="..." name="..." desc="..." quota="..." key="..."], [ACTION:REMOVE_API id="..."] o [ACTION:SET_AI provider="..." model="..." key="..."].
+{ui_str}{stats_str}{hist_str}"""
                 if context_str:
-                    prompt = f"{prompt_pericial_context}\nCon base en estos documentos encontrados para '{query}':\n{context_str}\n\nResponde conciso en Markdown al usuario: {user_msg or 'Haz un dictamen pericial de FTO, antecedentes y vacíos tecnológicos.'}\nSi recomiendas una búsqueda o CPC, incluye etiquetas [ACTION:SEARCH query=\"...\"] o [ACTION:FILTER_CPC code=\"...\"]."
+                    prompt = f"{prompt_pericial_context}\nCon base en estos documentos encontrados para '{query}':\n{context_str}\n\nResponde en Markdown al usuario: {user_msg or 'Haz un dictamen pericial y estadístico de FTO, antecedentes y vacíos tecnológicos.'}\nUsa etiquetas [ACTION:SEARCH query=\"...\"], [ACTION:FILTER_CPC code=\"...\"], [ACTION:AUTO_INSPECT id=\"...\"] o [ACTION:AUTO_PIN ids=\"...\"] cuando ahorren pasos manuales."
                 else:
                     prompt = f"{prompt_pericial_context}\nResponde en Markdown a esta consulta del usuario con rigor técnico, claridad y pedagogía: {user_msg or 'Preséntate y explica en qué puedes asistir.'}\nSi recomiendas una búsqueda de patentes o literatura, incluye la acción [ACTION:SEARCH query=\"...\"] o [ACTION:MODE mode=\"patents|literature\"]."
 
@@ -483,7 +491,7 @@ Posees pleno conocimiento del Glosario Técnico y de las Fuentes del proyecto:
                 with urllib.request.urlopen(req, timeout=15) as resp:
                     data = json.loads(resp.read().decode('utf-8'))
                     text = data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', 'Sin respuesta')
-                    self.send_json(200, {"provider": provider, "model": sel_model, "reply": text})
+                    self.send_json(200, {"provider": provider, "model": sel_model, "reply": text, "trace_steps": [{"step": f"Inferencia completada con {sel_model}", "time": "1.2"}]})
             else:
                 # OpenAI-compatible (Groq, OpenAI, DeepSeek, etc.)
                 endpoint = "https://api.openai.com/v1/chat/completions"

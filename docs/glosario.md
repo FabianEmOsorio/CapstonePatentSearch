@@ -6,7 +6,7 @@ Este diccionario técnico explica de forma sencilla y didáctica los términos c
 
 ## 1. Conceptos de Propiedad Intelectual, Vigilancia Tecnológica y JTBD
 
-- **JTBD (Job to be Done)**: Marco metodológico que define la tarea central del usuario: *«Gestionar documentación técnica disponible a partir de fuentes documentales heterogéneas, transformándola en patrones de búsqueda estructurados sobre bases de patentes y repositorios académicos abiertos, para dar soporte a informes terminados sobre el estado de la tecnología y decisiones estratégicas»*.
+- **JTBD (Job to be Done)**: Marco metodológico que define la tarea central del proyecto: *«Gestionar información tecnológica dispersa para realizar consultas eficientes, confiables y oportunas sobre desarrollos tecnológicos»*.
 - **Metodología E-T-S (Entidad - Tecnología - Solución)**: Patrón de descomposición de un problema técnico en tres bloques de sinónimos en inglés unidos por operadores booleanos (`(Sin1 OR Sin2) AND (Tec1 OR Tec2) AND CPC`) para recuperar patentes sin ruido documental.
 - **Filtro Cero (Literatura Científica - OpenAlex)**: Fase preliminar de exploración en artículos científicos arbitrados y preprints (250M+ obras en OpenAlex) para comprender el estado de la ciencia antes de auditar patentes comerciales.
 - **FTO (Freedom to Operate / Libertad de Operación)**: Evaluación jurídica y técnica que determina si un producto o proceso puede fabricarse y comercializarse en un país sin infringir patentes vigentes de terceros.
