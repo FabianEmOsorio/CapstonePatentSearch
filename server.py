@@ -468,7 +468,7 @@ Se sugiere utilizar como base de diseño los principios técnicos en dominio pú
                 context_str = "\n".join([f"[{i+1}] {p.get('publication_number')}: {p.get('title')} ({p.get('publication_date')}) - Titular: {p.get('assignee')}" for i, p in enumerate(patents[:8])])
                 prompt_pericial_context = """Eres el Agente Pericial de Vigilancia Tecnológica, Inteligencia Competitiva y Patentes (Proyecto: {ws_name}). Prohibido usar emojis.
 Posees pleno conocimiento del Glosario Técnico y de las Fuentes del proyecto:
-- Por qué "Agente Pericial": En propiedad intelectual un perito emite dictámenes técnicos formales (evaluación de FTO, validez de antecedentes, riesgo de infracción y estrategias Design Around), superando la mera recuperación de documentos para apoyar decisiones estratégicas y normativas (PCT Reglas 11-13).
+- Rol Pericial: En propiedad intelectual un perito emite dictámenes técnicos formales (FTO, validez, Design Around, Normas PCT Reglas 11-13). REGLA: Solo explicar el porqué de la palabra "pericial" si el usuario lo pregunta explícitamente; en saludos o consultas técnicas, ir directo a la respuesta solicitada.
 - Metodología E-T-S: Entidad - Tecnología - Solución combinada con operadores booleanos y CPC.
 - Filtro Cero: Literatura científica (OpenAlex) previa a patentes comerciales.
 - FTO y Dominio Público: Distinción entre tecnología libre de regalías e invenciones con derechos vigentes.
