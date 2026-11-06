@@ -88,6 +88,12 @@ La plataforma centraliza la vigilancia tecnológica, inteligencia competitiva y 
 
 ---
 
+### 2.13. Explicación Pedagógica de Metodologías Bajo Demanda (Explain-on-Demand)
+1. **Qué hace el usuario**: Pregunta por chat "¿qué metodologías usas?", "¿cómo buscas patentes?", "¿qué es snowballing?", "¿qué es la regla de todos los elementos?" o "¿cómo registro los derechos de autor de mi software?".
+2. **Qué procesa el sistema**: El Agente Pericial despliega una explicación estructurada utilizando analogías cotidianas, citas normativas y patentes de referencia (IBM US7680785B2, 35 U.S.C. 103, Decisión 486 CAN Art. 15e, Ley 23/1982 de DNDA) sin jerga incomprensible, orientando al usuario de forma didáctica y emitiendo las acciones de interfaz correspondientes si procede.
+
+---
+
 ## 3. Reglas de Negocio y Seguridad (Security by Design)
 1. **Cero Credenciales Hardcodeadas**: Todas las claves (`GEMINI_API_KEY`, `SERPAPI_KEY`, etc.) se leen de variables de entorno del servidor (`process.env` en Vercel o `.env` local).
 2. **Enmascaramiento de Claves en Memoria**: Cualquier token o clave ingresada en el chat se sanitiza antes de guardarse en el historial visual.

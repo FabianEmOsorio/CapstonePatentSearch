@@ -3494,6 +3494,9 @@
         <button id="gl-nav-territorio" class="glossary-tab-btn" onclick="cambiarGlosarioTab('territorio')">
            Territorialidad y Citas
         </button>
+        <button id="gl-nav-metodologias" class="glossary-tab-btn" onclick="cambiarGlosarioTab('metodologias')">
+          Metodologias de Vigilancia
+        </button>
       </div>
 
       <div class="glossary-modal-body">
@@ -3658,10 +3661,44 @@
             <div class="glossary-card-title"> Citas hacia adelante (Forward Citations)</div>
             <p>Mide cuántas patentes posteriores tuvieron que citar este documento como antecedente obligado. En el ecosistema de vigilancia e inversión tecnológica, un alto número de citas indica que la invención es una <strong>tecnología pionera o estándar fundamental</strong> de la industria.</p>
           </div>
+        <!-- 5. Pestana Metodologias de Vigilancia y Analisis Pericial -->
+        <div id="gl-pane-metodologias" class="glossary-tab-pane">
+          <div class="glossary-card">
+            <div class="glossary-card-title">Citation Snowballing (Rastreo Topologico en Cascada - IBM US7680785B2)</div>
+            <p>Rastreo bidireccional de citaciones para reconstruir la genealogia tecnica de una invencion. Rastrear hacia atras (<em>Backward Citations</em>) identifica las patentes seminales del estado del arte que la sustentaron; rastrear hacia adelante (<em>Forward Citations</em>) revela competidores que la estan derivando, posibles barreras y litigios activos.</p>
+          </div>
+
+          <div class="glossary-card">
+            <div class="glossary-card-title">Regla de Todos los Elementos (All Elements Rule - 35 U.S.C. 103 / Art. 56 CPE)</div>
+            <p>Principio rector de Libertad de Operacion (FTO). Una patente solo se infringe si un producto competidor incorpora <strong>todos y cada uno</strong> de los elementos de su reivindicacion independiente. Omitir o sustituir sustancialmente al menos un elemento esencial permite un <em>Design Around</em> (diseno alternativo) legalmente viable sin infringir derechos exclusivos.</p>
+          </div>
+
+          <div class="glossary-card">
+            <div class="glossary-card-title">Mapeo de Oceanos Azules (White Space Mapping - US8442998B2)</div>
+            <p>Cruce analitico multidimensional entre clasificaciones tecnologicas (CPC/IPC) y necesidades funcionales. Permite localizar vacios de patentabilidad donde no existen patentes vigentes, orientando la investigacion y desarrollo (I+D) hacia nichos de libre operacion con alta diferenciacion comercial.</p>
+          </div>
+
+          <div class="glossary-card">
+            <div class="glossary-card-title">Metodologia Facetada E-T-S (Entidad - Tecnologia - Solucion)</div>
+            <p>Estructuracion de busqueda formal segun directrices de examen de la EPO (Parte B-III) y MPEP 904 de la USPTO. Descompone el problema tecnico en tres facetas independientes unidas por operadores booleanos (AND, OR, NOT) y truncadores (*), eliminando el 99% del ruido documental de palabras clave ambiguas.</p>
+          </div>
+
+          <div class="glossary-card">
+            <div class="glossary-card-title">Filtro Cero (Literatura Cientifica Abierta - OpenAlex)</div>
+            <p>Fase de exploracion previa en mas de 250M de articulos cientificos arbitrados y preprints antes de evaluar patentes comerciales. Permite conocer los principios teoricos y descubrimientos experimentales de frontera no monopolizados mercantilmente.</p>
+          </div>
+
+          <div class="glossary-card">
+            <div class="glossary-card-title">Propiedad Intelectual y Software en Colombia (DNDA vs. SIC)</div>
+            <p>Segun la <strong>Decision 486 de la Comunidad Andina (Art. 15, literal e)</strong>, el software puro no se patenta ante la Superintendencia de Industria y Comercio (SIC). Se protege bajo <strong>Derechos de Autor como Soporte Logico (Ley 23 de 1982)</strong> de forma 100% gratuita y virtual ante la <strong>Direccion Nacional de Derecho de Autor (DNDA)</strong> en <code>www.registroenlinea.gov.co</code>.</p>
+          </div>
         </div>
       </div>
-    </
-    <!-- MODAL COMPARADOR LADO A LADO DE PATENTES (SPLIT VIEW / DIFF) -->
+    </div>
+  </div>
+
+  <!-- MODAL COMPARADOR LADO A LADO DE PATENTES (SPLIT VIEW / DIFF) -->
+
     <div id="modal-comparador-patentes" class="modal-overlay" onclick="cerrarComparadorModal(event)">
       <div class="modal-content" style="max-width: 1100px; width: 95vw; max-height: 90vh; display: flex; flex-direction: column;" onclick="event.stopPropagation()">
         <div class="modal-header">
@@ -3676,8 +3713,7 @@
         </div>
       </div>
     </div>
-div>
-  </div>
+
 
   <script>
     let rawJsonData = null;
@@ -5683,7 +5719,7 @@ div>
     }
 
     function cambiarGlosarioTab(tabName) {
-      const tabs = ['fuentes', 'cpc', 'estados', 'territorio'];
+      const tabs = ['fuentes', 'cpc', 'estados', 'territorio', 'metodologias'];
       tabs.forEach(t => {
         const nav = document.getElementById(`gl-nav-${t}`);
         const pane = document.getElementById(`gl-pane-${t}`);
