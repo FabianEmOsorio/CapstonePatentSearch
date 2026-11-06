@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   }
 
   const { q, source = 'all' } = req.query;
-  const SERPAPI_KEY = process.env.SERPAPI_KEY || "95dbb01b74ac677ffca277c162bb09294c58b2795b8ff4bc9374c718e5299e00";
+  const SERPAPI_KEY = process.env.SERPAPI_KEY || "";
 
   if (!q) {
     return res.status(400).json({ error: 'Parámetro de búsqueda "q" es requerido' });
@@ -94,7 +94,8 @@ export default async function handler(req, res) {
         // Fallback silencioso a SerpApi
       }
 
-      // Fallback a SerpApi
+      // Fallback a SerpApi (si existe SERPAPI_KEY en variables de entorno)
+      if (!SERPAPI_KEY) return;
       try {
         const targetUrl = `https://serpapi.com/search.json?engine=google_patents&q=${encodeURIComponent(q)}&api_key=${SERPAPI_KEY}`;
         const response = await fetch(targetUrl);

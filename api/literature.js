@@ -100,6 +100,7 @@ export default async function handler(req, res) {
       query: q,
       total_found: totalCount,
       results_count: works.length,
+      organic_results: works,
       works: works
     });
 

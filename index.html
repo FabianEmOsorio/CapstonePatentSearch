@@ -2155,6 +2155,70 @@
       z-index: 9999;
       padding: 20px;
     }
+    .modal-overlay.open {
+      display: flex !important;
+    }
+    .abstract-clamp {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .abstract-clamp.expanded {
+      -webkit-line-clamp: unset;
+      display: block;
+    }
+    .btn-expand-abstract {
+      background: none;
+      border: none;
+      color: var(--brand-primary);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 2px 6px;
+    }
+    .btn-expand-abstract:hover {
+      text-decoration: underline;
+    }
+    .jtbd-quick-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      padding: 7px 12px;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+    }
+    .jtbd-quick-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-right: 4px;
+    }
+    .jtbd-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-medium);
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .jtbd-pill:hover {
+      border-color: var(--brand-primary);
+      color: var(--text-high);
+      background-color: rgba(0, 145, 255, 0.1);
+    }
     .modal-content {
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
@@ -2433,12 +2497,15 @@
       </div>
     </header>
 
-        <!-- =========================================================
+    <!-- =========================================================
          DUAL-ENGINE SELECTOR: PATENTES vs LITERATURA CIENTÍFICA
          ========================================================= -->
     <div class="engine-mode-switcher">
       <button id="engine-btn-patents" class="engine-tab-btn active" onclick="setEngineMode('patents')" title="Consultar patentes mundiales concedidas y en trámite">
-        
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; color:var(--brand-primary);">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
         <div class="engine-text-col">
           <span class="engine-title">Patentes Tecnológicas</span>
           <span class="engine-sub">Google Patents &bull; Europe PMC (EPO/WIPO) &bull; PatentBrief</span>
@@ -2446,21 +2513,25 @@
       </button>
 
       <button id="engine-btn-literature" class="engine-tab-btn" onclick="setEngineMode('literature')" title="Consultar literatura científica académica, papers y tesis en OpenAlex">
-        
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; color:var(--src-openalex);">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
         <div class="engine-text-col">
-          <span class="engine-title">Literatura Científica</span>
-          <span class="engine-sub">OpenAlex &bull; Artículos y Papers &bull; 250M+ Obras Abiertas</span>
+          <span class="engine-title">Literatura Científica (Filtro Cero)</span>
+          <span class="engine-sub">OpenAlex &bull; Artículos Arbitrados &bull; 250M+ Obras Abiertas</span>
         </div>
       </button>
     </div>
 
     <!-- =========================================================
-         BARRA DE BÚSQUEDA / PROMPT BOX ESTILO ANTIGRAVITY
+         BARRA DE ESPACIOS DE TRABAJO Y METODOLOGÍA JTBD
          ========================================================= -->
-        <!-- BARRA DE ESPACIOS DE TRABAJO (WORKSPACES ESTILO ANTIGRAVITY) -->
     <div class="workspace-bar">
       <div class="workspace-selector-pill" onclick="toggleWorkspaceMenu(event)" id="workspace-pill-btn">
-        <span style="font-size: 13px;"></span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
         <span id="current-workspace-label">Proyecto: Principal</span>
         <span class="ag-pill-caret" id="workspace-caret">▼</span>
       </div>
@@ -2481,17 +2552,45 @@
       </div>
 
       <div class="workspace-actions">
-        <button class="btn-ws-pinned" onclick="togglePinnedPatentsView()" id="btn-pinned-count" title="Ver patentes fijadas en este proyecto">
+        <button class="btn-ws-pinned" onclick="togglePinnedPatentsView()" id="btn-pinned-count" title="Filtrar solo documentos semilla guardados en este proyecto">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="17" x2="12" y2="22"></line>
             <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
           </svg>
           <span id="pinned-count-label">0 Guardadas</span>
         </button>
-        <button class="btn-ghost" onclick="crearNuevoWorkspaceModal()" style="font-size: 11px; padding: 4px 8px;">
+        <button class="btn-ghost" onclick="crearNuevoWorkspaceModal()" style="font-size: 11px; padding: 4px 8px;" title="Crear nuevo proyecto de vigilancia">
           <span>+</span> Proyecto
         </button>
+        <button class="btn-ghost" onclick="abrirSettingsModal()" style="font-size: 11px; padding: 4px 8px; display: inline-flex; align-items: center; gap: 4px;" title="Configurar proveedor de IA o conectores de APIs">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>APIs & IA</span>
+        </button>
       </div>
+    </div>
+
+    <!-- Barra Metodológica JTBD: Asistentes de 1 Clic -->
+    <div class="jtbd-quick-bar">
+      <span class="jtbd-quick-label">Ruta JTBD:</span>
+      <button class="jtbd-pill" onclick="lanzarAsistenteJTBDEcuacion()" title="Transformar un problema técnico en una ecuación estructurada (Entidad - Tecnología - Solución) con códigos CPC">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        <span>1. Ecuación E-T-S / Booleana</span>
+      </button>
+      <button class="jtbd-pill" onclick="lanzarAsistenteJTBDPCT()" title="Autocrítica de patentabilidad (Novedad, Nivel Inventivo, Aplicación Industrial y Reglas 11 a 13 PCT)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--intel-purple)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        <span>2. Autocrítica PCT (Reglas 11–13)</span>
+      </button>
+      <button class="jtbd-pill" onclick="lanzarAsistenteJTBDFTO()" title="Evaluar Libertad de Operación (FTO): patentes vigentes vs. dominio público y diseño alrededor">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>3. Dictamen FTO & Dominio Público</span>
+      </button>
+      <button class="jtbd-pill" onclick="lanzarAsistenteJTBDBI()" title="Inteligencia competitiva: titulares líderes, cobertura geográfica y océanos azules no explotados">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span>4. Mapa Competitivo & Océanos Azules</span>
+      </button>
     </div>
 
     <div class="ag-prompt-container">
@@ -2732,7 +2831,7 @@
                 </svg>
                 <span>Dictamen Pericial & Asesoría Tecnológica</span>
               </div>
-              <span class="ai-model-tag" id="ai-active-model-tag">Gemini 3.5 Flash</span>
+              <span class="ai-model-tag" id="ai-active-model-tag">Gemini 2.5 Flash</span>
             </div>
             <div style="display:flex; gap:6px; align-items:center;">
               <button class="btn-ghost" onclick="copiarAnalisisIa()" style="font-size:11px; padding:3px 8px;" title="Copiar texto del análisis">Copiar</button>
@@ -2792,22 +2891,39 @@
       <aside class="col-inspection" id="col-inspection">
         <div class="inspection-header">
           <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--text-high);">
-            <span></span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
             <span>Inspección Técnica</span>
           </div>
           <div class="sidebar-tabs-bar" style="padding: 0; background: transparent; border: none; display: flex; align-items: center; gap: 4px;">
             <button id="ins-tab-dossier" class="sb-tab-btn active" onclick="cambiarInspectionTab('dossier')">Ficha</button>
             <button id="ins-tab-pdf" class="sb-tab-btn" onclick="cambiarInspectionTab('pdf')">PDF Oficial</button>
-            <button class="btn-ghost" onclick="maximizarInspeccionModal()" title="Ver en pantalla completa" style="font-size: 12px; padding: 3px 6px;"></button>
+            <button class="btn-ghost" onclick="maximizarInspeccionModal()" title="Ampliar ficha en pantalla completa" style="font-size: 12px; padding: 4px 7px; display: inline-flex; align-items: center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+                <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+              </svg>
+            </button>
           </div>
         </div>
 
         <div class="inspection-body" id="inspection-body-content">
           <div class="inspection-standby" id="inspection-standby-view">
-            <div class="inspection-standby-icon"></div>
+            <div class="inspection-standby-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <circle cx="11.5" cy="14.5" r="2.5"/>
+                <path d="M13.25 16.25 15 18"/>
+              </svg>
+            </div>
             <div style="font-weight: 700; color: var(--text-high); margin-bottom: 6px;">Espacio de Inspección y PDF</div>
             <p style="font-size: 12px; line-height: 1.5;">
-              Haz clic en <strong>"Ver Ficha"</strong> en cualquier resultado de la columna central para examinar aquí sus figuras técnicas, clasificaciones CPC, estado legal y visor de PDF embebido sin perder de vista los resultados ni el chat.
+              Haz clic en <strong>"Ficha"</strong> o en el título de cualquier patente o artículo científico para examinar aquí sus láminas técnicas, clasificaciones CPC, estado FTO y visor de PDF oficial sin perder de vista tus resultados.
             </p>
           </div>
           <div id="inspection-active-view" style="display: none;">
@@ -2868,7 +2984,7 @@
 
         <div class="settings-field-group">
           <label>Nombre del Modelo:</label>
-          <input type="text" id="cfg-ai-model" placeholder="gemini-1.5-flash">
+          <input type="text" id="cfg-ai-model" placeholder="gemini-2.5-flash">
         </div>
 
         <h3 style="font-size: 13px; font-weight: 700; color: var(--text-high); text-transform: uppercase; margin: 20px 0 10px 0; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
@@ -2877,12 +2993,12 @@
 
         <div class="settings-field-group">
           <label> EPO OPS - Consumer Key (Clave Pública):</label>
-          <input type="text" id="cfg-epo-key" placeholder="Eko8eGU1PMZeGHqp9tRFSjcoNzNXk8ChnSndfMBZ2BXiv3Tx">
+          <input type="text" id="cfg-epo-key" placeholder="Consumer Key de EPO OPS (Opcional)">
         </div>
 
         <div class="settings-field-group">
           <label> EPO OPS - Consumer Secret (Clave Secreta):</label>
-          <input type="password" id="cfg-epo-secret" placeholder="UJjngYfeBnOhnKoPpZ5Tr49NhBGvOyor4XVjyV2K8TTs8IUO0GrMEQ3o0omRNt63">
+          <input type="password" id="cfg-epo-secret" placeholder="Consumer Secret de EPO OPS (Opcional)">
         </div>
 
         <div class="settings-field-group">
@@ -3250,9 +3366,10 @@
     const translationCache = {};
     let cfgAiProvider = localStorage.getItem('capstone-ai-provider') || 'gemini';
     let cfgAiKey = localStorage.getItem('capstone-ai-key') || '';
-    let cfgAiModel = localStorage.getItem('capstone-ai-model') || 'gemini-1.5-flash';
-    let cfgEpoKey = localStorage.getItem('capstone-epo-key') || 'Eko8eGU1PMZeGHqp9tRFSjcoNzNXk8ChnSndfMBZ2BXiv3Tx';
-    let cfgEpoSecret = localStorage.getItem('capstone-epo-secret') || 'UJjngYfeBnOhnKoPpZ5Tr49NhBGvOyor4XVjyV2K8TTs8IUO0GrMEQ3o0omRNt63';
+    let cfgAiModel = localStorage.getItem('capstone-ai-model') || 'gemini-2.5-flash';
+    if (['gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-3.8-flash'].includes(cfgAiModel)) cfgAiModel = 'gemini-2.5-flash';
+    let cfgEpoKey = localStorage.getItem('capstone-epo-key') || '';
+    let cfgEpoSecret = localStorage.getItem('capstone-epo-secret') || '';
     let cfgLensToken = localStorage.getItem('capstone-lens-token') || '';
     let currentInspectionTab = 'dossier';
 
@@ -3302,7 +3419,7 @@
     function actualizarDefaultModel() {
       const p = document.getElementById('cfg-ai-provider').value;
       const m = document.getElementById('cfg-ai-model');
-      if (p === 'gemini') m.value = 'gemini-3.5-flash';
+      if (p === 'gemini') m.value = 'gemini-2.5-flash';
       else if (p === 'groq') m.value = 'llama-3.3-70b-versatile';
       else if (p === 'deepseek') m.value = 'deepseek-chat';
       else if (p === 'openai') m.value = 'gpt-4o-mini';
@@ -3382,7 +3499,7 @@
       workspaces = defaultWorkspaces;
     }
 
-    let activeWorkspaceId = localStorage.getItem('capstone-active-ws') || 'awake';
+    let activeWorkspaceId = localStorage.getItem('capstone-active-ws') || 'principal';
     let isShowingOnlyPinned = false;
 
     function getActiveWorkspace() {
@@ -3459,7 +3576,15 @@
       }
       guardarWorkspacesState();
       actualizarContadorPinned();
-      applyFiltersAndRender();
+      if (currentEngineMode === 'literature') {
+        const pinnedSet = new Set(ws.pinned);
+        const list = isShowingOnlyPinned
+          ? allRetrievedLiterature.filter(w => pinnedSet.has(w.doi || w.id || w.title))
+          : allRetrievedLiterature;
+        renderizarLiteratura(list);
+      } else {
+        applyFiltersAndRender();
+      }
     }
 
     function guardarWorkspacesState() {
@@ -3478,7 +3603,16 @@
         btn.style.backgroundColor = 'rgba(168, 85, 247, 0.12)';
         btn.style.color = '#c084fc';
       }
-      applyFiltersAndRender();
+      if (currentEngineMode === 'literature') {
+        const ws = getActiveWorkspace();
+        const pinnedSet = new Set((ws && ws.pinned) ? ws.pinned : []);
+        const list = isShowingOnlyPinned
+          ? allRetrievedLiterature.filter(w => pinnedSet.has(w.doi || w.id || w.title))
+          : allRetrievedLiterature;
+        renderizarLiteratura(list);
+      } else {
+        applyFiltersAndRender();
+      }
     }
 
     function crearNuevoWorkspaceModal() {
@@ -3589,12 +3723,7 @@
       }
     });
 
-    queryInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        buscar();
-      }
-    });
+    // Nota: el envío con Enter y salto con Shift/Alt+Enter se maneja en handleQueryInputKey(event)
 
     // GESTIÓN DE MENÚS FLOTANTES (APERTURA HACIA ABAJO ANTI-DESBORDAMIENTO)
     function toggleSourceMenu(e) {
@@ -3789,7 +3918,7 @@
           const data = await res.json();
           rawJsonData = data;
           rawOutput.textContent = JSON.stringify(data, null, 2);
-          allRetrievedLiterature = data.organic_results || [];
+          allRetrievedLiterature = data.organic_results || data.works || [];
           
           if (intelDropdown) intelDropdown.style.display = 'none';
           
@@ -3948,6 +4077,9 @@
 
       const activeList = [];
 
+      if (isShowingOnlyPinned) {
+        activeList.push({ label: 'Solo Guardadas (Semillas)', reset: () => togglePinnedPatentsView() });
+      }
       if (currentSource !== 'all') {
         activeList.push({ label: `Fuente: ${currentSource}`, reset: () => seleccionarFuente('all', 'Todas las fuentes') });
       }
@@ -4117,7 +4249,14 @@
       const chkFriendly = document.getElementById('chk-friendly')?.checked;
       const chkCorporate = document.getElementById('chk-corporate')?.checked;
 
+      const activeWs = getActiveWorkspace();
+      const pinnedSet = new Set((activeWs && activeWs.pinned) ? activeWs.pinned : []);
+
       let filtered = allRetrievedPatents.filter(p => {
+        // Filtro por Documentos Semilla Guardados (Pinned)
+        if (isShowingOnlyPinned && !pinnedSet.has(p.publication_number)) {
+          return false;
+        }
         // Filtro por Territorio / Jurisdicción
         if (currentJurisdictionFilter !== 'ALL') {
           const juris = getPatentJurisdiction(p);
@@ -4323,40 +4462,160 @@
       }
     }
 
+    function construirDossierHtml(p, isSidebarDrawer = false) {
+      if (!p) return '';
+      const isLit = Boolean(p.isLiterature);
+      const pubNum = escapeHtml(p.publication_number || 'N/A');
+      const title = escapeHtml(p.title || 'Sin título registrado');
+      const assignee = escapeHtml(p.assignee || 'No especificado');
+      const inventor = escapeHtml(p.inventor || 'No especificado');
+      const pubDate = escapeHtml(p.publication_date || 'N/A');
+      const filingDate = p.filing_date ? escapeHtml(p.filing_date) : null;
+      const snippet = escapeHtml(p.snippet || '');
+      const sourceName = escapeHtml(p.source || (isLit ? 'OpenAlex' : 'Google Patents'));
+      const act = isPatentActive(p);
+      const cits = p.forwardCitationCount || p.cited_by_count || 0;
+      const patentLink = p.patent_link || (isLit ? '#' : `https://patents.google.com/patent/${pubNum}/en`);
+      const suffix = isSidebarDrawer ? 'sb' : 'ins';
+
+      let figsHtml = '';
+      if (p.figures && p.figures.length > 0) {
+        figsHtml = `
+          <div style="margin-bottom: 14px;">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">
+              Galería Técnica de Figuras (${p.figures.length})
+            </div>
+            <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px;">
+              ${p.figures.map(f => `
+                <img src="${escapeHtml(f)}" style="height: 135px; border: 1px solid var(--border-color); border-radius: 6px; background: #fff; cursor: pointer; padding: 4px;" onclick="abrirModal('${escapeHtml(f)}', '${pubNum}')" title="Ampliar lámina técnica">
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else if (p.thumbnail) {
+        figsHtml = `
+          <div style="margin-bottom: 14px; text-align: center;">
+            <img src="${escapeHtml(p.thumbnail)}" style="max-height: 150px; border: 1px solid var(--border-color); border-radius: 6px; background: #fff; cursor: pointer; padding: 4px;" onclick="abrirModal('${escapeHtml(p.thumbnail)}', '${pubNum}')" title="Ampliar lámina técnica">
+          </div>
+        `;
+      }
+
+      let friendlyHtml = '';
+      if (p.one_sentence_summary) {
+        friendlyHtml = `
+          <div class="friendly-summary-box" style="margin-bottom: 12px;">
+            <div class="friendly-summary-title" style="justify-content: space-between;">
+              <span>Síntesis en Lenguaje Sencillo:</span>
+              <button class="btn-translate" id="${suffix}-trans-friendly-btn" onclick="toggleTraduccionSidebarFriendly('${suffix}')">
+                <span>Traducir</span>
+              </button>
+            </div>
+            <div id="${suffix}-friendly-text" style="font-size: 12.5px; line-height: 1.45;">${escapeHtml(p.one_sentence_summary)}</div>
+          </div>
+        `;
+      }
+
+      let cpcHtml = '';
+      if (p.classifications_cpc && p.classifications_cpc.length > 0) {
+        cpcHtml = `
+          <div style="margin-bottom: 12px;">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px;">Clasificaciones CPC (Clic para refinar)</div>
+            <div class="classif-row" style="margin-bottom: 0;">
+              ${p.classifications_cpc.map(c => `<span class="classif-pill" onclick="cerrarSidebar(); refinarConCPC('${escapeHtml(c)}')" title="Refinar búsqueda con esta clase">CPC: ${escapeHtml(c)}</span>`).join('')}
+            </div>
+          </div>
+        `;
+      } else if (p.concepts && p.concepts.length > 0) {
+        cpcHtml = `
+          <div style="margin-bottom: 12px;">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px;">Tópicos Académicos (Clic para explorar)</div>
+            <div class="classif-row" style="margin-bottom: 0;">
+              ${p.concepts.map(c => `<span class="classif-pill" onclick="cerrarSidebar(); buscar('${escapeHtml(c.name)}')">${escapeHtml(c.name)} (${c.score}%)</span>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      const statusBadgeHtml = isLit
+        ? (p.is_oa
+          ? '<span class="oa-badge oa-open">Acceso Abierto (OA)</span>'
+          : '<span class="oa-badge oa-closed">Suscripción</span>')
+        : (act
+          ? '<span class="patent-status-badge badge-ok">Vigente (Protegida)</span>'
+          : '<span class="patent-status-badge fto-public-domain">Dominio Público (FTO Libre)</span>');
+
+      return `
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
+          <span style="font-family: monospace; font-size: 12px; font-weight: 700; color: var(--brand-primary);">${pubNum}</span>
+          ${statusBadgeHtml}
+        </div>
+        <h3 style="font-size: 15px; font-weight: 700; color: var(--text-high); line-height: 1.35; margin-bottom: 12px;">
+          ${title}
+        </h3>
+
+        ${friendlyHtml}
+
+        <div style="background-color: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
+          <div class="patent-meta-grid" style="margin-bottom: 0; font-size: 12px;">
+            <span class="meta-lbl">${isLit ? 'Revista / Fuente:' : 'Titular:'}</span>
+            <span class="meta-val assignee-val">${assignee}</span>
+
+            <span class="meta-lbl">${isLit ? 'Autor(es):' : 'Inventor(es):'}</span>
+            <span class="meta-val">${inventor}</span>
+
+            ${filingDate ? `<span class="meta-lbl">Solicitud:</span><span class="meta-val">${filingDate}</span>` : ''}
+            <span class="meta-lbl">${isLit ? 'Año:' : 'Publicación:'}</span>
+            <span class="meta-val">${pubDate}</span>
+
+            <span class="meta-lbl">Citas de Impacto:</span>
+            <span class="meta-val">${cits} citas</span>
+
+            <span class="meta-lbl">Motor Origen:</span>
+            <span class="meta-val">${sourceName}</span>
+          </div>
+        </div>
+
+        ${figsHtml}
+
+        ${cpcHtml}
+
+        <div class="abstract-box" style="margin-bottom: 14px;">
+          <div class="abstract-header">
+            <span class="abstract-label">Resumen / Abstract Oficial</span>
+            <button class="btn-translate" id="${suffix}-trans-abstract-btn" onclick="toggleTraduccionSidebarAbstract('${suffix}')">
+              <span>Traducir al Español</span>
+            </button>
+          </div>
+          <div id="${suffix}-abstract-text" style="font-size: 12px; line-height: 1.55;">${snippet || 'Sin resumen registrado'}</div>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--border-color);">
+          <button class="btn-ask-patent" onclick="explicarDocumentoInspeccionado()" title="Pedir al Agente Pericial que explique este documento en detalle">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="12" x="3" y="8" rx="2"/><path d="M12 2v6"/><path d="M12 18v4"/><circle cx="9" cy="14" r="1"/><circle cx="15" cy="14" r="1"/></svg>
+            <span style="font-weight:700; color:var(--brand-primary);">?</span>
+            <span>Explicar con Agente</span>
+          </button>
+          ${p.pdf ? `<a href="${escapeHtml(p.pdf)}" target="_blank" rel="noopener" class="btn-copy-pdf" style="text-decoration: none;">PDF Oficial &nearr;</a>` : ''}
+          <a href="${escapeHtml(patentLink)}" target="_blank" rel="noopener" class="btn-ghost" style="font-size: 11px; color: var(--brand-primary); font-weight: 600; text-decoration: none;">Registro Oficial &nearr;</a>
+        </div>
+      `;
+    }
+
+    function explicarDocumentoInspeccionado() {
+      const p = currentActivePatentData;
+      if (!p) return;
+      const pubNum = p.publication_number || 'N/A';
+      const promptText = p.isLiterature
+        ? `Explícame en detalle este artículo científico (${pubNum}): "${p.title}". ¿Cuáles son sus aportes metodológicos, hallazgos clave y cómo alimenta nuestro estado de la técnica?`
+        : `Explícame en detalle la patente ${pubNum}: "${p.title}". ¿Qué reivindica técnicamente, cuál es su novedad frente a antecedentes y cuál es su situación de Libertad de Operación (FTO)?`;
+      preguntarAlAgente(promptText);
+    }
+
     function renderizarInspectionDossier() {
       const activeView = document.getElementById('inspection-active-view');
       const p = currentActivePatentData;
       if (!p || !activeView) return;
-
-      const title = p.title || 'Sin título';
-      const pubNum = p.publication_number || 'N/A';
-      const assignee = p.assignee || 'No especificado';
-      const pubDate = p.publication_date || 'N/A';
-      const act = isPatentActive(p);
-      const snippet = p.snippet || '';
-
-      activeView.innerHTML = `
-        <div style="font-size: 11px; font-weight: 700; color: var(--brand-primary); margin-bottom: 4px;">${pubNum}</div>
-        <h3 style="font-size: 14px; font-weight: 700; color: var(--text-high); line-height: 1.35; margin-bottom: 10px;">${title}</h3>
-        
-        <div style="background-color: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; font-size: 12px; margin-bottom: 12px;">
-          <div><strong>Titular:</strong> ${assignee}</div>
-          <div><strong>Fecha:</strong> ${pubDate}</div>
-          <div><strong>Estado FTO:</strong> ${act ? '<span style="color:#22c55e; font-weight:700;">Vigente</span>' : '<span style="color:#38bdf8; font-weight:700;">Dominio Público</span>'}</div>
-        </div>
-
-        ${p.thumbnail ? `<div style="margin-bottom: 12px; text-align: center;"><img src="${p.thumbnail}" style="max-height: 140px; border-radius: 4px; border: 1px solid var(--border-color); background: #fff;" onclick="abrirModal('${p.thumbnail}', '${pubNum}')"></div>` : ''}
-
-        <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Resumen Oficial:</div>
-        <div style="font-size: 12px; line-height: 1.5; color: var(--text-medium); max-height: 180px; overflow-y: auto; background-color: var(--bg-canvas); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-          ${snippet || 'Sin resumen disponible.'}
-        </div>
-
-        <div style="margin-top: 14px; display: flex; gap: 6px; flex-wrap: wrap;">
-          ${p.pdf ? `<button class="btn-copy-pdf" onclick="copiarEnlacePdf('${p.pdf}', this)">Copiar PDF</button>` : ''}
-          ${p.patent_link ? `<a href="${p.patent_link}" target="_blank" class="btn-ghost" style="font-size: 11px; text-decoration: none;"> Abrir Web Oficial &nearr;</a>` : ''}
-        </div>
-      `;
+      activeView.innerHTML = construirDossierHtml(p, false);
     }
 
     function renderizarInspectionPdf() {
@@ -4367,16 +4626,20 @@
       if (p.pdf) {
         activeView.innerHTML = `
           <div style="height: 100%; display: flex; flex-direction: column;">
-            <iframe src="${p.pdf}#view=FitH" style="width: 100%; height: 480px; border: 1px solid var(--border-color); border-radius: 6px; background: #fff;" title="PDF Oficial"></iframe>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px;">
+              <span style="color:var(--text-muted); font-weight:600;">Visor de Gaceta / PDF Oficial</span>
+              <a href="${escapeHtml(p.pdf)}" target="_blank" rel="noopener" style="color:var(--brand-primary); font-weight:600; text-decoration:none;">Abrir en pestaña nueva &nearr;</a>
+            </div>
+            <iframe src="${escapeHtml(p.pdf)}#view=FitH" style="width: 100%; height: 520px; border: 1px solid var(--border-color); border-radius: 6px; background: #fff;" title="PDF Oficial"></iframe>
           </div>
         `;
       } else {
         activeView.innerHTML = `
-          <div style="padding: 30px 10px; text-align: center; color: var(--text-muted);">
-            <div style="font-size: 28px; margin-bottom: 8px;"></div>
-            <div style="font-size: 13px; font-weight: 600; color: var(--text-high); margin-bottom: 6px;">PDF directo no disponible</div>
-            <p style="font-size: 11.5px; line-height: 1.4;">Consulta la gaceta escaneada en el portal oficial de origen.</p>
-            ${p.patent_link ? `<a href="${p.patent_link}" target="_blank" class="btn-ghost" style="margin-top: 10px; font-size: 11px; text-decoration: none;">Ir a Registro Oficial &nearr;</a>` : ''}
+          <div style="padding: 36px 14px; text-align: center; color: var(--text-muted);">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:10px; opacity:0.6;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <div style="font-size: 13px; font-weight: 600; color: var(--text-high); margin-bottom: 6px;">PDF directo no indexado en caché</div>
+            <p style="font-size: 11.5px; line-height: 1.45; margin-bottom: 12px;">El expediente oficial está disponible directamente en el portal de la oficina de origen.</p>
+            ${p.patent_link ? `<a href="${escapeHtml(p.patent_link)}" target="_blank" rel="noopener" class="btn-ghost" style="display:inline-block; font-size: 11.5px; color:var(--brand-primary); font-weight:600; text-decoration: none;">Abrir Expediente en Oficina Oficial &nearr;</a>` : ''}
           </div>
         `;
       }
@@ -4385,14 +4648,14 @@
     function abrirSidebarPatente(idx) {
       const p = currentRenderedPatents[idx];
       if (!p) return;
-      currentActivePatentData = p;
+      currentActivePatentData = { ...p, isLiterature: false };
 
       // Resaltar tarjeta activa en el centro
       document.querySelectorAll('.patent-card').forEach(c => c.classList.remove('active-inspected-card'));
       const activeCard = document.getElementById('card-pat-' + idx);
       if (activeCard) activeCard.classList.add('active-inspected-card');
 
-      cambiarSidebarTab('dossier');
+      // Actualizar panel derecho en escritorio
       const standbyView = document.getElementById('inspection-standby-view');
       const activeView = document.getElementById('inspection-active-view');
       if (standbyView && activeView) {
@@ -4401,138 +4664,34 @@
         cambiarInspectionTab('dossier');
       }
 
+      // Actualizar también el drawer móvil/tablet (< 1100px donde .col-inspection se oculta)
+      cambiarSidebarTab('dossier');
       const pubNum = p.publication_number || 'N/A';
-      const title = p.title || 'Sin título registrado';
-      const assignee = p.assignee || 'No especificado / Persona natural';
-      const inventor = p.inventor || 'No especificado';
-      const pubDate = p.publication_date || 'N/A';
-      const filingDate = p.filing_date || null;
-      const snippet = p.snippet || '';
       const sourceBadge = p.source_badge || 'google';
       const sourceName = p.source || 'Google Patents';
       const active = isPatentActive(p);
       const cits = p.forwardCitationCount || 0;
       const patentLink = p.patent_link || `https://patents.google.com/patent/${pubNum}/en`;
 
-      // Header de la barra lateral (si se abre en móvil)
       const sbHeader = document.getElementById('sidebar-header-left');
       if (sbHeader) {
         sbHeader.innerHTML = `
-          <span class="source-tag source-${sourceBadge}">[${sourceName}]</span>
+          <span class="source-tag source-${sourceBadge}">[${escapeHtml(sourceName)}]</span>
           <span class="jurisdiction-badge">${getJurisdictionFlag(pubNum)}</span>
-          <span style="font-family: monospace; font-size: 14px; font-weight: 700; color: var(--text-high);">${pubNum}</span>
-          <span class="patent-status-badge ${active ? 'badge-ok' : 'fto-public-domain'}" title="${active ? 'Patente vigente' : 'Libertad de Operación (FTO) en dominio público'}">${active ? (p.legal_status || 'Vigente') : 'Dominio Público (FTO)'}</span>
+          <span style="font-family: monospace; font-size: 14px; font-weight: 700; color: var(--text-high);">${escapeHtml(pubNum)}</span>
+          <span class="patent-status-badge ${active ? 'badge-ok' : 'fto-public-domain'}">${active ? escapeHtml(p.legal_status || 'Vigente') : 'Dominio Público (FTO)'}</span>
           ${cits > 0 ? `<span class="patent-citations-badge">Citas: ${cits}</span>` : ''}
         `;
       }
-
       const extBtn = document.getElementById('sidebar-ext-btn');
       if (extBtn) extBtn.href = patentLink;
 
-      // Body con dossier completo
-      let figsHtml = '';
-      if (p.figures && p.figures.length > 0) {
-        figsHtml = `
-          <div style="margin-bottom: 18px;">
-            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">
-               Galería Técnica de Figuras (${p.figures.length})
-            </div>
-            <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px;">
-              ${p.figures.map(f => `
-                <img src="${f}" style="height: 160px; border: 1px solid var(--border-color); border-radius: 6px; background: #fff; cursor: pointer; padding: 4px;" onclick="abrirModal('${f}', '${pubNum}')" title="Ver en grande">
-              `).join('')}
-            </div>
-          </div>
-        `;
-      } else if (p.thumbnail) {
-        figsHtml = `
-          <div style="margin-bottom: 18px;">
-            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">
-              Figura Técnica
-            </div>
-            <img src="${p.thumbnail}" style="max-height: 180px; border: 1px solid var(--border-color); border-radius: 6px; background: #fff; cursor: pointer; padding: 4px;" onclick="abrirModal('${p.thumbnail}', '${pubNum}')" title="Ver en grande">
-          </div>
-        `;
+      const sbDossier = document.getElementById('sidebar-body-dossier');
+      if (sbDossier) {
+        sbDossier.innerHTML = construirDossierHtml(currentActivePatentData, true);
       }
 
-      let friendlyHtml = '';
-      if (p.one_sentence_summary) {
-        friendlyHtml = `
-          <div class="friendly-summary-box" style="margin-bottom: 16px;">
-            <div class="friendly-summary-title" style="justify-content: space-between;">
-              <span>Resumen Tecnológico en Lenguaje Sencillo:</span>
-              <button class="btn-translate" id="sidebar-trans-friendly-btn" onclick="toggleTraduccionSidebarFriendly('${escapeHtml(p.one_sentence_summary)}')">
-                <span>Traducir</span>
-              </button>
-            </div>
-            <div id="sidebar-friendly-text" style="font-size: 13.5px; line-height: 1.5;">${p.one_sentence_summary}</div>
-            ${p.industry_tags && p.industry_tags.length ? `
-              <div class="industry-tags-row">
-                ${p.industry_tags.map(tag => `<span class="badge-industry">${tag.replace('_', ' ')}</span>`).join('')}
-              </div>
-            ` : ''}
-          </div>
-        `;
-      }
-
-      let cpcHtml = '';
-      if (p.classifications_cpc && p.classifications_cpc.length > 0) {
-        cpcHtml = `
-          <div style="margin-bottom: 14px;">
-            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Clasificaciones Tecnológicas (CPC)</div>
-            <div class="classif-row">
-              ${p.classifications_cpc.map(c => `<span class="classif-pill" onclick="cerrarSidebar(); refinarConCPC('${c}')" title="Refinar búsqueda con esta clase">CPC: ${c}</span>`).join('')}
-            </div>
-          </div>
-        `;
-      }
-
-      document.getElementById('sidebar-body-dossier').innerHTML = `
-        <h2 style="font-size: 17px; font-weight: 700; color: var(--text-high); line-height: 1.35; margin-bottom: 14px;">
-          ${title}
-        </h2>
-
-        ${friendlyHtml}
-
-        <div style="background-color: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
-          <div class="patent-meta-grid" style="margin-bottom: 0;">
-            <span class="meta-lbl">Titular:</span>
-            <span class="meta-val assignee-val">${assignee}</span>
-
-            <span class="meta-lbl">Inventor(es):</span>
-            <span class="meta-val">${inventor}</span>
-
-            ${filingDate ? `<span class="meta-lbl">Solicitud:</span><span class="meta-val">${filingDate}</span>` : ''}
-            <span class="meta-lbl">Publicación:</span>
-            <span class="meta-val">${pubDate}</span>
-
-            <span class="meta-lbl">Fuente API:</span>
-            <span class="meta-val">${sourceName}</span>
-          </div>
-        </div>
-
-        ${figsHtml}
-
-        ${cpcHtml}
-
-        <div class="abstract-box" style="margin-bottom: 18px;">
-          <div class="abstract-header">
-            <span class="abstract-label">Resumen / Abstract Oficial</span>
-            <button class="btn-translate" id="sidebar-trans-abstract-btn" onclick="toggleTraduccionSidebarAbstract('${escapeHtml(snippet)}')">
-              <span>Traducir al Español</span>
-            </button>
-          </div>
-          <div id="sidebar-abstract-text">${snippet || 'Sin resumen registrado'}</div>
-        </div>
-
-        <div style="display: flex; gap: 10px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--border-color);">
-          ${p.pdf ? `<a href="${p.pdf}" target="_blank" class="btn-ghost" style="color: var(--status-danger); font-weight: 600; text-decoration: none;"> Descargar PDF Oficial</a>` : ''}
-          <a href="${patentLink}" target="_blank" class="btn-ghost" style="color: var(--brand-primary); font-weight: 600; text-decoration: none;"> Ver en Ficha Web Externa &nearr;</a>
-        </div>
-      `;
-
-      // Solo abrir el drawer superpuesto en dispositivos móviles estrechos donde no cabe la 3a columna
-      if (window.innerWidth < 900) {
+      if (window.innerWidth < 1100) {
         document.getElementById('patent-sidebar').classList.add('open');
         document.getElementById('sidebar-backdrop').classList.add('open');
       }
@@ -4905,110 +5064,70 @@
       }
     });
 
-    // Traducción para el resumen de PatentBrief (en tarjetas y sidebar)
-    async function toggleTraduccionFriendly(idx, originalText) {
+    async function traducirTextoElemento(originalText, btn, textElem, labelIdle = 'Traducir al Español', labelRevert = '↺ Original') {
+      if (!originalText || !btn || !textElem) return;
+      if (btn.dataset.translated === "true") {
+        textElem.textContent = originalText;
+        btn.dataset.translated = "false";
+        btn.innerHTML = `<span>${labelIdle}</span>`;
+        return;
+      }
+      if (translationCache[originalText]) {
+        textElem.textContent = translationCache[originalText];
+        btn.dataset.translated = "true";
+        btn.innerHTML = `<span>${labelRevert}</span>`;
+        return;
+      }
+      btn.innerHTML = `<span>Traduciendo...</span>`;
+      try {
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: originalText })
+        });
+        const data = await res.json();
+        if (data.translated) {
+          translationCache[originalText] = data.translated;
+          textElem.textContent = data.translated;
+          btn.dataset.translated = "true";
+          btn.innerHTML = `<span>${labelRevert}</span>`;
+        } else {
+          btn.innerHTML = `<span>${labelIdle}</span>`;
+        }
+      } catch (e) {
+        btn.innerHTML = `<span>Error</span>`;
+      }
+    }
+
+    async function toggleTraduccionFriendly(idx) {
+      const p = currentRenderedPatents[idx];
+      if (!p || !p.one_sentence_summary) return;
       const btn = document.getElementById(`friendly-trans-btn-${idx}`);
       const textElem = document.getElementById(`friendly-text-${idx}`);
-      
-      if (btn.dataset.translated === "true") {
-        textElem.textContent = originalText;
-        btn.dataset.translated = "false";
-        btn.innerHTML = `<span>Traducir</span>`;
-        return;
-      }
-
-      if (translationCache[originalText]) {
-        textElem.textContent = translationCache[originalText];
-        btn.dataset.translated = "true";
-        btn.innerHTML = `<span>↺ Original</span>`;
-        return;
-      }
-
-      btn.innerHTML = `<span>Traduciendo...</span>`;
-      try {
-        const res = await fetch('/api/translate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: originalText })
-        });
-        const data = await res.json();
-        if (data.translated) {
-          translationCache[originalText] = data.translated;
-          textElem.textContent = data.translated;
-          btn.dataset.translated = "true";
-          btn.innerHTML = `<span>↺ Original</span>`;
-        }
-      } catch (e) {
-        btn.innerHTML = `<span>Error</span>`;
-      }
+      await traducirTextoElemento(p.one_sentence_summary, btn, textElem, 'Traducir', '↺ Original');
     }
 
-    async function toggleTraduccionSidebarFriendly(originalText) {
-      const btn = document.getElementById('sidebar-trans-friendly-btn');
-      const textElem = document.getElementById('sidebar-friendly-text');
-      if (btn.dataset.translated === "true") {
-        textElem.textContent = originalText;
-        btn.dataset.translated = "false";
-        btn.innerHTML = `<span>Traducir</span>`;
-        return;
-      }
-      if (translationCache[originalText]) {
-        textElem.textContent = translationCache[originalText];
-        btn.dataset.translated = "true";
-        btn.innerHTML = `<span>↺ Original</span>`;
-        return;
-      }
-      btn.innerHTML = `<span>Traduciendo...</span>`;
-      try {
-        const res = await fetch('/api/translate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: originalText })
-        });
-        const data = await res.json();
-        if (data.translated) {
-          translationCache[originalText] = data.translated;
-          textElem.textContent = data.translated;
-          btn.dataset.translated = "true";
-          btn.innerHTML = `<span>↺ Original</span>`;
-        }
-      } catch (e) {
-        btn.innerHTML = `<span>Error</span>`;
-      }
+    async function toggleTraduccionSidebarFriendly(suffix = 'ins') {
+      const p = currentActivePatentData;
+      if (!p || !p.one_sentence_summary) return;
+      const btn = document.getElementById(`${suffix}-trans-friendly-btn`);
+      const textElem = document.getElementById(`${suffix}-friendly-text`);
+      await traducirTextoElemento(p.one_sentence_summary, btn, textElem, 'Traducir', '↺ Original');
     }
 
-    async function toggleTraduccionSidebarAbstract(originalText) {
-      const btn = document.getElementById('sidebar-trans-abstract-btn');
-      const textElem = document.getElementById('sidebar-abstract-text');
-      if (btn.dataset.translated === "true") {
-        textElem.textContent = originalText;
-        btn.dataset.translated = "false";
-        btn.innerHTML = `<span>Traducir al Español</span>`;
-        return;
-      }
-      if (translationCache[originalText]) {
-        textElem.textContent = translationCache[originalText];
-        btn.dataset.translated = "true";
-        btn.innerHTML = `<span>↺ Ver Original en Inglés</span>`;
-        return;
-      }
-      btn.innerHTML = `<span>Traduciendo...</span>`;
-      try {
-        const res = await fetch('/api/translate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: originalText })
-        });
-        const data = await res.json();
-        if (data.translated) {
-          translationCache[originalText] = data.translated;
-          textElem.textContent = data.translated;
-          btn.dataset.translated = "true";
-          btn.innerHTML = `<span>↺ Ver Original en Inglés</span>`;
-        }
-      } catch (e) {
-        btn.innerHTML = `<span>Error</span>`;
-      }
+    async function toggleTraduccionSidebarAbstract(suffix = 'ins') {
+      const p = currentActivePatentData;
+      if (!p || !p.snippet) return;
+      const btn = document.getElementById(`${suffix}-trans-abstract-btn`);
+      const textElem = document.getElementById(`${suffix}-abstract-text`);
+      await traducirTextoElemento(p.snippet, btn, textElem, 'Traducir al Español', '↺ Ver Original');
+    }
+
+    function toggleExpandAbstract(elemId, btn) {
+      const el = document.getElementById(elemId);
+      if (!el || !btn) return;
+      const isExpanded = el.classList.toggle('expanded');
+      btn.textContent = isExpanded ? 'Ver menos ▴' : 'Leer más ▾';
     }
 
     
@@ -5050,17 +5169,17 @@
       
       // Parsear acción de búsqueda: [ACTION:SEARCH query="..."]
       let formatted = text.replace(/\[ACTION:SEARCH\s+query=["'](.*?)["']\]/gi, (match, q) => {
-        return `<div style="margin: 6px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('search', '${escapeHtml(q).replace(/'/g, "\\'")}')">Ejecutar búsqueda en panel: "<strong>${escapeHtml(q)}</strong>"</button></div>`;
+        return `<div style="margin: 6px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('search', '${escapeJsAttr(q)}')">Ejecutar búsqueda en panel: "<strong>${escapeHtml(q)}</strong>"</button></div>`;
       });
 
       // Parsear acción de filtrado CPC: [ACTION:FILTER_CPC code="..."]
       formatted = formatted.replace(/\[ACTION:FILTER_CPC\s+code=["'](.*?)["']\]/gi, (match, code) => {
-        return `<div style="margin: 6px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('filter_cpc', '${escapeHtml(code).replace(/'/g, "\\'")}')">Refinar por CPC: <strong>${escapeHtml(code)}</strong></button></div>`;
+        return `<div style="margin: 6px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('filter_cpc', '${escapeJsAttr(code)}')">Refinar por CPC: <strong>${escapeHtml(code)}</strong></button></div>`;
       });
 
       // Parsear acción de modo de motor: [ACTION:MODE mode="..."]
       formatted = formatted.replace(/\[ACTION:MODE\s+mode=["'](.*?)["']\]/gi, (match, mode) => {
-        return `<div style="margin: 6px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('mode', '${escapeHtml(mode).replace(/'/g, "\\'")}')">Cambiar a modo: <strong>${escapeHtml(mode)}</strong></button></div>`;
+        return `<div style="margin: 6px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('mode', '${escapeJsAttr(mode)}')">Cambiar a modo: <strong>${escapeHtml(mode)}</strong></button></div>`;
       });
 
       // Formato Markdown esencial
@@ -5144,11 +5263,11 @@
         { 
           id: 'epo_ops', 
           name: 'EPO OPS Oficial', 
-          desc: 'API Apigee Developers EPO', 
+          desc: 'DOCDB / INPADOC Europa', 
           type: 'Patentes', 
-          pct: cfgEpoKey ? 100 : 70, 
-          quotaText: cfgEpoKey ? 'Conectada / 4GB sem.' : 'Clave pendiente', 
-          status: cfgEpoKey ? 'ok' : 'pending' 
+          pct: 100, 
+          quotaText: 'Conectada / 4GB sem.', 
+          status: 'ok' 
         }
       ];
 
@@ -5169,7 +5288,7 @@
         <div class="ag-health-row">
           <div class="ag-health-info">
             <span class="ag-health-name">${escapeHtml(api.name)}</span>
-            <span class="ag-health-desc">${escapeHtml(api.desc)} &bull; <small style="color:var(--text-muted);">${api.quotaText}</small></span>
+            <span class="ag-health-desc">${escapeHtml(api.desc)} &bull; <small style="color:var(--text-muted);">${escapeHtml(api.quotaText)}</small></span>
           </div>
           <div class="ag-health-val">
             <span class="ag-health-pct" style="color: ${api.status === 'ok' ? '#22c55e' : '#eab308'};">${api.pct}%</span>
@@ -5183,15 +5302,41 @@
     }
 
     function abrirAsistenteConectarApi() {
-      const chatInput = document.getElementById('ai-chat-input');
-      if (chatInput) {
-        chatInput.value = 'Quiero conectar una nueva API (The Lens / SerpApi / EPO OPS / LLM). Guíame para configurarla, probarla y registrarla.';
-        enviarMensajeAgente();
-      }
       const submenu = document.getElementById('health-submenu');
       if (submenu) submenu.style.display = 'none';
       const sourceMenu = document.getElementById('source-popup-menu');
       if (sourceMenu) sourceMenu.classList.remove('show');
+      preguntarAlAgente('Quiero conectar o configurar una nueva API (The Lens, EPO OPS, SerpApi o proveedor LLM) y definir su tope de cuota. Guíame paso a paso.');
+    }
+
+    // ASISTENTES METODOLÓGICOS JTBD (1 CLIC)
+    function lanzarAsistenteJTBDEcuacion() {
+      const currentQ = document.getElementById('query-input').value.trim();
+      const base = currentQ ? `para nuestro tema actual "${currentQ}"` : 'para nuestro proyecto de investigación';
+      preguntarAlAgente(`Ayúdame a estructurar una ecuación de búsqueda profesional usando la metodología E-T-S (Entidad - Tecnología - Solución) ${base}, incluyendo operadores booleanos (AND, OR), sinónimos técnicos en inglés y códigos CPC/IPC recomendados listos para ejecutar.`);
+    }
+
+    function lanzarAsistenteJTBDPCT() {
+      const currentQ = document.getElementById('query-input').value.trim();
+      const base = currentQ ? `considerando los resultados de "${currentQ}"` : 'para evaluar nuestra invención';
+      preguntarAlAgente(`Realiza el cuestionario de autocrítica de patentabilidad según las Reglas 11 a 13 del Reglamento PCT ${base}: 1) ¿Qué aspectos técnicos debemos fortalecer para asegurar Novedad y Nivel Inventivo? 2) ¿Qué errores comunes debemos evitar o corregir en las reivindicaciones independientes y dependientes?`);
+    }
+
+    function lanzarAsistenteJTBDFTO() {
+      if (allRetrievedPatents && allRetrievedPatents.length > 0) {
+        const q = document.getElementById('query-input').value.trim() || 'resultados actuales';
+        consultarAgenteIA(q, allRetrievedPatents, false, `Genera un dictamen exhaustivo de Libertad de Operación (FTO) sobre las ${allRetrievedPatents.length} patentes recuperadas: distingue cuáles están en Dominio Público (libre uso) frente a las Vigentes, evalúa riesgos de infracción y sugiere estrategias de diseño alrededor (design around).`);
+      } else {
+        preguntarAlAgente('¿Cómo debemos realizar un análisis de Libertad de Operación (Freedom to Operate - FTO) paso a paso sobre patentes vigentes vs. dominio público y qué impacto tiene el principio de territorialidad en Latinoamérica/Colombia?');
+      }
+    }
+
+    function lanzarAsistenteJTBDBI() {
+      if ((allRetrievedPatents && allRetrievedPatents.length > 0) || (allRetrievedLiterature && allRetrievedLiterature.length > 0)) {
+        abrirDossierModal();
+      } else {
+        preguntarAlAgente('¿Cómo identificamos a los líderes competitivos (Top Assignees), la distribución territorial de patentes (USPTO, EPO, WIPO) y los Océanos Azules (mercados sin protección concedida) en nuestra vigilancia tecnológica?');
+      }
     }
 
     // MODAL DE INSPECCIÓN FULLSCREEN
@@ -5278,7 +5423,7 @@
           { id: 'connect', label: 'Conectando con registros oficiales (Google Patents, Espacenet EPO, WIPO PCT)', status: 'running', time: 0 },
           { id: 'retrieve', label: `Recuperando familias técnicas y evaluando Libertad de Operación (FTO)`, status: 'pending', time: 0 },
           { id: 'classify', label: 'Auditando clasificaciones tecnológicas CPC/IPC y similitud de invenciones', status: 'pending', time: 0 },
-          { id: 'reason', label: `Invocando motor de razonamiento ${cfgAiModel || 'Gemini 3.5 Flash'} (peritaje estratégico)`, status: 'pending', time: 0 },
+          { id: 'reason', label: `Invocando motor de razonamiento ${cfgAiModel || 'Gemini 2.5 Flash'} (peritaje estratégico)`, status: 'pending', time: 0 },
           { id: 'compile', label: 'Compilando dictamen estructurado en Markdown y expresiones LaTeX', status: 'pending', time: 0 }
         ];
 
@@ -5411,15 +5556,15 @@
 
       // 1. Reemplazar acciones del agente por botones interactivos
       let parsed = text.replace(/\[ACTION:SEARCH\s+query=["'](.*?)["']\]/gi, (match, q) => {
-        return `<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('search', '${escapeHtml(q).replace(/'/g, "\\'")}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Ejecutar búsqueda: "<strong>${escapeHtml(q)}</strong>"</button></div>`;
+        return `<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('search', '${escapeJsAttr(q)}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Ejecutar búsqueda: "<strong>${escapeHtml(q)}</strong>"</button></div>`;
       });
 
       parsed = parsed.replace(/\[ACTION:FILTER_CPC\s+code=["'](.*?)["']\]/gi, (match, code) => {
-        return `<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('filter_cpc', '${escapeHtml(code).replace(/'/g, "\\'")}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Refinar por clase CPC: <strong>${escapeHtml(code)}</strong></button></div>`;
+        return `<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('filter_cpc', '${escapeJsAttr(code)}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Refinar por clase CPC: <strong>${escapeHtml(code)}</strong></button></div>`;
       });
 
       parsed = parsed.replace(/\[ACTION:MODE\s+mode=["'](.*?)["']\]/gi, (match, mode) => {
-        return `<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('mode', '${escapeHtml(mode).replace(/'/g, "\\'")}')">Cambiar modo: <strong>${escapeHtml(mode)}</strong></button></div>`;
+        return `<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('mode', '${escapeJsAttr(mode)}')">Cambiar modo: <strong>${escapeHtml(mode)}</strong></button></div>`;
       });
 
       // 2. Compilar Markdown a HTML con marked.js
@@ -5432,6 +5577,9 @@
           .replace(/\*(.*?)\*/g, '<em>$1</em>')
           .replace(/\n/g, '<br>');
       }
+      // Sanitizar etiquetas potencialmente peligrosas preservando nuestros botones de acción
+      html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                 .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
       targetElement.innerHTML = html;
 
       // 3. Compilar expresiones LaTeX matemáticas con KaTeX
@@ -5473,7 +5621,7 @@
       const modelTag = document.getElementById('ai-active-model-tag');
 
       if (panel) panel.classList.add('active');
-      if (modelTag) modelTag.textContent = cfgAiModel || 'Gemini 3.5 Flash';
+      if (modelTag) modelTag.textContent = cfgAiModel || 'Gemini 2.5 Flash';
 
       // Activar la traza de actividad y pensamiento del agente
       AgentActivityTree.start(query);
@@ -5484,7 +5632,7 @@
         contentElem.innerHTML = `
           <div style="display:flex; align-items:center; gap:10px; color:var(--text-muted); font-size:13px; padding:8px 0;">
             <span class="thinking-spinner"></span>
-            <span>Generando dictamen pericial con ${cfgAiModel || 'Gemini 3.5 Flash'}...</span>
+            <span>Generando dictamen pericial con ${cfgAiModel || 'Gemini 2.5 Flash'}...</span>
           </div>
         `;
       }
@@ -5497,7 +5645,7 @@
         const payload = {
           provider: cfgAiProvider,
           apiKey: cfgAiKey,
-          model: cfgAiModel || 'gemini-3.5-flash',
+          model: cfgAiModel || 'gemini-2.5-flash',
           workspaceName: ws ? ws.name : 'General',
           query: query,
           activePatent: currentActivePatentData,
@@ -5526,7 +5674,7 @@
         if (data.follow_ups && data.follow_ups.length && followupsElem) {
           followupsElem.innerHTML = `
             <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Preguntas periciales sugeridas:</div>
-            ${data.follow_ups.map(f => `<span class="ai-chip-prompt" onclick="preguntarAlAgente('${f.replace(/'/g, "\\'")}')">${escapeHtml(f)}</span>`).join('')}
+            ${data.follow_ups.map(f => `<span class="ai-chip-prompt" onclick="preguntarAlAgente('${escapeJsAttr(f)}')">${escapeHtml(f)}</span>`).join('')}
           `;
         }
 
@@ -5582,10 +5730,9 @@
       const promptText = `Analiza pericialmente este artículo científico: "${w.title}". ¿Cuáles son sus principales aportes metodológicos, limitaciones experimentales y aplicaciones tecnológicas en propiedad intelectual?`;
 
       const input = document.getElementById('query-input');
-      if (input) input.value = `Consultando paper: ${w.title.substring(0, 40)}...`;
+      if (input) input.value = `Consultando paper: ${(w.title || '').substring(0, 45)}...`;
 
       consultarAgenteIA(promptText, allRetrievedLiterature, false, promptText);
-    }
     }
 
     function renderizarLiteratura(works) {
@@ -5596,56 +5743,38 @@
         return;
       }
 
+      const ws = getActiveWorkspace();
+      const pinnedSet = new Set((ws && ws.pinned) ? ws.pinned : []);
+
       container.innerHTML = works.map((w, idx) => {
-        const title = w.title || 'Sin título registrado';
-        const authors = w.authors || 'No especificados';
-        const journal = w.journal || 'Publicación Académica';
-        const year = w.publication_year || 'N/A';
+        const rawTitle = w.title || 'Sin título registrado';
+        const title = escapeHtml(rawTitle);
+        const authors = escapeHtml(w.authors || 'No especificados');
+        const journal = escapeHtml(w.journal || 'Publicación Académica');
+        const year = escapeHtml(String(w.publication_year || 'N/A'));
         const cits = w.cited_by_count || 0;
         const isOA = w.is_oa;
-        const oaStatus = (w.oa_status || 'closed').toUpperCase();
-        const snippet = w.snippet || '';
-        const concepts = w.concepts || [];
-        const doiUrl = w.doi_url || (w.doi ? `https://doi.org/${w.doi}` : '#');
+        const oaStatus = escapeHtml((w.oa_status || 'closed').toUpperCase());
+        const snippet = escapeHtml(w.snippet || '');
+        const isLongSnippet = (w.snippet || '').length > 240;
+        const concepts = (w.concepts || []).slice(0, 4);
+        const doiUrl = w.doi_url || (w.doi ? `https://doi.org/${w.doi}` : (w.landing_url || '#'));
         const pdfUrl = w.pdf_url;
+        const pinId = w.doi || w.id || rawTitle;
+        const isPinned = pinnedSet.has(pinId);
 
         let oaHtml = isOA 
           ? `<span class="oa-badge oa-open" title="Documento accesible sin muro de pago">Acceso Abierto (${oaStatus})</span>` 
-          : `<span class="oa-badge oa-closed" title="Publicación bajo suscripción">Requiere Suscripción</span>`;
+          : `<span class="oa-badge oa-closed" title="Publicación bajo suscripción">Suscripción</span>`;
 
         let conceptsHtml = '';
         if (concepts.length > 0) {
           conceptsHtml = `
-            <div class="classif-row" style="margin-top: 8px;">
+            <div class="classif-row" style="margin-top: 6px; margin-bottom: 8px;">
               <span class="classif-label">Tópicos:</span>
-              ${concepts.map(c => `<span class="classif-pill" onclick="buscar('${c.name}')" title="Buscar este tema">${c.name} (${c.score}%)</span>`).join('')}
+              ${concepts.map(c => `<span class="classif-pill" onclick="buscar('${escapeHtml(c.name)}')" title="Explorar este tópico">${escapeHtml(c.name)} (${c.score}%)</span>`).join('')}
             </div>
           `;
-        }
-
-                let linksHtml = `
-          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-            <button class="btn-ask-patent" onclick="consultarLiteraturaAgente(${idx}, event)" title="Consultar análisis pericial al Agente sobre este paper">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="18" height="12" x="3" y="8" rx="2"/>
-                <path d="M12 2v6"/>
-                <path d="M12 18v4"/>
-                <circle cx="9" cy="14" r="1"/>
-                <circle cx="15" cy="14" r="1"/>
-              </svg>
-              <span style="font-weight: 700; color: var(--brand-primary); margin-left: 1px;">?</span>
-              <span>Consultar</span>
-            </button>
-            <a href="javascript:void(0)" onclick="abrirSidebarLiteratura(${idx})" style="font-weight: 600; color: var(--brand-primary);">
-              Ver Ficha Académica &rarr;
-            </a>
-            <a href="${doiUrl}" target="_blank" rel="noopener">
-              DOI Oficial &nearr;
-            </a>
-            ${pdfUrl ? `<a href="${pdfUrl}" target="_blank" rel="noopener" class="pdf-link">Descargar PDF &rarr;</a>` : ''}
-          </div>
-        `;
-" target="_blank" rel="noopener" class="pdf-link"> Descargar PDF Abierto &rarr;</a>`;
         }
 
         return `
@@ -5654,17 +5783,24 @@
               <div class="patent-main-content">
                 <div class="patent-header">
                   <div class="patent-header-left">
-                    <span class="source-tag source-openalex">[OpenAlex (Literatura Científica)]</span>
+                    <span class="source-tag source-openalex">[OpenAlex]</span>
                     ${oaHtml}
                     <span class="patent-status-badge badge-pending">${year}</span>
-                    ${cits > 0 ? `<span class="patent-citations-badge" title="${cits} publicaciones científicas citan este artículo">Citas: ${cits} académicas</span>` : ''}
+                    ${cits > 0 ? `<span class="patent-citations-badge" title="${cits} publicaciones científicas citan este artículo">Citas: ${cits}</span>` : ''}
                   </div>
-                  <div class="patent-dates-text">
-                    ${journal}
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="patent-dates-text">${journal}</span>
+                    <button class="btn-pin-patent ${isPinned ? 'pinned' : ''}" onclick="togglePinPatent('${escapeJsAttr(pinId)}', event)" title="${isPinned ? 'Quitar de documentos semilla' : 'Guardar como documento semilla en el proyecto'}">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="${isPinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" style="vertical-align:-1px; margin-right:3px;">
+                        <line x1="12" y1="17" x2="12" y2="22"></line>
+                        <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
+                      </svg>
+                      <span>${isPinned ? 'Guardada' : 'Guardar'}</span>
+                    </button>
                   </div>
                 </div>
 
-                <div class="patent-title-text" style="cursor: pointer;" onclick="abrirSidebarLiteratura(${idx})" title="Ver ficha en panel lateral">
+                <div class="patent-title-text" style="cursor: pointer;" onclick="abrirSidebarLiteratura(${idx})" title="Inspeccionar ficha académica en el panel derecho">
                   ${title}
                 </div>
 
@@ -5672,11 +5808,8 @@
                   <span class="meta-lbl">Autor(es):</span>
                   <span class="meta-val">${authors}</span>
 
-                  <span class="meta-lbl">Revista / Repositorio:</span>
-                  <span class="meta-val assignee-val">${journal}</span>
-
-                  <span class="meta-lbl">Tipo de Obra:</span>
-                  <span class="meta-val">${w.type || 'Artículo científico arbitrado'}</span>
+                  <span class="meta-lbl">Publicación:</span>
+                  <span class="meta-val assignee-val">${journal} (${ escapeHtml(w.type || 'Artículo arbitrado') })</span>
                 </div>
 
                 ${conceptsHtml}
@@ -5685,24 +5818,38 @@
                   <div class="abstract-box">
                     <div class="abstract-header">
                       <span class="abstract-label">Resumen / Abstract Científico</span>
-                      <button class="btn-translate" id="trans-btn-lit-${idx}" onclick="toggleTraduccionLit(${idx}, '${escapeHtml(snippet)}')">
-                        <span>Traducir al Español</span>
-                      </button>
+                      <div style="display:flex; align-items:center; gap:6px;">
+                        ${isLongSnippet ? `<button class="btn-expand-abstract" onclick="toggleExpandAbstract('abstract-text-lit-${idx}', this)">Leer más ▾</button>` : ''}
+                        <button class="btn-translate" id="trans-btn-lit-${idx}" onclick="toggleTraduccionLit(${idx})">
+                          <span>Traducir al Español</span>
+                        </button>
+                      </div>
                     </div>
-                    <div id="abstract-text-lit-${idx}">${snippet}</div>
+                    <div id="abstract-text-lit-${idx}" class="${isLongSnippet ? 'abstract-clamp' : ''}">${snippet}</div>
                   </div>
                 ` : ''}
 
-                <div class="patent-links">
-                  ${linksHtml}
-                </div>
-              </div>
-
-              <div class="patent-thumbnail-col">
-                <div class="no-thumb-box" style="border-color: rgba(16, 185, 129, 0.3);">
-                  <span style="font-size: 20px; margin-bottom: 2px;"></span>
-                  <span style="font-size: 10px; color: var(--src-openalex); font-weight: 600;">Paper Arbitrado</span>
-                  <span style="font-size: 9px; color: var(--text-muted); margin-top: 2px;">${year}</span>
+                <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                  <div style="display:flex; align-items:center; gap:10px; font-size:12px;">
+                    <a href="${escapeHtml(doiUrl)}" target="_blank" rel="noopener" style="color:var(--text-medium); text-decoration:none;">DOI Oficial &nearr;</a>
+                    ${pdfUrl ? `<a href="${escapeHtml(pdfUrl)}" target="_blank" rel="noopener" style="color:var(--status-success); font-weight:600; text-decoration:none;">PDF Abierto (OA) &nearr;</a>` : ''}
+                  </div>
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <button class="btn-ask-patent" onclick="consultarLiteraturaAgente(${idx}, event)" title="Consultar análisis pericial al Agente sobre este paper">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="18" height="12" x="3" y="8" rx="2"/>
+                        <path d="M12 2v6"/>
+                        <path d="M12 18v4"/>
+                        <circle cx="9" cy="14" r="1"/>
+                        <circle cx="15" cy="14" r="1"/>
+                      </svg>
+                      <span style="font-weight: 700; color: var(--brand-primary); margin-left: 1px;">?</span>
+                      <span>Consultar</span>
+                    </button>
+                    <button class="btn-ghost" onclick="abrirSidebarLiteratura(${idx})" style="font-size: 11.5px; font-weight: 600; color: var(--brand-primary);">
+                      Ficha y PDF &rarr;
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -5711,121 +5858,75 @@
       }).join('');
     }
 
-    async function toggleTraduccionLit(idx, originalText) {
+    async function toggleTraduccionLit(idx) {
+      const w = currentRenderedLiterature[idx];
+      if (!w || !w.snippet) return;
       const btn = document.getElementById(`trans-btn-lit-${idx}`);
       const textElem = document.getElementById(`abstract-text-lit-${idx}`);
-      if (btn.dataset.translated === "true") {
-        textElem.textContent = originalText;
-        btn.dataset.translated = "false";
-        btn.innerHTML = `<span>Traducir al Español</span>`;
-        return;
-      }
-      if (translationCache[originalText]) {
-        textElem.textContent = translationCache[originalText];
-        btn.dataset.translated = "true";
-        btn.innerHTML = `<span>↺ Ver Original en Inglés</span>`;
-        return;
-      }
-      btn.innerHTML = `<span>Traduciendo...</span>`;
-      try {
-        const res = await fetch('/api/translate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: originalText })
-        });
-        const data = await res.json();
-        if (data.translated) {
-          translationCache[originalText] = data.translated;
-          textElem.textContent = data.translated;
-          btn.dataset.translated = "true";
-          btn.innerHTML = `<span>↺ Ver Original en Inglés</span>`;
-        }
-      } catch (e) {
-        btn.innerHTML = `<span>Error de traducción</span>`;
-      }
+      await traducirTextoElemento(w.snippet, btn, textElem, 'Traducir al Español', '↺ Ver Original en Inglés');
     }
 
     function abrirSidebarLiteratura(idx) {
       const w = currentRenderedLiterature[idx];
       if (!w) return;
       currentActivePatentData = {
-        pdf: w.pdf_url,
-        patent_link: w.doi_url || w.landing_url
+        isLiterature: true,
+        publication_number: w.doi || w.id || 'OpenAlex Paper',
+        title: w.title || 'Sin título registrado',
+        assignee: w.journal || 'Publicación Académica',
+        inventor: w.authors || 'No especificados',
+        publication_date: String(w.publication_year || 'N/A'),
+        legal_status: w.is_oa ? 'Acceso Abierto (OA)' : 'Suscripción',
+        is_oa: w.is_oa,
+        cited_by_count: w.cited_by_count || 0,
+        forwardCitationCount: w.cited_by_count || 0,
+        snippet: w.snippet || '',
+        concepts: w.concepts || [],
+        source: 'OpenAlex (Literatura Científica)',
+        pdf: w.pdf_url || null,
+        patent_link: w.doi_url || w.landing_url || '#'
       };
 
-      cambiarSidebarTab('dossier');
+      // Resaltar tarjeta activa en el centro
+      document.querySelectorAll('.patent-card').forEach(c => c.classList.remove('active-inspected-card'));
+      const activeCard = document.getElementById('card-lit-' + idx);
+      if (activeCard) activeCard.classList.add('active-inspected-card');
 
-      const isOA = w.is_oa;
-      const oaStatus = (w.oa_status || 'closed').toUpperCase();
-      let oaHtml = isOA 
-        ? `<span class="oa-badge oa-open">Acceso Abierto (${oaStatus})</span>` 
-        : `<span class="oa-badge oa-closed">Requiere Suscripción</span>`;
-
-      document.getElementById('sidebar-header-left').innerHTML = `
-        <span class="source-tag source-openalex">[OpenAlex Literatura]</span>
-        ${oaHtml}
-        <span class="patent-status-badge badge-pending">${w.publication_year || 'N/A'}</span>
-        ${w.cited_by_count > 0 ? `<span class="patent-citations-badge">Citas: ${w.cited_by_count}</span>` : ''}
-      `;
-
-      document.getElementById('sidebar-ext-btn').href = w.doi_url || w.landing_url || '#';
-
-      let conceptsHtml = '';
-      if (w.concepts && w.concepts.length) {
-        conceptsHtml = `
-          <div style="margin-bottom: 14px;">
-            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Tópicos de Investigación</div>
-            <div class="classif-row">
-              ${w.concepts.map(c => `<span class="classif-pill" onclick="cerrarSidebar(); buscar('${c.name}')">${c.name} (${c.score}%)</span>`).join('')}
-            </div>
-          </div>
-        `;
+      // Actualizar panel de inspección derecho en escritorio
+      const standbyView = document.getElementById('inspection-standby-view');
+      const activeView = document.getElementById('inspection-active-view');
+      if (standbyView && activeView) {
+        standbyView.style.display = 'none';
+        activeView.style.display = 'block';
+        cambiarInspectionTab('dossier');
       }
 
-      document.getElementById('sidebar-body-dossier').innerHTML = `
-        <h2 style="font-size: 17px; font-weight: 700; color: var(--text-high); line-height: 1.35; margin-bottom: 14px;">
-          ${w.title}
-        </h2>
+      // Actualizar drawer móvil/tablet (< 1100px)
+      cambiarSidebarTab('dossier');
+      const isOA = w.is_oa;
+      const oaStatus = escapeHtml((w.oa_status || 'closed').toUpperCase());
+      let oaHtml = isOA 
+        ? `<span class="oa-badge oa-open">Acceso Abierto (${oaStatus})</span>` 
+        : `<span class="oa-badge oa-closed">Suscripción</span>`;
 
-        <div style="background-color: var(--bg-canvas); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
-          <div class="patent-meta-grid" style="margin-bottom: 0;">
-            <span class="meta-lbl">Autor(es):</span>
-            <span class="meta-val">${w.authors}</span>
+      const sbHeader = document.getElementById('sidebar-header-left');
+      if (sbHeader) {
+        sbHeader.innerHTML = `
+          <span class="source-tag source-openalex">[OpenAlex Literatura]</span>
+          ${oaHtml}
+          <span class="patent-status-badge badge-pending">${escapeHtml(String(w.publication_year || 'N/A'))}</span>
+          ${w.cited_by_count > 0 ? `<span class="patent-citations-badge">Citas: ${w.cited_by_count}</span>` : ''}
+        `;
+      }
+      const extBtn = document.getElementById('sidebar-ext-btn');
+      if (extBtn) extBtn.href = w.doi_url || w.landing_url || '#';
 
-            <span class="meta-lbl">Revista / Publicación:</span>
-            <span class="meta-val assignee-val">${w.journal}</span>
+      const sbDossier = document.getElementById('sidebar-body-dossier');
+      if (sbDossier) {
+        sbDossier.innerHTML = construirDossierHtml(currentActivePatentData, true);
+      }
 
-            <span class="meta-lbl">Año:</span>
-            <span class="meta-val">${w.publication_year}</span>
-
-            <span class="meta-lbl">Citas Académicas:</span>
-            <span class="meta-val">${w.cited_by_count} citas</span>
-
-            <span class="meta-lbl">DOI:</span>
-            <span class="meta-val">${w.doi || 'No asignado'}</span>
-          </div>
-        </div>
-
-        ${conceptsHtml}
-
-        <div class="abstract-box" style="margin-bottom: 18px;">
-          <div class="abstract-header">
-            <span class="abstract-label">Resumen / Abstract Científico</span>
-            <button class="btn-translate" id="sidebar-trans-abstract-btn" onclick="toggleTraduccionSidebarAbstract('${escapeHtml(w.snippet)}')">
-              <span>Traducir al Español</span>
-            </button>
-          </div>
-          <div id="sidebar-abstract-text">${w.snippet || 'Sin resumen registrado'}</div>
-        </div>
-
-        <div style="display: flex; gap: 10px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--border-color);">
-          ${w.pdf_url ? `<a href="${w.pdf_url}" target="_blank" class="btn-ghost" style="color: var(--status-success); font-weight: 600; text-decoration: none;"> Descargar PDF Abierto (OA)</a>` : ''}
-          <a href="${w.doi_url || w.landing_url}" target="_blank" class="btn-ghost" style="color: var(--brand-primary); font-weight: 600; text-decoration: none;"> Ver en Repositorio Oficial (DOI) &nearr;</a>
-        </div>
-      `;
-
-      // Solo abrir el drawer superpuesto en dispositivos móviles estrechos donde no cabe la 3a columna
-      if (window.innerWidth < 900) {
+      if (window.innerWidth < 1100) {
         document.getElementById('patent-sidebar').classList.add('open');
         document.getElementById('sidebar-backdrop').classList.add('open');
       }
@@ -5839,24 +5940,30 @@
         return;
       }
 
+      const ws = getActiveWorkspace();
+      const pinnedSet = new Set((ws && ws.pinned) ? ws.pinned : []);
+
       container.innerHTML = patents.map((p, idx) => {
-        const pubNum = p.publication_number || 'N/A';
-        const title = p.title || 'Sin título registrado';
-        const assignee = p.assignee || 'No especificado / Persona natural';
-        const inventor = p.inventor || 'No especificado';
-        const pubDate = p.publication_date || 'N/A';
-        const filingDate = p.filing_date || null;
-        const snippet = p.snippet || '';
-        const sourceBadge = p.source_badge || 'google';
-        const sourceName = p.source || 'Google Patents';
+        const rawPubNum = p.publication_number || 'N/A';
+        const pubNum = escapeHtml(rawPubNum);
+        const title = escapeHtml(p.title || 'Sin título registrado');
+        const assignee = escapeHtml(p.assignee || 'No especificado / Persona natural');
+        const inventor = escapeHtml(p.inventor || 'No especificado');
+        const pubDate = escapeHtml(p.publication_date || 'N/A');
+        const filingDate = p.filing_date ? escapeHtml(p.filing_date) : null;
+        const snippet = escapeHtml(p.snippet || '');
+        const isLongSnippet = (p.snippet || '').length > 240;
+        const sourceBadge = escapeHtml(p.source_badge || 'google');
+        const sourceName = escapeHtml(p.source || 'Google Patents');
+        const isPinned = pinnedSet.has(rawPubNum);
 
         const active = isPatentActive(p);
         let statusClass = active ? 'badge-ok' : 'fto-public-domain';
         let statusText = active 
-          ? (p.legal_status || 'Vigente') 
-          : 'Dominio Público (FTO)';
+          ? escapeHtml(p.legal_status || 'Vigente') 
+          : 'Dominio Público (FTO Libre)';
         let statusTitle = active
-          ? 'Patente con derechos vigentes: requiere licenciamiento o diseño alternativo.'
+          ? 'Patente con derechos vigentes: requiere licenciamiento o diseño alternativo (design around).'
           : 'Libertad de Operación (Freedom to Operate): Patente en dominio público. Se puede fabricar, adaptar y comercializar libremente sin regalías.';
         const cits = p.forwardCitationCount || 0;
 
@@ -5865,67 +5972,60 @@
         if (p.thumbnail) {
           thumbHtml = `
             <div class="patent-thumbnail-col">
-              <img src="${p.thumbnail}" alt="Fig. Patente" class="patent-thumb-img" onclick="abrirModal('${p.thumbnail}', '${pubNum}')" title="Ver figura técnica en grande">
+              <img src="${escapeHtml(p.thumbnail)}" alt="Fig. Patente" class="patent-thumb-img" onclick="abrirModal('${escapeHtml(p.thumbnail)}', '${pubNum}')" title="Ampliar figura técnica">
               <span style="font-size: 10.5px; color: var(--text-muted); font-weight: 500;">Figura Técnica</span>
             </div>
           `;
         } else {
           thumbHtml = `
             <div class="patent-thumbnail-col">
-              <div class="no-thumb-box">
+              <div class="no-thumb-box" onclick="abrirSidebarPatente(${idx})" style="cursor:pointer;" title="Abrir ficha técnica">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                <span>Sin lámina registrada</span>
+                <span>Ver Ficha</span>
               </div>
             </div>
           `;
         }
 
-        // Clasificaciones CPC
+        // Clasificaciones CPC (mostrar hasta 4 en la tarjeta para no abrumar, resto en Ficha)
         let classifHtml = '';
         const cpcs = p.classifications_cpc || [];
         if (cpcs.length > 0) {
-          classifHtml = '<div class="classif-row"><span class="classif-label">Clasificaciones:</span>';
-          cpcs.forEach(c => {
-            classifHtml += `<span class="classif-pill" onclick="refinarConCPC('${c}')" title="Filtrar por esta clase">CPC: ${c}</span>`;
+          const visibleCpcs = cpcs.slice(0, 4);
+          const extraCount = cpcs.length - visibleCpcs.length;
+          classifHtml = '<div class="classif-row"><span class="classif-label">CPC:</span>';
+          visibleCpcs.forEach(c => {
+            classifHtml += `<span class="classif-pill" onclick="refinarConCPC('${escapeHtml(c)}')" title="Filtrar ecuación por esta clase CPC">${escapeHtml(c)}</span>`;
           });
+          if (extraCount > 0) {
+            classifHtml += `<span class="classif-pill" onclick="abrirSidebarPatente(${idx})" title="Ver todas las clasificaciones en la Ficha">+${extraCount} más</span>`;
+          }
           classifHtml += '</div>';
         }
 
-        // Resumen amigable PatentBrief con Botón de Traducción
+        // Resumen amigable PatentBrief con Botón de Traducción seguro por índice
         let friendlySummaryHtml = '';
         if (p.one_sentence_summary) {
           friendlySummaryHtml = `
             <div class="friendly-summary-box">
               <div class="friendly-summary-title" style="display: flex; justify-content: space-between; align-items: center;">
-                <span>Resumen Tecnológico en Lenguaje Sencillo:</span>
-                <button class="btn-translate" id="friendly-trans-btn-${idx}" onclick="toggleTraduccionFriendly(${idx}, '${escapeHtml(p.one_sentence_summary)}')">
+                <span>Síntesis en Lenguaje Sencillo:</span>
+                <button class="btn-translate" id="friendly-trans-btn-${idx}" onclick="toggleTraduccionFriendly(${idx})">
                   <span>Traducir</span>
                 </button>
               </div>
-              <div id="friendly-text-${idx}">${p.one_sentence_summary}</div>
+              <div id="friendly-text-${idx}">${escapeHtml(p.one_sentence_summary)}</div>
               ${p.industry_tags && p.industry_tags.length ? `
                 <div class="industry-tags-row">
-                  ${p.industry_tags.map(tag => `<span class="badge-industry">${tag.replace('_', ' ')}</span>`).join('')}
+                  ${p.industry_tags.slice(0, 4).map(tag => `<span class="badge-industry">${escapeHtml(tag.replace(/_/g, ' '))}</span>`).join('')}
                 </div>
               ` : ''}
             </div>
           `;
         }
 
-        // Enlace que abre la Ficha e Inspección Técnica
-        let dynamicLinkHtml = `
-          <a href="javascript:void(0)" onclick="abrirSidebarPatente(${idx})" style="font-weight: 600; color: var(--brand-primary);">
-            Ficha e Inspección &rarr;
-          </a>
-        `;
-        if (sourceBadge === 'google') {
-          if (p.patent_link) dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Google Patents &nearr;</a>`;
-        } else if (sourceBadge === 'europepmc') {
-          if (p.patent_link) dynamicLinkHtml += `<a href="${p.patent_link}" target="_blank" rel="noopener">Espacenet / EPO &nearr;</a>`;
-        }
-        if (p.pdf) {
-          dynamicLinkHtml += `<a href="${p.pdf}" target="_blank" rel="noopener" class="pdf-link">Descargar PDF Oficial &rarr;</a>`;
-        }
+        const espacenetUrl = `https://worldwide.espacenet.com/patent/search?q=${encodeURIComponent(rawPubNum)}`;
+        const officialUrl = p.patent_link || `https://patents.google.com/patent/${encodeURIComponent(rawPubNum)}/en`;
 
         return `
           <div class="patent-card" id="card-pat-${idx}">
@@ -5934,17 +6034,26 @@
                 <div class="patent-header">
                   <div class="patent-header-left">
                     <span class="source-tag source-${sourceBadge}">[${sourceName}]</span>
-                    <span class="jurisdiction-badge">${getJurisdictionFlag(pubNum)}</span>
+                    <span class="jurisdiction-badge">${getJurisdictionFlag(rawPubNum)}</span>
                     <span class="patent-id-badge">${pubNum}</span>
                     <span class="patent-status-badge ${statusClass}" title="${statusTitle}">${statusText}</span>
                     ${cits > 0 ? `<span class="patent-citations-badge" title="${cits} patentes posteriores citan esta invención">Citas: ${cits}</span>` : ''}
                   </div>
-                  <div class="patent-dates-text">
-                    ${filingDate ? `Solicitud: ${filingDate} &bull; ` : ''}Publicación: ${pubDate}
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="patent-dates-text">
+                      ${filingDate ? `Sol: ${filingDate} &bull; ` : ''}Pub: ${pubDate}
+                    </span>
+                    <button class="btn-pin-patent ${isPinned ? 'pinned' : ''}" onclick="togglePinPatent('${escapeJsAttr(rawPubNum)}', event)" title="${isPinned ? 'Quitar de documentos semilla' : 'Guardar como documento semilla en el proyecto'}">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="${isPinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" style="vertical-align:-1px; margin-right:3px;">
+                        <line x1="12" y1="17" x2="12" y2="22"></line>
+                        <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
+                      </svg>
+                      <span>${isPinned ? 'Guardada' : 'Guardar'}</span>
+                    </button>
                   </div>
                 </div>
 
-                <div class="patent-title-text" style="cursor: pointer;" onclick="abrirSidebarPatente(${idx})" title="Hacer clic para ver ficha técnica en el panel lateral">${title}</div>
+                <div class="patent-title-text" style="cursor: pointer;" onclick="abrirSidebarPatente(${idx})" title="Hacer clic para examinar ficha completa y PDF en el panel derecho">${title}</div>
 
                 ${friendlySummaryHtml}
 
@@ -5962,24 +6071,21 @@
                   <div class="abstract-box">
                     <div class="abstract-header">
                       <span class="abstract-label">Resumen / Abstract Oficial</span>
-                      <button class="btn-translate" id="trans-btn-${idx}" onclick="toggleTraduccion(${idx}, '${escapeHtml(snippet)}')">
-                        <span>Traducir al Español</span>
-                      </button>
+                      <div style="display:flex; align-items:center; gap:6px;">
+                        ${isLongSnippet ? `<button class="btn-expand-abstract" onclick="toggleExpandAbstract('abstract-text-${idx}', this)">Leer más ▾</button>` : ''}
+                        <button class="btn-translate" id="trans-btn-${idx}" onclick="toggleTraduccion(${idx})">
+                          <span>Traducir al Español</span>
+                        </button>
+                      </div>
                     </div>
-                    <div id="abstract-text-${idx}">${snippet}</div>
+                    <div id="abstract-text-${idx}" class="${isLongSnippet ? 'abstract-clamp' : ''}">${snippet}</div>
                   </div>
                 ` : ''}
 
                 <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                  <div class="dynamic-source-dropdown">
-                    <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Ver Registro Oficial en:</span>
-                    <select class="source-select-dropdown" onchange="if(this.value) window.open(this.value, '_blank')">
-                      <option value="">Seleccionar plataforma oficial...</option>
-                      ${p.patent_link ? `<option value="${p.patent_link}">Google Patents (Red Mundial)</option>` : ''}
-                      <option value="https://worldwide.espacenet.com/patent/search?q=${pubNum}">[EP] Espacenet / EPO (DOCDB)</option>
-                      ${pubNum.startsWith('US') ? `<option value="https://patentsview.org/patent/${pubNum.replace('US','')}">[US] USPTO PatentsView (EE.UU.)</option>` : ''}
-                      ${p.one_sentence_summary ? `<option value="https://patents.google.com/patent/${pubNum}/en">PatentBrief</option>` : ''}
-                    </select>
+                  <div style="display: flex; align-items: center; gap: 10px; font-size: 11.5px;">
+                    <a href="${escapeHtml(officialUrl)}" target="_blank" rel="noopener" style="color: var(--text-medium); text-decoration: none;" title="Abrir en Google Patents / Fuente">Fuente Oficial &nearr;</a>
+                    <a href="${escapeHtml(espacenetUrl)}" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: none;" title="Verificar familia DOCDB en Espacenet EPO">Espacenet EPO &nearr;</a>
                   </div>
 
                   <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
@@ -5994,9 +6100,9 @@
                       <span style="font-weight: 700; color: var(--brand-primary); margin-left: 1px;">?</span>
                       <span>Consultar</span>
                     </button>
-                    ${p.pdf ? `<button class="btn-copy-pdf" onclick="copiarEnlacePdf('${p.pdf}', this)" title="Copiar enlace directo al archivo PDF">Copiar PDF</button>` : ''}
-                    <button class="btn-ghost" onclick="abrirSidebarPatente(${idx})" style="font-size: 11px; font-weight: 600; color: var(--brand-primary);">
-                      Ficha &rarr;
+                    ${p.pdf ? `<button class="btn-copy-pdf" onclick="copiarEnlacePdf('${escapeHtml(p.pdf)}', this)" title="Copiar enlace directo al archivo PDF">Copiar PDF</button>` : ''}
+                    <button class="btn-ghost" onclick="abrirSidebarPatente(${idx})" style="font-size: 11.5px; font-weight: 600; color: var(--brand-primary);">
+                      Ficha y PDF &rarr;
                     </button>
                   </div>
                 </div>
@@ -6009,47 +6115,18 @@
       }).join('');
     }
 
-    // Traducir Abstract
-    async function toggleTraduccion(idx, originalText) {
+    // Traducir Abstract de Patente (Seguro por índice)
+    async function toggleTraduccion(idx) {
+      const p = currentRenderedPatents[idx];
+      if (!p || !p.snippet) return;
       const btn = document.getElementById(`trans-btn-${idx}`);
       const textElem = document.getElementById(`abstract-text-${idx}`);
-      
-      if (btn.dataset.translated === "true") {
-        textElem.textContent = originalText;
-        btn.dataset.translated = "false";
-        btn.innerHTML = `<span>Traducir al Español</span>`;
-        return;
-      }
-
-      if (translationCache[originalText]) {
-        textElem.textContent = translationCache[originalText];
-        btn.dataset.translated = "true";
-        btn.innerHTML = `<span>↺ Ver Original en Inglés</span>`;
-        return;
-      }
-
-      btn.innerHTML = `<span>Traduciendo...</span>`;
-      try {
-        const res = await fetch('/api/translate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: originalText })
-        });
-        const data = await res.json();
-        if (data.translated) {
-          translationCache[originalText] = data.translated;
-          textElem.textContent = data.translated;
-          btn.dataset.translated = "true";
-          btn.innerHTML = `<span>↺ Ver Original en Inglés</span>`;
-        }
-      } catch (e) {
-        btn.innerHTML = `<span>Error de traducción</span>`;
-      }
+      await traducirTextoElemento(p.snippet, btn, textElem, 'Traducir al Español', '↺ Ver Original en Inglés');
     }
 
     function abrirModal(imgUrl, pubNum) {
       document.getElementById('modal-img-src').src = imgUrl;
-      document.getElementById('modal-patent-title').textContent = `Lámina Técnica Oficial &bull; ${pubNum}`;
+      document.getElementById('modal-patent-title').textContent = `Lámina Técnica Oficial • ${pubNum}`;
       document.getElementById('image-modal').style.display = 'flex';
     }
 
@@ -6059,10 +6136,25 @@
     }
 
     function escapeHtml(text) {
-      return text
-        .replace(/'/g, "\\'")
+      if (text === null || text === undefined) return '';
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
-        .replace(/\n/g, ' ');
+        .replace(/'/g, '&#39;');
+    }
+
+    function escapeJsAttr(text) {
+      if (text === null || text === undefined) return '';
+      return String(text)
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/\r?\n/g, ' ')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
     }
 
     function copiarJson() {

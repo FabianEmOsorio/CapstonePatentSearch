@@ -98,7 +98,10 @@ DIRECTIVAS ESTRICTAS DE ESTILO Y RIGOR:
 
     // 1. Google Gemini API
     if (effectiveProvider === 'gemini') {
-      const candidateModels = [model, 'gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-latest'].filter(Boolean);
+      const normalizedModel = (!model || ['gemini-3.5-flash', 'gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-1.5-flash'].includes(model))
+        ? 'gemini-2.5-flash'
+        : model;
+      const candidateModels = [...new Set([normalizedModel, 'gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.0-flash'])].filter(Boolean);
       let lastError = null;
 
       for (const m of candidateModels) {

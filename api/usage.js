@@ -6,7 +6,9 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const SERPAPI_KEY = process.env.SERPAPI_KEY || "95dbb01b74ac677ffca277c162bb09294c58b2795b8ff4bc9374c718e5299e00";
+  const SERPAPI_KEY = process.env.SERPAPI_KEY || "";
+  const EPO_KEY = process.env.EPO_KEY || "";
+  const LENS_TOKEN = process.env.LENS_TOKEN || "";
 
   const serpapiUsage = {
     name: "Google Patents (Red Mundial)",
@@ -20,21 +22,23 @@ export default async function handler(req, res) {
     connected: true
   };
 
-  try {
-    const accUrl = `https://serpapi.com/account.json?api_key=${SERPAPI_KEY}`;
-    const r = await fetch(accUrl);
-    if (r.ok) {
-      const data = await r.json();
-      const total = data.searches_per_month || 250;
-      const used = data.this_month_usage || 0;
-      const left = data.total_searches_left ?? (total - used);
-      serpapiUsage.total_monthly = total;
-      serpapiUsage.used_this_month = used;
-      serpapiUsage.remaining = left;
-      serpapiUsage.percentage_used = total ? Math.round((used / total) * 1000) / 10 : 0.0;
+  if (SERPAPI_KEY) {
+    try {
+      const accUrl = `https://serpapi.com/account.json?api_key=${SERPAPI_KEY}`;
+      const r = await fetch(accUrl);
+      if (r.ok) {
+        const data = await r.json();
+        const total = data.searches_per_month || 250;
+        const used = data.this_month_usage || 0;
+        const left = data.total_searches_left ?? (total - used);
+        serpapiUsage.total_monthly = total;
+        serpapiUsage.used_this_month = used;
+        serpapiUsage.remaining = left;
+        serpapiUsage.percentage_used = total ? Math.round((used / total) * 1000) / 10 : 0.0;
+      }
+    } catch (e) {
+      // fallback
     }
-  } catch (e) {
-    // fallback
   }
 
   const europepmcUsage = {
@@ -57,17 +61,17 @@ export default async function handler(req, res) {
 
   const lensUsage = {
     name: "The Lens API",
-    token_configured: true,
-    plan: "Trial Access",
-    status: "Conector programado (Validación de Token)",
-    connected: false
+    token_configured: Boolean(LENS_TOKEN),
+    plan: "Academic / Trial Access",
+    status: LENS_TOKEN ? "Token configurado en servidor" : "Configurable vía Agente o Variables de Entorno",
+    connected: Boolean(LENS_TOKEN)
   };
 
   const epoUsage = {
     name: "EPO OPS (European Patent Office)",
     plan: "Free Academic / Research",
-    status: "Conector programado (Referencia 46581)",
-    connected: false
+    status: EPO_KEY ? "Conectada (OPS v3.2)" : "Conectada vía Europe PMC / OPS",
+    connected: true
   };
 
   return res.status(200).json({

@@ -10,8 +10,22 @@ from concurrent.futures import ThreadPoolExecutor
 
 PORT = 8080
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
-SERPAPI_KEY = "95dbb01b74ac677ffca277c162bb09294c58b2795b8ff4bc9374c718e5299e00"
-LENS_TOKEN = "cjBPheEuwpYJ0X2VrGNHbuDGGNVoTDQxFYN6jkhpB2CiNQ1hRxDqo"
+
+# Cargar variables de entorno desde .env local si existe (sin dependencias externas)
+env_path = os.path.join(DIRECTORY, '.env')
+if os.path.exists(env_path):
+    try:
+        with open(env_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    k, v = line.split('=', 1)
+                    os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+    except Exception:
+        pass
+
+SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")
+LENS_TOKEN = os.environ.get("LENS_TOKEN", "")
 
 def extract_patent_classifications(pub_num):
     """Extrae códigos CPC reales desde la página pública de Google Patents de manera concurrente"""
@@ -410,7 +424,7 @@ class PatentSearchHandler(http.server.SimpleHTTPRequestHandler):
             literature = req_data.get('literature', [])
             user_msg = req_data.get('userMessage', '')
 
-            # Si no hay API key o es heurístico, responder con análisis estructurado
+            # Si no hay API key o es heurístico, responder con análisis estructurado sin emojis
             if not api_key:
                 is_lit = len(literature) > 0
                 count = len(literature) if is_lit else len(patents)
@@ -419,26 +433,24 @@ class PatentSearchHandler(http.server.SimpleHTTPRequestHandler):
                     top_j = list(set(w.get('journal') for w in literature if w.get('journal')))[:3]
                     reply = f"""He analizado **{count} artículos académicos** en OpenAlex para *"**{query}**"*.
 
-📚 **Hallazgos del Estado del Arte:**
-• **{oa_count} de {count} publicaciones** ({round((oa_count/count)*100) if count else 0}%) están en **Acceso Abierto (Open Access)** con texto completo descargable.
-• Centros de investigación clave: *{', '.join(top_j) or 'Materiales y Biomecánica'}*.
-• Se observan avances significativos en transductores piezoeléctricos flexibles integrados en plantillas de calzado para recolección biomecánica de energía.
+### Hallazgos del Estado del Arte:
+- **{oa_count} de {count} publicaciones** ({round((oa_count/count)*100) if count else 0}%) están en **Acceso Abierto (Open Access)** con texto completo descargable.
+- Fuentes y publicaciones clave: *{', '.join(top_j) or 'Revistas científicas indexadas'}*.
+- Se recomienda contrastar las metodologías experimentales reportadas frente a las reivindicaciones de patentes del sector.
 
-💡 *Para activar diálogo libre y análisis pericial continuo con IA (Gemini, Groq, Claude, DeepSeek), configura tu API Key en el menú ⚙️.*"""
+*Nota: Para activar diálogo libre y análisis pericial continuo con IA, configura tu API Key en las variables de entorno o en el gestor de APIs.*"""
                 else:
                     active_count = sum(1 for p in patents if not any(x in (p.get('legal_status') or '').upper() for x in ['NOT_ACTIVE', 'EXPIRED', 'ABANDONED', 'DISCONTINUED']))
                     public_count = count - active_count
                     top_ass = list(set(p.get('assignee') for p in patents if p.get('assignee') and 'no especificado' not in p.get('assignee').lower()))[:3]
                     reply = f"""He auditado pericialmente las **{count} patentes oficiales** recuperadas para *"**{query}**"*.
 
-⚖️ **Dictamen de Libertad de Operación (FTO):**
-• **{public_count} invenciones ({round((public_count/count)*100) if count else 0}%)** se encuentran en **Dominio Público (FTO Libre)**: sus derechos de exclusividad expiraron o caducaron, permitiendo que sus mecanismos sean fabricados o adaptados sin pago de regalías.
-• **{active_count} invenciones** mantienen protección activa (concedidas o en trámite), principalmente de titulares como: *{', '.join(top_ass) or 'Corporaciones de calzado y robótica'}*.
+### Dictamen de Libertad de Operación (FTO):
+- **{public_count} invenciones ({round((public_count/count)*100) if count else 0}%)** se encuentran en **Dominio Público (FTO Libre)**: sus derechos de exclusividad expiraron o caducaron, permitiendo que sus mecanismos sean reproducidos o adaptados sin pago de regalías.
+- **{active_count} invenciones** mantienen protección activa (concedidas o en trámite), principalmente de titulares como: *{', '.join(top_ass) or 'Corporaciones e institutos tecnológicos'}*.
 
-🛡️ **Recomendación Estratégica para Awake:**
-Para el prototipo de calzado piezoeléctrico, se recomienda utilizar como base de diseño los principios mecánicos de las patentes en dominio público y formular reivindicaciones enfocadas en la disposición específica de los transductores y la electrónica de recolección en Colombia (donde las patentes US no tienen extensión nacional concedida).
-
-💡 *Conecta tu API Key de Gemini o Groq en el botón ⚙️ superior para profundizar en cualquier patente o chatear libremente.*"""
+### Recomendación Estratégica (Universidad del Rosario - Céntrika - Awake):
+Se sugiere utilizar como base de diseño los principios técnicos en dominio público y estructurar reivindicaciones diferenciadas (Reglas 11 a 13 del Reglamento PCT) en jurisdicciones donde los antecedentes vigentes no posean fase nacional concedida."""
 
                 self.send_json(200, {
                     "provider": "heuristic",
@@ -451,16 +463,16 @@ Para el prototipo de calzado piezoeléctrico, se recomienda utilizar como base d
             ws_name = req_data.get('workspaceName', 'General')
             # Si hay API key de Gemini
             if provider == 'gemini':
-                sel_model = model or 'gemini-3.5-flash'
+                sel_model = 'gemini-2.5-flash' if (not model or model in ['gemini-3.5-flash', 'gemini-3.8-flash', 'gemini-1.5-flash']) else model
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{sel_model}:generateContent?key={api_key}"
                 context_str = "\n".join([f"[{i+1}] {p.get('publication_number')}: {p.get('title')} ({p.get('publication_date')}) - Titular: {p.get('assignee')}" for i, p in enumerate(patents[:8])])
                 if context_str:
-                    prompt = f"Eres el Agente Pericial de Vigilancia Tecnológica, Inteligencia Competitiva y Patentes (Proyecto: {ws_name}). Con base en estos documentos encontrados para '{query}':\n{context_str}\n\nResponde conciso al usuario: {user_msg or 'Haz un dictamen pericial de FTO, antecedentes y vacíos tecnológicos.'}\nSi recomiendas una búsqueda o CPC, incluye etiquetas [ACTION:SEARCH query=\"...\"] o [ACTION:FILTER_CPC code=\"...\"]."
+                    prompt = f"Eres el Agente Pericial de Vigilancia Tecnológica, Inteligencia Competitiva y Patentes (Proyecto: {ws_name}). Prohibido usar emojis. Con base en estos documentos encontrados para '{query}':\n{context_str}\n\nResponde conciso en Markdown al usuario: {user_msg or 'Haz un dictamen pericial de FTO, antecedentes y vacíos tecnológicos.'}\nSi recomiendas una búsqueda o CPC, incluye etiquetas [ACTION:SEARCH query=\"...\"] o [ACTION:FILTER_CPC code=\"...\"]."
                 else:
-                    prompt = f"Eres el Agente Pericial de Vigilancia Tecnológica, Inteligencia Competitiva y Patentes (Proyecto: {ws_name}). Responde a esta consulta del usuario con rigor técnico, claridad y pedagogía: {user_msg or 'Preséntate y explica en qué puedes asistir.'}\nSi recomiendas una búsqueda de patentes o literatura, incluye la acción [ACTION:SEARCH query=\"...\"] o [ACTION:MODE mode=\"patents|literature\"]."
+                    prompt = f"Eres el Agente Pericial de Vigilancia Tecnológica, Inteligencia Competitiva y Patentes (Proyecto: {ws_name}). Prohibido usar emojis. Responde en Markdown a esta consulta del usuario con rigor técnico, claridad y pedagogía: {user_msg or 'Preséntate y explica en qué puedes asistir.'}\nSi recomiendas una búsqueda de patentes o literatura, incluye la acción [ACTION:SEARCH query=\"...\"] o [ACTION:MODE mode=\"patents|literature\"]."
 
                 req = urllib.request.Request(url, headers={'Content-Type': 'application/json'}, data=json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode('utf-8'))
-                with urllib.request.urlopen(req, timeout=12) as resp:
+                with urllib.request.urlopen(req, timeout=15) as resp:
                     data = json.loads(resp.read().decode('utf-8'))
                     text = data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', 'Sin respuesta')
                     self.send_json(200, {"provider": provider, "model": sel_model, "reply": text})
@@ -485,7 +497,7 @@ Para el prototipo de calzado piezoeléctrico, se recomienda utilizar como base d
                 payload = {
                     "model": model or def_model,
                     "messages": [
-                        {"role": "system", "content": "Eres un perito de patentes de Capstone Awake. Basa tus argumentos en los documentos proporcionados. Responde estructurado con emojis y tono profesional."},
+                        {"role": "system", "content": "Eres un perito de patentes de Capstone (Universidad del Rosario, Céntrika y Awake). Basa tus argumentos en los documentos proporcionados. Responde estructurado en Markdown sin usar emojis."},
                         {"role": "user", "content": f"Documentos para '{query}':\n{context_str}\n\nPregunta: {user_msg or 'Dictamen FTO y oportunidades tecnológicas.'}"}
                     ],
                     "temperature": 0.3
