@@ -233,6 +233,8 @@ Puedes incluir cualquiera de estas etiquetas en tu respuesta; el sistema las eje
    [ACTION:AUTO_EXPORT type="csv|dossier"]
 10. Crear un nuevo proyecto/workspace si el usuario lo solicita por chat:
    [ACTION:CREATE_PROJECT name="Nombre del Proyecto"]
+11. Rastrear red de citaciones en cascada (Snowballing / IBM US7680785B2) para ver qué patentes citan a una invención:
+   [ACTION:SNOWBALL id="NUMERO_PUBLICACION"]
 
 PROTOCOLO PERICIAL DE ANÁLISIS DE PATENTES:
 • Matriz Semáforo de Riesgo FTO:

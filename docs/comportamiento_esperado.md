@@ -81,6 +81,11 @@ La plataforma centraliza la vigilancia tecnológica, inteligencia competitiva y 
 1. **Qué hace el usuario**: Hace clic en la etiqueta del modelo en la cabecera (`#ai-active-model-tag`).
 2. **Qué procesa el sistema**: Conmuta entre `gemini-2.5-flash` (alta velocidad, cuota de 1.500 req/día) y `gemini-2.5-pro` (máxima profundidad de análisis pericial y árbol de reivindicaciones, cuota de 50 req/día), persistiendo la preferencia en `localStorage`.
 
+### 2.12. Métodos Avanzados de Búsqueda de Patentes (Snowballing & All Elements Rule)
+1. **Topología de Citaciones en Cascada (Citation Snowballing / IBM US7680785B2)**: El usuario o el agente (`[ACTION:SNOWBALL id="PUB_NUM"]`) puede disparar una búsqueda de citaciones sobre cualquier patente semilla para auditar qué invenciones y competidores derivaron de ella (`cites:PUB_NUM`).
+2. **Auditoría de Nivel Inventivo (All Elements Rule / 35 U.S.C. 103)**: Desde la ficha de inspección técnica, se desglosa la reivindicación 1 en elementos $A + B + C$ para identificar cómo aplicar diseño alternativo (*Design Around*) suprimiendo o alterando componentes esenciales.
+3. **Registro Gubernamental de Propiedad Intelectual**: Documentado el procedimiento oficial ante la DNDA (Dirección Nacional de Derecho de Autor) en `docs/guia_registro_propiedad_intelectual_dnda.md`.
+
 ---
 
 ## 3. Reglas de Negocio y Seguridad (Security by Design)
@@ -112,4 +117,7 @@ La plataforma centraliza la vigilancia tecnológica, inteligencia competitiva y 
 - [x] Comparador lado a lado de patentes (`[ACTION:COMPARE]`) para análisis dual de reivindicaciones y FTO.
 - [x] Enfoque autónomo en láminas técnicas con visor de imágenes (`[ACTION:SHOW_FIGURE]`).
 - [x] Conmutador interactivo entre Gemini 2.5 Flash y Gemini 2.5 Pro con preservación de cuota.
+- [x] Topología de citaciones en cascada (Citation Snowballing) ejecutable desde tarjeta o mediante `[ACTION:SNOWBALL]`.
+- [x] Mapeo de la Regla de Todos los Elementos (All Elements Rule) para auditoría de novedad y nivel inventivo.
+- [x] Guía exhaustiva de registro gubernamental ante la DNDA redactada en `docs/guia_registro_propiedad_intelectual_dnda.md`.
 - [x] Cero errores de sintaxis (`verify_all.py` / `node --check` / `py_compile`) y cero secretos filtrados.

@@ -5043,6 +5043,29 @@ div>
         `;
       }
 
+      let methodologyBoxHtml = '';
+      if (!isLit && pubNum !== 'N/A') {
+        methodologyBoxHtml = `
+          <div style="margin: 12px 0; padding: 10px 12px; background: rgba(0, 112, 243, 0.04); border: 1px solid rgba(0, 112, 243, 0.18); border-radius: 8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+              <span style="font-size: 11px; font-weight: 700; color: var(--brand-primary); text-transform: uppercase;">Topología de Citaciones (Snowballing)</span>
+              <button class="btn-ghost" onclick="rastrearCitacionesPatente('${escapeJsAttr(pubNum)}')" style="font-size: 10.5px; padding: 2px 7px; color: var(--brand-primary); border-color: var(--brand-primary);">
+                Rastrear Quien Cita &nearr;
+              </button>
+            </div>
+            <div style="font-size: 11.5px; color: var(--text-muted); line-height: 1.45;">
+              Recupera las patentes y competidores que citan este antecedente (Patente IBM US7680785B2).
+            </div>
+            <div style="margin-top: 8px; pt-1; border-top: 1px dashed rgba(0, 112, 243, 0.15); display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 11px; font-weight: 600; color: var(--text-high);">Regla de Todos los Elementos:</span>
+              <button class="btn-ghost" onclick="auditarAllElementsRule('${escapeJsAttr(pubNum)}')" style="font-size: 10.5px; padding: 2px 7px;">
+                Auditar Reivindicación 1
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
       let cpcHtml = '';
       if (p.classifications_cpc && p.classifications_cpc.length > 0) {
         cpcHtml = `
@@ -5095,6 +5118,7 @@ div>
         </div>
 
         ${figsHtml}
+        ${methodologyBoxHtml}
         ${cpcHtml}
 
         <div class="abstract-box" style="margin-bottom: 14px;">
@@ -5894,6 +5918,23 @@ div>
     let speechRecognizer = null;
     let isListeningVoice = false;
 
+    
+    // =========================================================
+    // METODOLOGIAS DE BUSQUEDA DE PATENTES (SNOWBALLING Y ALL ELEMENTS)
+    // =========================================================
+    function rastrearCitacionesPatente(pubNum, event) {
+      if (event) event.stopPropagation();
+      if (!pubNum) return;
+      const citesQuery = `cites:${pubNum}`;
+      buscar(citesQuery);
+      consultarAgenteIA(citesQuery, allRetrievedPatents, false, `Aplica la metodologia de analisis topologico de citaciones (IBM US7680785B2 / Citation Snowballing) sobre la patente semilla [DOC:${pubNum}]: que desarrollos tecnologicos o competidores la estan citando en estos resultados y que novedades tecnicas aportaron?`);
+    }
+
+    function auditarAllElementsRule(pubNum) {
+      if (!pubNum) return;
+      consultarAgenteIA(pubNum, allRetrievedPatents, false, `Aplica la metodologia de la Regla de Todos los Elementos (All Elements Rule / 35 U.S.C. 103) sobre la patente [DOC:${pubNum}]: desglosa los componentes tecnicos esenciales (Elemento A, Elemento B, Elemento C) de su invencion y senala exactamente que elemento debemos omitir o modificar en nuestro diseno alternativo (Design Around) para garantizar 100% Libertad de Operacion.`);
+    }
+
     function toggleVoiceDictation(e) {
       if (e) e.preventDefault();
       const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -6337,6 +6378,10 @@ div>
       text = text.replace(/\[ACTION:SHOW_FIGURE\s+id=["'](.*?)["'](?:\s+fig=["']?(\d+)["']?)?\]/gi, (match, pubNum, figNum) => {
         const fig = figNum || '1';
         return `<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="mostrarFiguraTecnicaPatente('${escapeJsAttr(pubNum)}', ${fig})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg> Ver Lámina Técnica: Fig. ${escapeHtml(fig)} &bull; <strong>${escapeHtml(pubNum)}</strong></button></div>`;
+      });
+
+      text = text.replace(/\[ACTION:SNOWBALL\s+id=["'](.*?)["']\]/gi, (match, pubNum) => {
+        return `<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="rastrearCitacionesPatente('${escapeJsAttr(pubNum)}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Rastrear Citaciones en Cascada (Snowballing): <strong>${escapeHtml(pubNum)}</strong></button></div>`;
       });
 
       text = text.replace(/\[ACTION:AUTO_PIN\s+ids=["'](.*?)["']\]/gi, (match, ids) => {
@@ -7054,6 +7099,10 @@ div>
                   </div>
 
                   <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                    <button class="btn-ghost" onclick="rastrearCitacionesPatente('${escapeJsAttr(rawPubNum)}', event)" style="font-size: 11px; padding: 4px 8px;" title="Metodología Snowballing (IBM US7680785B2): Rastrear qué invenciones citan esta patente">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px; margin-right:2px;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                      <span>Snowballing</span>
+                    </button>
                     <button class="btn-ask-patent" onclick="consultarPatenteAgente(${idx}, event)">
                       <span>Consultar con Agente</span>
                     </button>
