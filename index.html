@@ -2725,6 +2725,110 @@
       50% { box-shadow: 0 0 0 8px rgba(0, 112, 243, 0.2); }
       100% { box-shadow: 0 0 0 0 rgba(0, 112, 243, 0); }
     }
+
+    /* =========================================================
+       MEJORAS DE DISENO BENTO & ERGONOMIA VISUAL (MODERN WEB GUIDANCE)
+       ========================================================= */
+    :root {
+      --fto-free-bg: rgba(16, 185, 129, 0.12);
+      --fto-free-text: #34d399;
+      --fto-free-border: rgba(16, 185, 129, 0.3);
+      --fto-active-bg: rgba(239, 68, 68, 0.12);
+      --fto-active-text: #f87171;
+      --fto-active-border: rgba(239, 68, 68, 0.3);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+      --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+    }
+
+    [data-theme="light"] {
+      --fto-free-bg: rgba(16, 185, 129, 0.1);
+      --fto-free-text: #059669;
+      --fto-free-border: rgba(16, 185, 129, 0.3);
+      --fto-active-bg: rgba(239, 68, 68, 0.1);
+      --fto-active-text: #dc2626;
+      --fto-active-border: rgba(239, 68, 68, 0.3);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Tarjetas de patentes estilo Bento con alta jerarquia */
+    .patent-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--shadow-sm);
+    }
+    .patent-card:hover {
+      border-color: rgba(56, 189, 248, 0.45);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1.5px);
+    }
+    .patent-card.active-inspected-card {
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 2px rgba(0, 145, 255, 0.25);
+    }
+
+    .fto-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .fto-pill.free {
+      background: var(--fto-free-bg);
+      color: var(--fto-free-text);
+      border: 1px solid var(--fto-free-border);
+    }
+    .fto-pill.active {
+      background: var(--fto-active-bg);
+      color: var(--fto-active-text);
+      border: 1px solid var(--fto-active-border);
+    }
+
+    /* Cuadro de Sintesis en Lenguaje Sencillo */
+    .friendly-summary-box {
+      background: rgba(56, 189, 248, 0.06);
+      border-left: 3px solid var(--brand-primary);
+      border-radius: 0 10px 10px 0;
+      padding: 12px 16px;
+      margin: 12px 0 14px 0;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text-high);
+    }
+
+    /* Columna de Inspeccion Adaptativa / Plegable */
+    .col-inspection {
+      width: 420px;
+      flex-shrink: 0;
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .col-inspection.closed {
+      display: none !important;
+    }
+
+    /* Botones de accion de la tarjeta */
+    .card-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-color);
+      padding-top: 12px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
   </style>
   <!-- Motor LaTeX Math (KaTeX) y Markdown (Marked) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -3268,6 +3372,9 @@
                 <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
                 <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
               </svg>
+            </button>
+            <button class="btn-ghost" onclick="cerrarColumnaInspeccion()" title="Minimizar panel de inspeccion para ver resultados a pantalla completa" style="font-size: 14px; padding: 3px 8px; color: var(--text-muted); line-height: 1;">
+              &times;
             </button>
           </div>
         </div>
@@ -5310,6 +5417,7 @@
         cambiarInspectionTab('dossier');
       }
 
+      abrirColumnaInspeccion();
       cambiarSidebarTab('dossier');
       const pubNum = p.publication_number || 'N/A';
       const sourceBadge = p.source_badge || 'google';
@@ -5393,6 +5501,18 @@
       currentActivePatentData = synthetic;
       actualizarVistasInspeccion(synthetic);
       resaltarColumnaInspeccion();
+    }
+
+        // Control Plegable / Adaptativo de la Columna de Inspeccion
+    function cerrarColumnaInspeccion() {
+      const col = document.getElementById('col-inspection');
+      if (col) col.classList.add('closed');
+      document.querySelectorAll('.patent-card').forEach(c => c.classList.remove('active-inspected-card'));
+    }
+
+    function abrirColumnaInspeccion() {
+      const col = document.getElementById('col-inspection');
+      if (col) col.classList.remove('closed');
     }
 
     function actualizarVistasInspeccion(p) {
@@ -6812,6 +6932,7 @@
     // ZERO STATE HUB INTERACTIVO Y ONBOARDING
     // =========================================================
     function mostrarZeroState() {
+      cerrarColumnaInspeccion();
       const container = document.getElementById('view-cards');
       if (!container) return;
       const countBadge = document.getElementById('results-count-badge');
