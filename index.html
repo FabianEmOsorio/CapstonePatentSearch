@@ -2829,6 +2829,824 @@
       gap: 8px;
     }
 
+  
+    /* =========================================================
+       PREVIEW BENTO DESIGN SYSTEM & MODERN ERGONOMICS
+       ========================================================= */
+
+    /* =========================================================
+       SISTEMA DE DISENO: VARIABLES SEMANTICAS (WCAG AAA)
+       ========================================================= */
+    :root {
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      
+      /* Modo Oscuro (Por defecto - Filosofia Antigravity) */
+      --bg-canvas: #090b10;
+      --bg-surface: #10141d;
+      --bg-elevated: #161c28;
+      --bg-subtle: rgba(255, 255, 255, 0.04);
+      --bg-hover: rgba(255, 255, 255, 0.08);
+      
+      --border-color: rgba(255, 255, 255, 0.09);
+      --border-focus: rgba(99, 102, 241, 0.6);
+      
+      --text-high: #f1f5f9;
+      --text-medium: #94a3b8;
+      --text-muted: #64748b;
+      
+      --brand-primary: #38bdf8;
+      --brand-primary-rgb: 56, 189, 248;
+      --brand-accent: #818cf8;
+      
+      /* Semafoto FTO Accesible */
+      --fto-free-bg: rgba(16, 185, 129, 0.12);
+      --fto-free-text: #34d399;
+      --fto-free-border: rgba(16, 185, 129, 0.3);
+      
+      --fto-pending-bg: rgba(245, 158, 11, 0.12);
+      --fto-pending-text: #fbbf24;
+      --fto-pending-border: rgba(245, 158, 11, 0.3);
+      
+      --fto-active-bg: rgba(239, 68, 68, 0.12);
+      --fto-active-text: #f87171;
+      --fto-active-border: rgba(239, 68, 68, 0.3);
+      
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.65);
+      
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+    }
+
+    [data-theme="light"] {
+      --bg-canvas: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-elevated: #f1f5f9;
+      --bg-subtle: rgba(0, 0, 0, 0.03);
+      --bg-hover: rgba(0, 0, 0, 0.06);
+      
+      --border-color: rgba(0, 0, 0, 0.1);
+      --border-focus: rgba(37, 99, 235, 0.6);
+      
+      --text-high: #0f172a;
+      --text-medium: #475569;
+      --text-muted: #64748b;
+      
+      --brand-primary: #0284c7;
+      --brand-primary-rgb: 2, 132, 199;
+      --brand-accent: #4f46e5;
+      
+      --fto-free-bg: rgba(16, 185, 129, 0.1);
+      --fto-free-text: #059669;
+      --fto-free-border: rgba(16, 185, 129, 0.3);
+      
+      --fto-pending-bg: rgba(245, 158, 11, 0.1);
+      --fto-pending-text: #d97706;
+      --fto-pending-border: rgba(245, 158, 11, 0.3);
+      
+      --fto-active-bg: rgba(239, 68, 68, 0.1);
+      --fto-active-text: #dc2626;
+      --fto-active-border: rgba(239, 68, 68, 0.3);
+      
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Reset y Base */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-canvas);
+      color: var(--text-high);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* =========================================================
+       1. APP HEADER UNIFICADO (ERGONOMIA NIVEL 1)
+       ========================================================= */
+    .app-header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-logo-badge {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 14px;
+      box-shadow: 0 2px 8px rgba(var(--brand-primary-rgb), 0.3);
+    }
+    .brand-info h1 {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-high);
+    }
+    .brand-info span {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Selector de Espacio de Trabajo */
+    .ws-selector-btn {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+      padding: 5px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-high);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .ws-selector-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-focus);
+    }
+    .ws-pill-badge {
+      background: rgba(var(--brand-primary-rgb), 0.15);
+      color: var(--brand-primary);
+      padding: 1px 7px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+    }
+
+    /* Segmented Control Central (Patentes vs Literatura) */
+    .engine-switcher {
+      display: flex;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      padding: 3px;
+      border-radius: var(--radius-full);
+    }
+    .engine-option {
+      border: none;
+      background: transparent;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-medium);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .engine-option.active {
+      background: var(--bg-elevated);
+      color: var(--text-high);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Acciones Derechas */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .icon-btn {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-medium);
+      transition: all 0.2s ease;
+    }
+    .icon-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-high);
+      border-color: var(--border-focus);
+    }
+    .text-action-btn {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-medium);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .text-action-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-high);
+    }
+
+    /* =========================================================
+       2. BARRA DE RUTA JTBD (ACCIONES METODOLOGICAS DE 1 CLIC)
+       ========================================================= */
+    .jtbd-strip {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 8px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      overflow-x: auto;
+    }
+    .jtbd-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .jtbd-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .jtbd-pill-btn {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+      padding: 5px 12px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-medium);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .jtbd-pill-btn:hover {
+      background: rgba(var(--brand-primary-rgb), 0.1);
+      border-color: var(--brand-primary);
+      color: var(--brand-primary);
+    }
+
+    /* =========================================================
+       3. CONTENEDOR PRINCIPAL DUAL (GRID DINAMICO)
+       ========================================================= */
+    .app-main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+      transition: grid-template-columns 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .app-main.drawer-open {
+      grid-template-columns: 1fr 440px;
+    }
+
+    .feed-container {
+      padding: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+      padding-bottom: 120px; /* Espacio para barra inferior */
+    }
+
+    /* Tarjeta Pericial del Agente */
+    .agent-panel-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      margin-bottom: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .agent-panel-header {
+      padding: 12px 18px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .agent-title-lockup {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .agent-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+    }
+    .agent-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-high);
+    }
+    .model-tag-switcher {
+      background: rgba(var(--brand-primary-rgb), 0.12);
+      color: var(--brand-primary);
+      border: 1px solid rgba(var(--brand-primary-rgb), 0.25);
+      border-radius: var(--radius-full);
+      padding: 2px 8px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* Traza de Razonamiento Pericial (Arriba de la respuesta) */
+    .reasoning-trace-box {
+      margin: 14px 18px 8px 18px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .trace-header {
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-medium);
+      user-select: none;
+    }
+    .trace-header:hover {
+      background: var(--bg-hover);
+    }
+    .trace-steps-list {
+      padding: 10px 14px;
+      border-top: 1px solid var(--border-color);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .trace-step-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .trace-step-item span:first-child {
+      color: var(--text-high);
+    }
+
+    /* Cuerpo Conversacional */
+    .agent-reply-body {
+      padding: 16px 18px;
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: var(--text-high);
+    }
+    .agent-reply-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 12px;
+    }
+    .agent-reply-body th, .agent-reply-body td {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      text-align: left;
+    }
+    .agent-reply-body th {
+      background: var(--bg-elevated);
+      font-weight: 700;
+    }
+
+    /* =========================================================
+       4. TARJETAS DE PATENTES REDISENADAS (ESTILO BENTO / PRO)
+       ========================================================= */
+    .feed-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .feed-count {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-medium);
+    }
+    .feed-count strong {
+      color: var(--text-high);
+    }
+
+    .patent-cards-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .patent-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .patent-card:hover {
+      border-color: rgba(var(--brand-primary-rgb), 0.4);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+
+    .card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .card-badges-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .patent-id-pill {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 12px;
+      background: var(--bg-elevated);
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      color: var(--text-high);
+      border: 1px solid var(--border-color);
+    }
+    .fto-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .fto-pill.free {
+      background: var(--fto-free-bg);
+      color: var(--fto-free-text);
+      border: 1px solid var(--fto-free-border);
+    }
+    .fto-pill.active {
+      background: var(--fto-active-bg);
+      color: var(--fto-active-text);
+      border: 1px solid var(--fto-active-border);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-high);
+      line-height: 1.4;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    .card-title:hover {
+      color: var(--brand-primary);
+    }
+
+    /* Sintesis en Lenguaje Sencillo (PatentBrief) */
+    .card-plain-summary {
+      background: rgba(var(--brand-primary-rgb), 0.05);
+      border-left: 3px solid var(--brand-primary);
+      padding: 8px 12px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 12.5px;
+      color: var(--text-medium);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .card-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .card-meta-item strong {
+      color: var(--text-medium);
+    }
+
+    .card-cpc-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .cpc-badge {
+      background: var(--bg-elevated);
+      color: var(--text-medium);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+      padding: 2px 8px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .cpc-badge:hover {
+      border-color: var(--brand-primary);
+      color: var(--brand-primary);
+    }
+
+    /* Barra de Acciones de la Tarjeta */
+    .card-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-color);
+      padding-top: 14px;
+    }
+    .card-actions-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-btn {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-medium);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-high);
+      border-color: var(--border-focus);
+    }
+    .card-btn.primary {
+      background: var(--brand-primary);
+      color: #000;
+      font-weight: 700;
+      border: none;
+    }
+    .card-btn.primary:hover {
+      filter: brightness(1.1);
+    }
+
+    /* =========================================================
+       5. DRAWER LATERAL DE INSPECCION TECNICA (MODERNO & SUAVE)
+       ========================================================= */
+    .inspection-drawer {
+      position: sticky;
+      top: 53px;
+      height: calc(100vh - 53px);
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border-color);
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+      z-index: 50;
+    }
+    .app-main.drawer-open .inspection-drawer {
+      display: flex;
+    }
+
+    .drawer-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-elevated);
+    }
+    .drawer-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-high);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .drawer-close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+    }
+    .drawer-close-btn:hover {
+      color: var(--text-high);
+    }
+
+    .drawer-body {
+      padding: 18px;
+      flex: 1;
+      overflow-y: auto;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .dossier-section-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--brand-primary);
+      margin: 16px 0 8px 0;
+    }
+
+    /* =========================================================
+       6. BARRA FLOTANTE DE BUSQUEDA (COMMAND BAR / GLASSMORPHISM)
+       ========================================================= */
+    .command-bar-wrapper {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 760px;
+      background: rgba(16, 20, 29, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      padding: 8px 12px;
+      z-index: 90;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    [data-theme="light"] .command-bar-wrapper {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(0, 0, 0, 0.15);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .command-input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .command-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-high);
+      font-size: 14px;
+      font-family: var(--font-sans);
+      outline: none;
+      padding: 6px 0;
+    }
+    .command-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .command-controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-color);
+      padding-top: 8px;
+      font-size: 11.5px;
+    }
+    .filter-pills-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .control-pill {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+      padding: 3px 10px;
+      font-size: 11px;
+      color: var(--text-medium);
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+    .control-pill:hover {
+      background: var(--bg-hover);
+      color: var(--text-high);
+    }
+
+    .send-query-btn {
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      color: #fff;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .send-query-btn:hover {
+      transform: scale(1.08);
+    }
+
+    /* Modal Generico */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 20px;
+    }
+    .modal-overlay.open {
+      display: flex !important;
+    }
+    .modal-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      max-width: 600px;
+      width: 100%;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-box-header {
+      padding: 14px 18px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 700;
+    }
+    .modal-box-body {
+      padding: 20px;
+    }
+  
+
+    /* Reglas de proteccion y visualizacion de lightboxes */
+    .modal-overlay {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      background: rgba(0, 0, 0, 0.75) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+      display: none;
+      align-items: center !important;
+      justify-content: center !important;
+      z-index: 1000 !important;
+      padding: 20px !important;
+    }
+    .modal-overlay.open,
+    .modal-overlay[style*="display: flex"],
+    .modal-overlay[style*="display:flex"] {
+      display: flex !important;
+    }
+
   </style>
   <!-- Motor LaTeX Math (KaTeX) y Markdown (Marked) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -2838,577 +3656,391 @@
 </head>
 <body>
 
-  <div class="container">
-    <!-- Header -->
-    <header>
-      <div class="header-title">
-        <h1>
-          <span></span>
-          <span>Sistema de Vigilancia y Búsqueda de Patentes</span>
-        </h1>
-        <div class="subtitle">Proyecto Capstone Grupo 6 &bull; Céntrika &bull; Awake</div>
+  <!-- 1. APP HEADER UNIFICADO (1 SOLA LINEA COMPACTA, MAXIMA ERGONOMIA) -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="brand-logo-badge">CP</div>
+      <div class="brand-info">
+        <h1>Vigilancia y Búsqueda de Patentes</h1>
+        <span>Capstone Ingeniería &bull; Awake &bull; Céntrika</span>
       </div>
-      <div class="header-actions" style="position: relative;">
-        <!-- Switcher de Tema Antigravity -->
-        <button class="btn-theme-pill" onclick="toggleTheme()" id="theme-btn" title="Alternar entre modo oscuro Antigravity y modo claro">
-          <span id="theme-icon"></span>
-          <span id="theme-text">Modo Oscuro</span>
+
+      <!-- Selector de Workspace estilo Pill con Dropdown -->
+      <div style="position: relative;">
+        <button class="ws-selector-btn" onclick="toggleWorkspaceMenu(event)" id="workspace-pill-btn" title="Cambiar o crear espacio de trabajo">
+          <span>Proyecto:</span>
+          <span class="ws-pill-badge" id="current-workspace-label">Sin Proyecto</span>
+          <span style="font-size: 8px; color: var(--text-muted); display: inline-block; transition: transform 0.2s;" id="workspace-caret">▼</span>
         </button>
 
-        <!-- Píldora de Estado 100% Online con Dropdown propio -->
-        <div style="position: relative;">
-          <button class="btn-health-pill" onclick="toggleHeaderHealth(event)" id="header-health-btn" title="Ver estado de infraestructura de patentes">
-            <span class="pulse-green-dot"></span>
-            <span>Fuentes 100% Online</span>
-            <span style="font-size: 8px; color: var(--text-muted); display: inline-block; transition: transform 0.2s;" id="header-health-caret">▼</span>
-          </button>
-
-          <!-- Menú flotante del Header hacia abajo -->
-          <div class="ag-popup-menu" id="header-health-dropdown" style="right: 0; left: auto; top: calc(100% + 8px); width: 290px; padding: 12px 14px;">
-            <div class="ag-menu-header" style="padding: 0 0 8px 0; color: var(--text-muted); border-bottom: 1px solid var(--border-color); margin-bottom: 8px;">
-              <span>Disponibilidad y Conectividad</span>
-            </div>
-
-            <div class="ag-health-row">
-              <div class="ag-health-info">
-                <span class="ag-health-name">Google Patents</span>
-                <span class="ag-health-desc">Motor Híbrido Directo</span>
-              </div>
-              <div class="ag-health-val">
-                <span class="ag-health-pct">100%</span>
-                <svg class="circular-ring" viewBox="0 0 36 36">
-                  <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                  <path class="circular-ring-fill" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                </svg>
-              </div>
-            </div>
-
-            <div class="ag-health-row">
-              <div class="ag-health-info">
-                <span class="ag-health-name">Europe PMC (EPO/WIPO)</span>
-                <span class="ag-health-desc">API Abierta EMBL-EBI</span>
-              </div>
-              <div class="ag-health-val">
-                <span class="ag-health-pct">100%</span>
-                <svg class="circular-ring" viewBox="0 0 36 36">
-                  <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                  <path class="circular-ring-fill" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                </svg>
-              </div>
-            </div>
-
-            <div class="ag-health-row">
-              <div class="ag-health-info">
-                <span class="ag-health-name">PatentBrief</span>
-                <span class="ag-health-desc">API Tecnológica Amigable</span>
-              </div>
-              <div class="ag-health-val">
-                <span class="ag-health-pct">100%</span>
-                <svg class="circular-ring" viewBox="0 0 36 36">
-                  <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                  <path class="circular-ring-fill" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                </svg>
-              </div>
-            </div>
-
-            <div class="ag-health-row">
-              <div class="ag-health-info">
-                <span class="ag-health-name">EPO OPS Oficial</span>
-                <span class="ag-health-desc">Conectada &bull; Clave Apigee Ref: 46581</span>
-              </div>
-              <div class="ag-health-val">
-                <span class="ag-health-pct" style="color: #22c55e;">100%</span>
-                <svg class="circular-ring" viewBox="0 0 36 36">
-                  <path class="circular-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                  <path class="circular-ring-fill" stroke="#22c55e" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                </svg>
-              </div>
-            </div>
+        <!-- Menú Popup de Espacios de Trabajo -->
+        <div class="ag-popup-menu" id="workspace-popup-menu" style="left: 0; right: auto; top: calc(100% + 8px); width: 280px;">
+          <div class="ag-menu-header">
+            <span>Tus Espacios de Trabajo</span>
+            <button class="btn-ghost" onclick="abrirModalNuevoProyecto()" style="font-size: 11px; padding: 2px 6px;">+ Nuevo</button>
+          </div>
+          <div id="workspace-list-items" class="workspace-list-scroll"></div>
+          <div class="ag-menu-footer" style="padding: 8px 10px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+            <button class="btn-ghost" id="btn-delete-workspace" onclick="eliminarWorkspaceActual()" style="font-size: 11px; padding: 3px 6px; color: var(--status-danger);">Eliminar Proyecto</button>
           </div>
         </div>
       </div>
-    </header>
+    </div>
 
-    <!-- =========================================================
-         DUAL-ENGINE SELECTOR: PATENTES vs LITERATURA CIENTÍFICA
-         ========================================================= -->
-    <div class="engine-mode-switcher">
-      <button id="engine-btn-patents" class="engine-tab-btn active" onclick="setEngineMode('patents')" title="Consultar patentes mundiales concedidas y en trámite">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; color:var(--brand-primary);">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          <path d="m9 12 2 2 4-4"/>
-        </svg>
-        <div class="engine-text-col">
-          <span class="engine-title">Patentes Tecnológicas</span>
-          <span class="engine-sub">Google Patents &bull; Europe PMC (EPO/WIPO) &bull; PatentBrief</span>
-        </div>
+    <!-- Segmented Control Central (Patentes vs Literatura) -->
+    <div class="engine-switcher">
+      <button class="engine-option active" id="engine-btn-patents" onclick="cambiarMotorBusqueda('patents')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Patentes Tecnológicas</span>
       </button>
-
-      <button id="engine-btn-literature" class="engine-tab-btn" onclick="setEngineMode('literature')" title="Consultar literatura científica académica, papers y tesis en OpenAlex">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; color:var(--src-openalex);">
-          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-        </svg>
-        <div class="engine-text-col">
-          <span class="engine-title">Literatura Científica (Filtro Cero)</span>
-          <span class="engine-sub">OpenAlex &bull; Artículos Arbitrados &bull; 250M+ Obras Abiertas</span>
-        </div>
+      <button class="engine-option" id="engine-btn-literature" onclick="cambiarMotorBusqueda('literature')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Literatura Científica</span>
       </button>
     </div>
 
-    <!-- =========================================================
-         BARRA DE ESPACIOS DE TRABAJO Y METODOLOGÍA JTBD
-         ========================================================= -->
-    <div class="workspace-bar">
-      <div class="workspace-selector-pill" onclick="toggleWorkspaceMenu(event)" id="workspace-pill-btn">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-        </svg>
-        <span id="current-workspace-label">Proyecto: Principal</span>
-        <span class="ag-pill-caret" id="workspace-caret">▼</span>
+    <!-- Acciones Derechas de Cabecera -->
+    <div class="header-actions">
+      <button class="text-action-btn" onclick="abrirGlosarioModal()" title="Centro de Conocimiento y Glosario Metodológico">Glosario y Metodologías</button>
+      <button class="text-action-btn" onclick="abrirDossierModal()" title="Generar informe estructurado FTO en PDF">Dossier FTO</button>
+      <button class="text-action-btn" onclick="abrirSettingsModal()" title="Estado de Conectores & APIs">APIs & IA</button>
+
+      <!-- Píldora de Estado 100% Online con Dropdown -->
+      <div style="position: relative;">
+        <button class="btn-health-pill" onclick="toggleHeaderHealth(event)" id="header-health-btn" title="Ver estado de infraestructura de patentes">
+          <span class="pulse-green-dot"></span>
+          <span style="font-size: 11px;">100% Online</span>
+          <span style="font-size: 8px; color: var(--text-muted);" id="header-health-caret">▼</span>
+        </button>
+
+        <div class="ag-popup-menu" id="header-health-dropdown" style="right: 0; left: auto; top: calc(100% + 8px); width: 280px; padding: 12px 14px;">
+          <div class="ag-menu-header" style="padding: 0 0 8px 0; color: var(--text-muted); border-bottom: 1px solid var(--border-color); margin-bottom: 8px;">
+            <span>Disponibilidad de Fuentes Oficiales</span>
+          </div>
+          <div id="dynamic-health-rows-container">
+            <div class="ag-health-row"><div class="ag-health-info"><span class="ag-health-name">Google Patents</span><span class="ag-health-desc">Red Mundial Oficial</span></div><div class="ag-health-val"><span class="ag-health-pct">100%</span></div></div>
+            <div class="ag-health-row"><div class="ag-health-info"><span class="ag-health-name">Europe PMC (EPO / WIPO)</span><span class="ag-health-desc">EMBL-EBI Open API</span></div><div class="ag-health-val"><span class="ag-health-pct">100%</span></div></div>
+            <div class="ag-health-row"><div class="ag-health-info"><span class="ag-health-name">PatentBrief API</span><span class="ag-health-desc">Tecnología Amigable</span></div><div class="ag-health-val"><span class="ag-health-pct">100%</span></div></div>
+            <div class="ag-health-row"><div class="ag-health-info"><span class="ag-health-name">OpenAlex (Literatura)</span><span class="ag-health-desc">250M+ Artículos Científicos</span></div><div class="ag-health-val"><span class="ag-health-pct">100%</span></div></div>
+          </div>
+        </div>
       </div>
 
-      <!-- Menú Flotante de Proyectos -->
-      <div class="ag-popup-menu" id="workspace-popup-menu" style="left: 0; top: calc(100% + 4px); min-width: 290px;">
-        <div class="ag-menu-header">Espacios de Trabajo / Investigaciones</div>
-        <div id="workspace-list-items">
-          <!-- Injected via JS -->
-        </div>
-        <div class="ag-menu-divider"></div>
-        <div class="ag-menu-item" onclick="crearNuevoWorkspaceModal()">
-          <span>+ Crear Nuevo Espacio de Trabajo...</span>
-        </div>
-        <div class="ag-menu-item" onclick="exportarWorkspaceActual()">
-          <span>Exportar Memoria del Proyecto (.json)</span>
-        </div>
-      </div>
-
-      <div class="workspace-actions">
-        <button class="btn-ws-pinned" onclick="togglePinnedPatentsView()" id="btn-pinned-count" title="Filtrar solo documentos semilla guardados en este proyecto">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="17" x2="12" y2="22"></line>
-            <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
-          </svg>
-          <span id="pinned-count-label">0 Guardadas</span>
-        </button>
-        <button class="btn-ghost" onclick="crearNuevoWorkspaceModal()" style="font-size: 11px; padding: 4px 8px;" title="Crear nuevo proyecto de vigilancia">
-          <span>+</span> Proyecto
-        </button>
-        <button class="btn-ghost" id="btn-delete-workspace" onclick="eliminarWorkspaceActual()" style="font-size: 11px; padding: 4px 8px; color: var(--status-danger); border-color: rgba(239, 68, 68, 0.35);" title="Eliminar el proyecto activo y sus datos">
-          Eliminar Proyecto
-        </button>
-        <button class="btn-ghost" onclick="abrirSettingsModal()" style="font-size: 11px; padding: 4px 8px; display: inline-flex; align-items: center; gap: 4px;" title="Ver estado de APIs y gestionar conectores con el Agente">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-          <span>APIs & IA</span>
-        </button>
-      </div>
+      <!-- Switcher Tema Oscuro / Claro -->
+      <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Alternar Modo Oscuro / Claro">
+        <span id="theme-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </span>
+        <span id="theme-text" style="display:none;">Modo Oscuro</span>
+      </button>
     </div>
+  </header>
 
-    <!-- Barra Metodológica JTBD: Asistentes de 1 Clic -->
-    <div class="jtbd-quick-bar">
-      <span class="jtbd-quick-label">Ruta JTBD:</span>
-      <button class="jtbd-pill" onclick="lanzarAsistenteJTBDEcuacion()" title="Transformar un problema técnico en una ecuación estructurada (Entidad - Tecnología - Solución) con códigos CPC">
+  <!-- 2. BARRA DE RUTA JTBD (ACCIONES METODOLOGICAS) -->
+  <section class="jtbd-strip">
+    <div class="jtbd-label">Ruta JTBD:</div>
+    <div class="jtbd-actions">
+      <button class="jtbd-pill-btn" onclick="lanzarAsistenteJTBDEcuacion()" title="Transformar un problema técnico en una ecuación estructurada con códigos CPC">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
         <span>1. Ecuación E-T-S / Booleana</span>
       </button>
-      <button class="jtbd-pill" onclick="lanzarAsistenteJTBDPCT()" title="Autocrítica de patentabilidad (Novedad, Nivel Inventivo, Aplicación Industrial y Reglas 11 a 13 PCT)">
+      <button class="jtbd-pill-btn" onclick="lanzarAsistenteJTBDPCT()" title="Autocrítica de patentabilidad (Novedad, Nivel Inventivo, Reglas 11-13 PCT)">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--intel-purple)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
         <span>2. Autocrítica PCT (Reglas 11–13)</span>
       </button>
-      <button class="jtbd-pill" onclick="lanzarAsistenteJTBDFTO()" title="Evaluar Libertad de Operación (FTO): patentes vigentes vs. dominio público y diseño alrededor">
+      <button class="jtbd-pill-btn" onclick="lanzarAsistenteJTBDFTO()" title="Evaluar Libertad de Operación (FTO): patentes vigentes vs. dominio público">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         <span>3. Dictamen FTO & Dominio Público</span>
       </button>
-      <button class="jtbd-pill" onclick="lanzarAsistenteJTBDBI()" title="Inteligencia competitiva: titulares líderes, cobertura geográfica y océanos azules no explotados">
+      <button class="jtbd-pill-btn" onclick="lanzarAsistenteJTBDBI()" title="Inteligencia competitiva: titulares líderes y océanos azules">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         <span>4. Mapa Competitivo & Océanos Azules</span>
       </button>
     </div>
 
-    <div class="ag-prompt-container">
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+      <!-- Píldora de patentes guardadas -->
+      <button class="btn-pinned-pill" onclick="mostrarSoloGuardadas()" id="btn-pinned-count" title="Ver patentes guardadas en este proyecto">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        <span id="pinned-count-label">0 Guardadas</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- 3. MAIN LAYOUT: FEED BENTO + DRAWER ADAPTATIVO -->
+  <main class="app-main" id="app-main-layout">
+    <div class="feed-container" id="col-search-results">
+
+      <!-- Panel del Agente Pericial en Vivo -->
+      <section class="agent-panel-card" id="ai-unified-panel"><div id="agent-active-live-container" style="display: none;">
+        <div class="agent-panel-header">
+          <div class="agent-title-lockup">
+            <span class="agent-status-dot"></span>
+            <span class="agent-title">Dictamen Pericial & Asesoría Tecnológica</span>
+            <button class="model-tag-switcher" onclick="alternarModeloRapidoAvanzado()" id="ai-active-model-tag" title="Alternar entre Gemini Flash Lite y Pro">gemini-3.5-flash-lite</button>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="control-pill" onclick="copiarAnalisisIa()" id="copy-btn">Copiar</button>
+            <button class="control-pill" onclick="limpiarHistorialChatActual()">Limpiar Chat</button>
+            <button class="control-pill" onclick="minimizarPanelAiActual()">Minimizar</button>
+          </div>
+        </div>
+
+        <!-- Traza de razonamiento pericial en la parte superior -->
+        <div class="reasoning-trace-box" id="thinking-bar-pill" style="display: none;">
+          <div class="trace-header" onclick="toggleThinkingTray()">
+            <span id="thinking-spinner-icon" class="thinking-spinner" style="display:none;"></span>
+            <span id="thinking-header-title">Razonamiento y traza pericial completada</span>
+            <span id="thinking-timer-badge" class="thinking-timer" style="display:none;">(<span id="thinking-timer-val">0.0s</span>)</span>
+            <span id="thinking-caret" style="margin-left:auto; font-size:10px;">▲</span>
+          </div>
+          <div class="trace-steps-list" id="thinking-tray-body">
+            <div id="agent-activity-slot"></div>
+          </div>
+        </div>
+
+        <!-- Cuerpo de respuesta y streaming del Agente -->
+        <div class="agent-reply-body" id="agent-reply-text">
+          <div id="agent-streaming-reply-wrap" style="display: none;">
+            <div id="agent-streaming-reply-content"></div>
+          </div>
+          <div id="ai-unified-content">
+            <div id="ai-unified-verdict-slot"></div>
+          </div>
+          <div id="ai-history-recent-slot"></div>
+          <div id="ai-history-older-slot"></div>
+        </div>
+
+        <!-- Preguntas de seguimiento sugeridas -->
+        <div class="ai-unified-followups" id="ai-unified-followups" style="display: none;"></div>
+      </div></section>
+
+      <!-- Boton para restaurar panel si fue minimizado -->
+      <div id="btn-restore-ai-panel" style="display: none; margin-bottom: 14px;">
+        <button class="control-pill" onclick="restaurarPanelAiMinimizado()">
+          <span>Mostrar Análisis del Agente Pericial</span>
+          <span class="badge" id="restore-chat-count">1</span>
+        </button>
+      </div>
+
+      <!-- Dropdown / Franja de Inteligencia CPC -->
+      <div class="intel-dropdown" id="intel-dropdown" style="display: none; margin-bottom: 14px;">
+        <div class="intel-header" onclick="toggleIntelDropdown()">
+          <span style="font-weight: 600; font-size: 12.5px; color: var(--intel-purple);">Inteligencia de Clasificaciones Tecnológicas (CPC / IPC)</span>
+          <span class="intel-badge" id="intel-badge-count">0 detectadas</span>
+          <span class="intel-arrow" id="intel-arrow">▼</span>
+        </div>
+        <div class="intel-body" id="intel-body" style="display: none;">
+          <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px;">
+            Clasificaciones dominantes detectadas en estos resultados. Haz clic en cualquiera para refinar la ecuación o realizar una segunda búsqueda por similitud de clase:
+          </div>
+          <div class="cpc-chips" id="cpc-chips-container"></div>
+        </div>
+      </div>
+
+      <!-- Barra de Filtros Activos -->
+      <div class="active-filters-container" id="active-filters-container" style="display: none;">
+        <div id="active-filters-chips" style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;"></div>
+      </div>
+
+      <!-- Encabezado de Resultados: Contador, Pestañas, Exportación -->
+      <div class="feed-header" id="feed-header-controls">
+        <div class="feed-title-wrap" style="display: flex; align-items: center; gap: 10px;">
+          <span class="results-badge" id="results-count-badge">Resultados (0)</span>
+          <span class="active-query-pill" id="active-query-pill" style="display:none;">
+            Consulta: <strong id="active-query-text"></strong>
+          </span>
+          <div class="view-tabs" style="display: inline-flex; background: var(--bg-subtle); border-radius: var(--radius-full); padding: 2px;">
+            <button class="tab-btn active" id="tab-cards" onclick="cambiarVistaResultados('cards')">Tarjetas</button>
+            <button class="tab-btn" id="tab-raw" onclick="cambiarVistaResultados('raw')">JSON en Crudo</button>
+          </div>
+        </div>
+        <div class="feed-actions-wrap" style="display: flex; align-items: center; gap: 8px;">
+          <button class="control-pill" id="export-csv-btn" onclick="exportarResultadosCSV()" title="Descargar como hoja de cálculo CSV">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportar CSV
+          </button>
+          <button class="control-pill" id="export-dossier-btn" onclick="abrirDossierModal()" title="Generar informe técnico estructurado">Dossier FTO</button>
+          <button class="control-pill" onclick="abrirComparadorModal()" title="Comparar patentes seleccionadas lado a lado">Comparar Lado a Lado</button>
+        </div>
+      </div>
+
+      <!-- Contenedor Principal de Tarjetas (Bento Feed) -->
+      <div id="view-cards" class="cards-feed"></div>
+
+      <!-- Vista JSON en Crudo -->
+      <div id="view-raw" style="display: none;">
+        <pre id="raw-output" class="raw-pre"></pre>
+      </div>
+
+    </div>
+
+    <!-- 4. DRAWER LATERAL DE INSPECCION TECNICA (PLEGABLE / ADAPTATIVO) -->
+    <aside class="inspection-drawer" id="col-inspection" style="display: none;">
+      <div class="drawer-header">
+        <div class="drawer-title" id="sidebar-header-left">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span style="font-weight: 700; font-size: 13.5px;">Inspección Técnica de Patente</span>
+        </div>
+        <div class="drawer-controls" style="display: flex; align-items: center; gap: 6px;">
+          <div class="drawer-tabs">
+            <button class="drawer-tab active" id="ins-tab-dossier" onclick="cambiarInspectionTab('dossier')">Ficha</button>
+            <button class="drawer-tab" id="ins-tab-pdf" onclick="cambiarInspectionTab('pdf')">PDF Oficial</button>
+          </div>
+          <button class="icon-btn-sm" onclick="maximizarInspeccionModal()" title="Ver en pantalla completa">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          </button>
+          <button class="icon-btn-sm" onclick="cerrarColumnaInspeccion()" title="Cerrar panel de inspección">&times;</button>
+        </div>
+      </div>
+
+      <div class="drawer-body" id="inspection-body-content">
+        <div id="inspection-standby-view" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 350px; text-align: center; color: var(--text-muted); padding: 30px;">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.35; margin-bottom: 12px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="11" cy="14" r="3"/><line x1="13.5" y1="16.5" x2="16" y2="19"/></svg>
+          <div style="font-size: 13px; font-weight: 600; color: var(--text-high); margin-bottom: 4px;">Espacio de Inspección y PDF</div>
+          <div style="font-size: 11.5px; line-height: 1.5; max-width: 260px;">
+            Haz clic en "Inspeccionar Expediente" o en el título de cualquier patente para examinar sus láminas técnicas, clasificación CPC, estado FTO y visor de PDF oficial.
+          </div>
+        </div>
+
+        <div id="inspection-active-view" style="display: none;">
+          <div id="sidebar-body-dossier" class="drawer-pane"></div>
+          <div id="sidebar-body-pdf" class="drawer-pane" style="display: none;"></div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- 5. COMMAND BAR INFERIOR FLOTANTE (DOCK DE MAXIMA PRODUCTIVIDAD) -->
+  <div class="command-bar-wrapper">
+    <div class="command-input-row">
       <textarea 
         id="query-input" 
-        class="ag-prompt-input" 
-        rows="2" 
+        class="command-input" 
+        rows="1" 
         placeholder="Escribe conceptos técnicos, palabras clave, ecuaciones de patente o haz una pregunta directa al Agente Pericial..."
         onkeydown="handleQueryInputKey(event)"
       ></textarea>
-
-      <div class="ag-prompt-toolbar">
-        <!-- Izquierda: Selector de Fuentes estilo Model Selector -->
-        <div class="ag-toolbar-left">
-          <div class="ag-pill-btn" onclick="toggleSourceMenu(event)" id="source-pill-btn">
+      <button class="send-query-btn" id="ag-search-btn" onclick="ejecutarBusquedaDesdePrompt()" title="Buscar o consultar al Agente">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="command-controls-row">
+      <div class="filter-pills-group">
+        
+        <!-- Selector de Fuentes estilo Model Selector -->
+        <div style="position: relative;">
+          <div class="control-pill" onclick="toggleSourceMenu(event)" id="source-pill-btn">
             <span style="font-weight: 700; color: #8b949e;">+</span>
             <span id="current-source-label">Todas las fuentes</span>
             <span class="ag-pill-caret" id="source-caret">▼</span>
           </div>
 
-          <!-- Menú Flotante de Fuentes (Hacia arriba) -->
-          <div class="ag-popup-menu" id="source-popup-menu">
-            <div class="ag-menu-header">Fuentes de Patentes Conectadas</div>
-            
-            <div class="ag-menu-item selected" onclick="seleccionarFuente('all', 'Todas las fuentes')">
-              <div>
-                <div>Todas las fuentes</div>
-                <div class="ag-item-desc">Búsqueda Centralizada Multihilo</div>
-              </div>
-              <span class="ag-item-check" id="check-all">✓</span>
+          <!-- Menú Flotante de Fuentes -->
+          <div class="ag-popup-menu" id="source-popup-menu"><div id="health-submenu" style="display:none;"></div>
+            <div class="ag-menu-header">Fuentes de Información</div>
+            <div class="ag-menu-option selected" onclick="seleccionarFuenteDirecta('all', event)" id="opt-juris-all">
+              <span class="ag-option-label">Todas las fuentes combinadas</span>
+              <span class="ag-option-check" id="check-all">✓</span>
             </div>
-
-            <div class="ag-menu-item" onclick="seleccionarFuente('google', 'Google Patents')">
-              <div>
-                <div>Google Patents</div>
-                <div class="ag-item-desc">Red Mundial Oficial (120M+ documentos)</div>
-              </div>
-              <span class="ag-item-check" id="check-google">✓</span>
+            <div class="ag-menu-option" onclick="seleccionarFuenteDirecta('google', event)" id="opt-juris-google">
+              <span class="ag-option-label">Google Patents Engine</span>
+              <span class="ag-option-check" id="check-google"></span>
             </div>
-
-            <div class="ag-menu-item" onclick="seleccionarFuente('europepmc', 'Europe PMC')">
-              <div>
-                <div>Europe PMC (EPO / WIPO)</div>
-                <div class="ag-item-desc">Oficina Europea y Tratado PCT</div>
-              </div>
-              <span class="ag-item-check" id="check-europepmc">✓</span>
+            <div class="ag-menu-option" onclick="seleccionarFuenteDirecta('europepmc', event)" id="opt-juris-europepmc">
+              <span class="ag-option-label">Europe PMC (EPO / WIPO)</span>
+              <span class="ag-option-check" id="check-europepmc"></span>
             </div>
-
-            <div class="ag-menu-item" onclick="seleccionarFuente('patentbrief', 'PatentBrief')">
-              <div>
-                <div>PatentBrief</div>
-                <div class="ag-item-desc">Tecnología en Lenguaje Amigable</div>
-              </div>
-              <span class="ag-item-check" id="check-patentbrief">✓</span>
+            <div class="ag-menu-option" onclick="seleccionarFuenteDirecta('patentbrief', event)" id="opt-juris-patentbrief">
+              <span class="ag-option-label">PatentBrief (Tecnología Amigable)</span>
+              <span class="ag-option-check" id="check-patentbrief"></span>
             </div>
-
-            <div class="ag-menu-divider"></div>
-
-            <!-- Item para ver Estado de Salud / Uptime (Como View Usage en Antigravity) -->
-            <div class="ag-menu-item" onmouseenter="mostrarHealthHover(true)" onclick="toggleHealthSubmenu(event)">
-              <div>Estado y Conectividad de APIs</div>
-              <span style="font-size: 11px; color: var(--text-muted);">▸</span>
-            </div>
-          </div>
-
-          <!-- Submenú Lateral de Salud y Consumo de APIs (Dinámico) -->
-          <div class="ag-health-submenu" id="health-submenu">
-            <div class="ag-menu-header" style="display: flex; justify-content: space-between; align-items: center; padding: 0 0 8px 0; color: var(--text-muted); border-bottom: 1px solid var(--border-color); margin-bottom: 8px;">
-              <span>Disponibilidad & Cuotas</span>
-              <button class="btn-ghost" onclick="abrirAsistenteConectarApi()" style="font-size: 11px; padding: 2px 6px; color: var(--brand-primary);" title="Conectar nueva API con el Agente">+ Conectar</button>
-            </div>
-
-            <div id="dynamic-health-rows-container">
-              <!-- Renderizado dinámico vía renderDynamicApisHealth() -->
-            </div>
-
-            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-color); text-align: center;">
-              <button class="btn-ghost" onclick="abrirAsistenteConectarApi()" style="font-size: 11px; color: var(--brand-primary); width: 100%;">
-                Conectar Nueva API con el Asistente
-              </button>
-            </div>
-          </div>
-
-          <!-- Botón de Dictado por Voz (Web Speech API) -->
-          <div class="ag-pill-btn voice-btn" id="voice-dictate-btn" onclick="toggleVoiceDictation(event)" title="Dictar consulta por voz en español (Web Speech API nativa gratuita)">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px; margin-right:3px;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-            <span id="voice-dictate-label">Voz</span>
           </div>
         </div>
 
-        <!-- Derecha: Botón Shuffle + Selector de Filtros/Orden + Botón de Búsqueda -->
-        <div class="ag-toolbar-right">
-          <!-- Botón de Shuffle APIs -->
-          <div class="ag-pill-btn" onclick="toggleShuffle()" id="shuffle-pill-btn" title="Intercalado equilibrado: muestra 1 patente de cada API alternadamente (Google, Europe PMC, PatentBrief)">
-            <span id="shuffle-label">Shuffle APIs</span>
-          </div>
+        <!-- Shuffle: 1 de c/API -->
+        <div class="control-pill" onclick="toggleShuffle()" id="shuffle-pill-btn" title="Intercalar 1 resultado de cada API de forma equitativa">
+          <span id="shuffle-label">Shuffle: 1 de c/API (On)</span>
+        </div>
 
-          <!-- Botón de Shuffle Países -->
-          <div class="ag-pill-btn" onclick="toggleCountryShuffle()" id="country-shuffle-pill-btn" title="Intercalado por países: muestra 1 patente de cada territorio alternadamente (EE.UU., Europa, PCT, etc.)">
-            <span id="country-shuffle-label">Shuffle Países</span>
-          </div>
+        <!-- Filtro País / Territorio -->
+        <div class="control-pill" onclick="rotarJurisdiccionDirecta()" id="country-shuffle-pill-btn" title="Rotar filtro de jurisdicción (Todos, EE.UU., Europa, OMPI, Otros)">
+          <span id="country-shuffle-label">Filtro País: Todos</span>
+        </div>
 
-          <div class="ag-pill-btn" onclick="toggleFilterMenu(event)" id="filter-pill-btn">
+        <!-- Ordenamiento y Filtros Avanzados -->
+        <div style="position: relative;">
+          <div class="control-pill" onclick="toggleFilterMenu(event)" id="filter-pill-btn">
             <span id="current-sort-label">Relevancia</span>
             <span class="ag-pill-caret" id="filter-caret">▼</span>
           </div>
 
-          <!-- Menú Flotante de Filtros (Hacia arriba) -->
-          <div class="ag-popup-menu" id="filter-popup-menu" style="right: 0; min-width: 250px;">
+          <!-- Menú Pop-up de Ordenamiento y Filtros -->
+          <div class="ag-popup-menu" id="filter-popup-menu">
             <div class="ag-menu-header">Criterio de Ordenamiento</div>
-            <div class="ag-menu-item selected" id="opt-sort-rel" onclick="setSort('relevance', 'Relevancia')">
-              <span>Relevancia Tecnológica</span>
-              <span class="ag-item-check" id="check-sort-rel">✓</span>
+            <div class="ag-menu-option selected" onclick="aplicarOrdenDirecto('relevance', event)" id="opt-sort-rel">
+              <span class="ag-option-label">Mayor Relevancia Técnica</span>
+              <span class="ag-option-check" id="check-sort-rel">✓</span>
             </div>
-            <div class="ag-menu-item" id="opt-sort-date" onclick="setSort('date_desc', 'Más Recientes')">
-              <span>Más Recientes Primero</span>
-              <span class="ag-item-check" id="check-sort-date">✓</span>
+            <div class="ag-menu-option" onclick="aplicarOrdenDirecto('citations', event)" id="opt-sort-cits">
+              <span class="ag-option-label">Mayor Impacto (Citas hacia adelante)</span>
+              <span class="ag-option-check" id="check-sort-cits"></span>
             </div>
-            <div class="ag-menu-item" id="opt-sort-date-asc" onclick="setSort('date_asc', 'Más Antiguas')">
-              <span>Más Antiguas Primero</span>
-              <span class="ag-item-check" id="check-sort-date-asc">✓</span>
+            <div class="ag-menu-option" onclick="aplicarOrdenDirecto('date_desc', event)" id="opt-sort-date">
+              <span class="ag-option-label">Más Recientes (Prioridad)</span>
+              <span class="ag-option-check" id="check-sort-date"></span>
             </div>
-            <div class="ag-menu-item" id="opt-sort-cits" onclick="setSort('citations_desc', 'Más Citadas')">
-              <span>Más Citadas / Impacto</span>
-              <span class="ag-item-check" id="check-sort-cits">✓</span>
-            </div>
-
-            <div class="ag-menu-divider"></div>
-
-            <div class="ag-menu-header">Territorio / Jurisdicción</div>
-            <div class="ag-menu-item selected" id="opt-juris-all" onclick="setJurisdictionFilter('ALL', 'Todas las regiones')">
-              <span>[INT] Todas las regiones / mundiales</span>
-              <span class="ag-item-check" id="check-juris-all">✓</span>
-            </div>
-            <div class="ag-menu-item" id="opt-juris-us" onclick="setJurisdictionFilter('US', '[US] Estados Unidos')">
-              <span>[US] Estados Unidos (USPTO)</span>
-              <span class="ag-item-check" id="check-juris-us" style="display:none;">✓</span>
-            </div>
-            <div class="ag-menu-item" id="opt-juris-ep" onclick="setJurisdictionFilter('EP', '[EP] Europa')">
-              <span>[EP] Oficina Europea (EPO)</span>
-              <span class="ag-item-check" id="check-juris-ep" style="display:none;">✓</span>
-            </div>
-            <div class="ag-menu-item" id="opt-juris-wo" onclick="setJurisdictionFilter('WO', '[PCT] Mundial PCT')">
-              <span>[PCT] Tratado Internacional (PCT / WIPO)</span>
-              <span class="ag-item-check" id="check-juris-wo" style="display:none;">✓</span>
-            </div>
-            <div class="ag-menu-item" id="opt-juris-other" onclick="setJurisdictionFilter('OTHER', '[Otras] Otras Regiones')">
-              <span>[Otras] Otras Oficinas (JP, CN, DE, KR...)</span>
-              <span class="ag-item-check" id="check-juris-other" style="display:none;">✓</span>
+            <div class="ag-menu-option" onclick="aplicarOrdenDirecto('date_asc', event)" id="opt-sort-date-asc">
+              <span class="ag-option-label">Más Antiguas (Patentes Seminales)</span>
+              <span class="ag-option-check" id="check-sort-date-asc"></span>
             </div>
 
-            <div class="ag-menu-divider"></div>
-
-            <div class="ag-menu-header">Estado Legal (Vigencia)</div>
-            <div class="ag-menu-item selected" id="opt-status-all" onclick="setStatusFilter('all', 'Todos los estados')">
-              <span>Todos los estados</span>
-              <span class="ag-item-check" id="check-status-all">✓</span>
+            <div style="display:none;">
+              <input type="number" id="filter-year-from">
+              <input type="number" id="filter-year-to">
+              <input type="checkbox" id="chk-recent">
+              <input type="checkbox" id="chk-friendly">
+              <input type="checkbox" id="chk-corporate">
+              <input type="checkbox" id="chk-drawings">
+              <input type="checkbox" id="chk-has-pdf">
+              <input type="checkbox" id="chk-shuffle-menu">
+              <div id="opt-status-all"></div>
+              <div id="opt-status-active"></div>
+              <div id="opt-status-inactive"></div>
+              <span id="check-status-all"></span>
+              <span id="check-status-active"></span>
+              <span id="check-status-inactive"></span>
+              <div id="opt-juris-us"></div>
+              <div id="opt-juris-ep"></div>
+              <div id="opt-juris-wo"></div>
+              <div id="opt-juris-other"></div>
+              <span id="check-juris-all"></span>
+              <span id="check-juris-us"></span>
+              <span id="check-juris-ep"></span>
+              <span id="check-juris-wo"></span>
+              <span id="check-juris-other"></span>
             </div>
-            <div class="ag-menu-item" id="opt-status-active" onclick="setStatusFilter('active', 'Solo Activas / Vigentes')">
-              <span>Solo Activas (Concedidas / Vigentes)</span>
-              <span class="ag-item-check" id="check-status-active" style="display:none;">✓</span>
-            </div>
-            <div class="ag-menu-item" id="opt-status-inactive" onclick="setStatusFilter('inactive', 'Solo Inactivas / Dominio Público')">
-              <span>Solo Inactivas (Dominio Público)</span>
-              <span class="ag-item-check" id="check-status-inactive" style="display:none;">✓</span>
-            </div>
-
-            <div class="ag-menu-divider"></div>
-
-            <div class="ag-menu-header">Rango de Años (Publicación)</div>
-            <div style="display:flex; align-items:center; gap:6px; padding: 4px 10px 8px 10px;">
-              <input type="number" id="filter-year-from" placeholder="Desde (ej. 2018)" min="1900" max="2030" onchange="setYearRangeFilter()" style="width:50%; background:var(--bg-canvas); border:1px solid var(--border-color); color:var(--text-high); border-radius:5px; padding:4px 6px; font-size:11.5px;">
-              <span style="color:var(--text-muted);">-</span>
-              <input type="number" id="filter-year-to" placeholder="Hasta (ej. 2026)" min="1900" max="2030" onchange="setYearRangeFilter()" style="width:50%; background:var(--bg-canvas); border:1px solid var(--border-color); color:var(--text-high); border-radius:5px; padding:4px 6px; font-size:11.5px;">
-            </div>
-            <div class="ag-menu-divider"></div>
-            <div class="ag-menu-header">Filtros Rápidos</div>
-            <label class="ag-filter-checkbox-row">
-              <span>Solo con resumen en lenguaje amigable</span>
-              <input type="checkbox" id="chk-friendly" onchange="applyFiltersAndRender()">
-            </label>
-            <label class="ag-filter-checkbox-row">
-              <span>Solo con PDF oficial descargable</span>
-              <input type="checkbox" id="chk-has-pdf" onchange="applyFiltersAndRender()">
-            </label>
-            <label class="ag-filter-checkbox-row">
-              <span>Solo empresas y corporaciones</span>
-              <input type="checkbox" id="chk-corporate" onchange="applyFiltersAndRender()">
-            </label>
-            <label class="ag-filter-checkbox-row">
-              <span>Solo con lámina técnica (Fig. 1)</span>
-              <input type="checkbox" id="chk-drawings" onchange="applyFiltersAndRender()">
-            </label>
-            <label class="ag-filter-checkbox-row">
-              <span>Solo últimos 5 años (2021+)</span>
-              <input type="checkbox" id="chk-recent" onchange="applyFiltersAndRender()">
-            </label>
-            <label class="ag-filter-checkbox-row">
-              <span>Intercalado 1x1 (Shuffle Fuentes)</span>
-              <input type="checkbox" id="chk-shuffle-menu" onchange="toggleShuffle(event)">
-            </label>
           </div>
-
-          <!-- Botón Circular Antigravity -->
-          <button id="ag-search-btn" class="ag-search-circle-btn active" onclick="buscar()" title="Buscar patentes">
-            <svg viewBox="0 0 24 24">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </button>
         </div>
+
+        <!-- Dictado por Voz (Web Speech API) -->
+        <button class="control-pill" id="voice-dictate-btn" onclick="toggleDictadoVoz()" title="Dictar consulta por voz (Web Speech API)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          <span id="voice-dictate-label">Voz</span>
+        </button>
+
+      </div>
+      <div style="color: var(--text-muted); font-size: 11px; margin-left: auto;">
+        Presiona Enter para consultar al Agente Pericial
       </div>
     </div>
-
-    <!-- Surveillance Intelligence Dropdown (DESPLEGABLE Y COMPACTO) -->
-    <div id="intel-dropdown" class="intel-dropdown" style="display: none;">
-      <button class="intel-header-btn" onclick="toggleIntelBody()">
-        <div class="intel-title-left">
-          <span>Inteligencia de Clasificaciones Tecnológicas (CPC / IPC)</span>
-          <span class="intel-badge-count" id="intel-badge-count">0 detectadas</span>
-        </div>
-        <span class="intel-arrow" id="intel-arrow">▼</span>
-      </button>
-      <div class="intel-body" id="intel-body">
-        <div class="intel-desc">
-          Clasificaciones dominantes detectadas en estos resultados. Haz clic en cualquiera para <strong>refinar la ecuación</strong> o realizar una <strong>segunda búsqueda por similitud de clase</strong>:
-        </div>
-        <div class="cpc-chips" id="cpc-chips-container">
-          <!-- Injected via JS -->
-        </div>
-      </div>
-    </div>
-
-        <!-- =========================================================
-         WORKSPACE TRI-COLUMNA (CHAT IA + RESULTADOS + INSPECCIÓN)
-         ========================================================= -->
-    <div class="workspace-tri-column">
-      
-      <!-- ESPACIO UNIFICADO: DICTAMEN DE IA + RESULTADOS DE BÚSQUEDA -->
-      <main class="col-search-results" id="col-search-results">
-        
-        <!-- PANEL UNIFICADO DE ASESORÍA, HISTORIAL Y DICTAMEN DE IA -->
-        <div class="ai-unified-panel" id="ai-unified-panel">
-          <div class="ai-unified-header">
-            <div class="ai-unified-title-wrap">
-              <div class="ai-unified-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect width="18" height="12" x="3" y="8" rx="2"/>
-                  <path d="M12 2v6"/>
-                  <path d="M12 18v4"/>
-                  <path d="M4.93 19.07l2.83-2.83"/>
-                  <path d="M16.24 16.24l2.83 2.83"/>
-                  <circle cx="9" cy="14" r="1"/>
-                  <circle cx="15" cy="14" r="1"/>
-                </svg>
-                <span>Agente Pericial & Historial de Conversación</span>
-              </div>
-              <span class="ai-model-tag" id="ai-active-model-tag" onclick="alternarModeloIa()" style="cursor:pointer;" title="Clic para alternar entre Gemini 2.5 Flash y Gemini 2.5 Pro">gemini-2.5-flash</span>
-            </div>
-            <div style="display:flex; gap:6px; align-items:center;">
-              <button class="btn-ghost" onclick="limpiarHistorialChatActual()" style="font-size:11px; padding:3px 8px;" title="Borrar historial de conversación de este proyecto">Limpiar Chat</button>
-              <button class="btn-ghost" onclick="copiarAnalisisIa()" style="font-size:11px; padding:3px 8px;" title="Copiar último dictamen">Copiar</button>
-              <button class="btn-ghost" onclick="cerrarPanelIa()" style="font-size:11px; padding:3px 8px;" title="Minimizar panel de chat (puedes reabrirlo desde la barra de resultados)">Minimizar Chat</button>
-            </div>
-          </div>
-          <!-- Botón desplegable para mensajes anteriores (arriba de los últimos 2 mensajes) -->
-          <div id="ai-history-older-slot"></div>
-          <!-- Últimos 2 mensajes del historial -->
-          <div id="ai-history-recent-slot"></div>
-          <!-- Turno Activo del Agente: Traza de Razonamiento ARRIBA, Respuesta mecanografiada ABAJO -->
-          <div id="agent-active-live-container" style="display: none; margin-top: 10px;">
-            <div id="agent-activity-slot"></div>
-            <div id="agent-streaming-reply-wrap" class="chat-turn-assistant-wrap" style="display: none;">
-              <div class="ai-compiled-markdown antigravity-flow" id="agent-streaming-reply-content"></div>
-            </div>
-          </div>
-          <div id="ai-unified-verdict-slot" style="display: none;"></div>
-          <div class="ai-unified-content" id="ai-unified-content" style="display: none;"></div>
-          <div id="ai-unified-followups" class="ai-chips-suggestions" style="margin-top:14px; padding-top:10px; border-top:1px solid var(--border-color);"></div>
-        </div>
-        
-        <!-- Tabs & View Switcher -->
-        <div class="tabs-bar">
-          <div class="tabs-left" style="display:flex; align-items:center; flex-wrap:wrap; gap:6px;">
-            <button id="tab-cards" class="tab-btn active" onclick="cambiarVista('cards')">
-              Resultados (<span id="results-count-badge">0</span>)
-            </button>
-            <button id="tab-raw" class="tab-btn" onclick="cambiarVista('raw')">
-              JSON en Crudo
-            </button>
-            <button id="btn-restore-ai-panel" class="btn-ghost" onclick="mostrarPanelIa()" style="display: none; font-size: 11.5px; padding: 4px 10px; color: var(--brand-primary); border-color: var(--brand-primary); font-weight: 600;" title="Volver a mostrar la conversación con el Agente Pericial">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              <span>Mostrar Chat del Agente (<span id="restore-chat-count">0</span>)</span>
-            </button>
-            <span id="active-query-pill" style="display:none; font-size:11.5px; color:var(--text-muted); padding: 3px 8px; background:var(--bg-subtle); border-radius:12px; border:1px solid var(--border-color);"><span id="active-query-text"></span></span>
-          </div>
-          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-            <button class="btn-csv-export" id="export-csv-btn" onclick="exportarResultadosCsv()" title="Descargar todas las patentes y metadatos con enlaces directos a PDF">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> <span>Exportar CSV</span>
-            </button>
-            <button class="btn-dossier-export" id="export-dossier-btn" onclick="abrirDossierModal()" title="Generar e imprimir informe ejecutivo de vigilancia tecnológica">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> <span>Dossier FTO</span>
-            </button>
-            <button class="btn-ghost" id="copy-btn" onclick="copiarJson()">Copiar JSON</button>
-          </div>
-        </div>
-
-        <!-- Barra de Filtros Activos con botón de Limpiar -->
-        <div id="active-filters-container" style="display: none;" class="active-filters-bar">
-          <span style="font-weight: 600; color: var(--text-muted);">Filtros activos:</span>
-          <div id="active-filters-chips" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
-          <button class="btn-clear-all-filters" onclick="resetearTodosLosFiltros()">Limpiar todos</button>
-        </div>
-
-        <!-- 1. Structured Cards List -->
-        <div id="view-cards" class="patents-list">
-          <!-- Renderizado dinámico inicial vía mostrarZeroState() -->
-        </div>
-
-        <!-- 2. Raw JSON View -->
-        <div id="view-raw" style="display: none;">
-          <pre id="raw-output">// Presione "Buscar" para obtener el JSON en crudo...</pre>
-        </div>
-
-      </main>
-
-      <!-- 3. COLUMNA DERECHA: PANEL DE INSPECCIÓN / PDF STANDBY -->
-      <aside class="col-inspection" id="col-inspection">
-        <div class="inspection-header">
-          <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--text-high);">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-            <span>Inspección Técnica</span>
-          </div>
-          <div class="sidebar-tabs-bar" style="padding: 0; background: transparent; border: none; display: flex; align-items: center; gap: 4px;">
-            <button id="ins-tab-dossier" class="sb-tab-btn active" onclick="cambiarInspectionTab('dossier')">Ficha</button>
-            <button id="ins-tab-pdf" class="sb-tab-btn" onclick="cambiarInspectionTab('pdf')">PDF Oficial</button>
-            <button class="btn-ghost" onclick="maximizarInspeccionModal()" title="Ampliar ficha en pantalla completa" style="font-size: 12px; padding: 4px 7px; display: inline-flex; align-items: center;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
-                <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
-              </svg>
-            </button>
-            <button class="btn-ghost" onclick="cerrarColumnaInspeccion()" title="Minimizar panel de inspeccion para ver resultados a pantalla completa" style="font-size: 14px; padding: 3px 8px; color: var(--text-muted); line-height: 1;">
-              &times;
-            </button>
-          </div>
-        </div>
-
-        <div class="inspection-body" id="inspection-body-content">
-          <div class="inspection-standby" id="inspection-standby-view">
-            <div class="inspection-standby-icon">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <circle cx="11.5" cy="14.5" r="2.5"/>
-                <path d="M13.25 16.25 15 18"/>
-              </svg>
-            </div>
-            <div style="font-weight: 700; color: var(--text-high); margin-bottom: 6px;">Espacio de Inspección y PDF</div>
-            <p style="font-size: 12px; line-height: 1.5;">
-              Haz clic en <strong>"Ficha"</strong> o en el título de cualquier patente o artículo científico para examinar aquí sus láminas técnicas, clasificaciones CPC, estado FTO y visor de PDF oficial sin perder de vista tus resultados.
-            </p>
-          </div>
-          <div id="inspection-active-view" style="display: none;">
-            <!-- Injected via JS -->
-          </div>
-        </div>
-      </aside>
-
-    </div>
-
-    <footer>
-      Grupo 6 &bull; Fabián Osorio, Mariana Álvarez, Kevin Cruz, Lina Peña &bull; Capstone Ingeniería
-    </footer>
-
   </div>
 
-      <!-- Modal de Estado de Conectores (Gestión Exclusiva mediante el Agente Pericial) -->
+  <footer style="text-align: center; padding: 20px; font-size: 11px; color: var(--text-muted); margin-bottom: 90px;">
+    Grupo 6 &bull; Fabián Osorio, Mariana Álvarez, Kevin Cruz, Lina Peña &bull; Capstone Ingeniería
+  </footer>
+
+<!-- Modal de Estado de Conectores (Gestión Exclusiva mediante el Agente Pericial) -->
   <div id="settings-modal" class="modal-overlay" onclick="cerrarSettingsModal(event)">
     <div class="modal-content settings-modal-content" onclick="event.stopPropagation()">
       <div class="modal-header">
@@ -5504,16 +6136,29 @@
     }
 
         // Control Plegable / Adaptativo de la Columna de Inspeccion
+    // Control Adaptativo del Drawer Lateral de Inspeccion
     function cerrarColumnaInspeccion() {
+      const main = document.getElementById('app-main-layout');
+      if (main) main.classList.remove('drawer-open');
       const col = document.getElementById('col-inspection');
-      if (col) col.classList.add('closed');
+      if (col) {
+        col.classList.add('closed');
+        col.style.display = 'none';
+      }
       document.querySelectorAll('.patent-card').forEach(c => c.classList.remove('active-inspected-card'));
     }
 
     function abrirColumnaInspeccion() {
+      const main = document.getElementById('app-main-layout');
+      if (main) main.classList.add('drawer-open');
       const col = document.getElementById('col-inspection');
-      if (col) col.classList.remove('closed');
+      if (col) {
+        col.classList.remove('closed');
+        col.style.display = 'flex';
+      }
     }
+    window.closeDrawer = cerrarColumnaInspeccion;
+    window.openDrawer = abrirColumnaInspeccion;
 
     function actualizarVistasInspeccion(p) {
       const standbyView = document.getElementById('inspection-standby-view');
@@ -7012,7 +7657,7 @@
       const container = document.getElementById('view-cards');
       if (!container) return;
       if (!works || works.length === 0) {
-        container.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; padding: 40px; text-align: center;">No se encontraron articulos cientificos para esta busqueda. Intenta con terminos tecnicos en ingles.</div>`;
+        container.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; padding: 40px; text-align: center;">No se encontraron artículos científicos para esta búsqueda. Intenta con términos técnicos en inglés.</div>`;
         return;
       }
 
@@ -7020,100 +7665,78 @@
       const pinnedSet = new Set((ws && ws.pinned) ? ws.pinned : []);
 
       container.innerHTML = works.map((w, idx) => {
-        const rawTitle = w.title || 'Sin titulo registrado';
+        const rawTitle = w.title || 'Sin título registrado';
         const title = escapeHtml(rawTitle);
         const authors = escapeHtml(w.authors || 'No especificados');
-        const journal = escapeHtml(w.journal || 'Publicacion Academica');
+        const journal = escapeHtml(w.journal || 'Publicación Académica');
         const year = escapeHtml(String(w.publication_year || 'N/A'));
         const cits = w.cited_by_count || 0;
         const isOA = w.is_oa;
         const oaStatus = escapeHtml((w.oa_status || 'closed').toUpperCase());
         const snippet = escapeHtml(w.snippet || '');
-        const isLongSnippet = (w.snippet || '').length > 240;
         const concepts = (w.concepts || []).slice(0, 4);
         const doiUrl = w.doi_url || (w.doi ? `https://doi.org/${w.doi}` : (w.landing_url || '#'));
         const pdfUrl = w.pdf_url;
         const pinId = w.doi || w.id || rawTitle;
         const isPinned = pinnedSet.has(pinId);
 
-        let oaHtml = isOA 
-          ? `<span class="oa-badge oa-open">Acceso Abierto (${oaStatus})</span>` 
-          : `<span class="oa-badge oa-closed">Suscripcion</span>`;
+        let oaStatusText = isOA ? `Acceso Abierto (${oaStatus})` : 'Suscripción';
+        let oaClass = isOA ? 'free' : 'active';
 
         let conceptsHtml = '';
         if (concepts.length > 0) {
-          conceptsHtml = `
-            <div class="classif-row" style="margin-top: 6px; margin-bottom: 8px;">
-              <span class="classif-label">Topicos:</span>
-              ${concepts.map(c => `<span class="classif-pill" onclick="buscar('${escapeHtml(c.name)}')" title="Explorar este topico">${escapeHtml(c.name)} (${c.score}%)</span>`).join('')}
-            </div>
-          `;
+          conceptsHtml = '<div class="card-cpc-row">';
+          concepts.forEach(c => {
+            conceptsHtml += `<span class="cpc-badge" onclick="buscar('${escapeHtml(c.name)}')" title="Explorar este tópico">${escapeHtml(c.name)} (${c.score}%)</span>`;
+          });
+          conceptsHtml += '</div>';
         }
 
         return `
-          <div class="patent-card" id="card-lit-${idx}">
-            <div class="patent-card-layout">
-              <div class="patent-main-content">
-                <div class="patent-header">
-                  <div class="patent-header-left">
-                    <span class="source-tag source-openalex">[OpenAlex]</span>
-                    ${oaHtml}
-                    <span class="patent-status-badge badge-pending">${year}</span>
-                    ${cits > 0 ? `<span class="patent-citations-badge">Citas: ${cits}</span>` : ''}
-                  </div>
-                  <div style="display:flex; align-items:center; gap:8px;">
-                    <span class="patent-dates-text">${journal}</span>
-                    <button class="btn-pin-patent ${isPinned ? 'pinned' : ''}" onclick="togglePinPatent('${escapeJsAttr(pinId)}', event)" title="${isPinned ? 'Quitar' : 'Guardar'}">
-                      <span>${isPinned ? 'Guardada' : 'Guardar'}</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div class="patent-title-text" style="cursor: pointer;" onclick="abrirSidebarLiteratura(${idx})">
-                  ${title}
-                </div>
-
-                <div class="patent-meta-grid">
-                  <span class="meta-lbl">Autor(es):</span>
-                  <span class="meta-val">${authors}</span>
-                  <span class="meta-lbl">Publicacion:</span>
-                  <span class="meta-val assignee-val">${journal}</span>
-                </div>
-
-                ${conceptsHtml}
-
-                ${snippet ? `
-                  <div class="abstract-box">
-                    <div class="abstract-header">
-                      <span class="abstract-label">Resumen Cientifico</span>
-                      <div style="display:flex; align-items:center; gap:6px;">
-                        ${isLongSnippet ? `<button class="btn-expand-abstract" onclick="toggleExpandAbstract('abstract-text-lit-${idx}', this)">Leer mas</button>` : ''}
-                        <button class="btn-translate" id="trans-btn-lit-${idx}" onclick="toggleTraduccionLit(${idx})">
-                          <span>Traducir</span>
-                        </button>
-                      </div>
-                    </div>
-                    <div id="abstract-text-lit-${idx}" class="${isLongSnippet ? 'abstract-clamp' : ''}">${snippet}</div>
-                  </div>
-                ` : ''}
-
-                <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                  <div style="display:flex; align-items:center; gap:10px; font-size:12px;">
-                    <a href="${escapeHtml(doiUrl)}" target="_blank" rel="noopener" style="color:var(--text-medium); text-decoration:none;">DOI Oficial &nearr;</a>
-                    ${pdfUrl ? `<a href="${escapeHtml(pdfUrl)}" target="_blank" rel="noopener" style="color:var(--status-success); font-weight:600; text-decoration:none;">PDF Abierto &nearr;</a>` : ''}
-                  </div>
-                  <div style="display:flex; align-items:center; gap:6px;">
-                    <button class="btn-ask-patent" onclick="consultarLiteraturaAgente(${idx}, event)">
-                      <span>Consultar con Agente</span>
-                    </button>
-                    <button class="btn-ghost" onclick="abrirSidebarLiteratura(${idx})" style="font-size: 11.5px; font-weight: 600; color: var(--brand-primary);">
-                      Ficha y PDF &rarr;
-                    </button>
-                  </div>
-                </div>
+          <article class="patent-card" id="card-lit-${idx}">
+            <div class="card-top-row">
+              <div class="card-badges-left">
+                <span class="patent-id-pill">${escapeHtml(w.doi || 'OpenAlex')}</span>
+                <span class="fto-pill ${oaClass}">${oaStatusText}</span>
+                <span class="cpc-badge">Literatura Científica</span>
               </div>
+              <span style="font-size: 11.5px; color: var(--text-muted);">Año: ${year}</span>
             </div>
-          </div>
+
+            <h2 class="card-title" onclick="abrirSidebarLiteratura(${idx})" title="Inspeccionar artículo">
+              ${title}
+            </h2>
+
+            ${snippet ? `
+              <div style="font-size: 12px; color: var(--text-medium); line-height: 1.55; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <span style="font-weight: 700; font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Resumen Científico:</span>
+                  <button class="btn-translate" id="trans-btn-lit-${idx}" onclick="toggleTraduccionLit(${idx})">Traducir</button>
+                </div>
+                <div id="abstract-text-lit-${idx}" class="abstract-clamp">${snippet}</div>
+              </div>
+            ` : ''}
+
+            <div class="card-meta-row">
+              <div class="card-meta-item">Autor(es): <strong>${authors}</strong></div>
+              <div class="card-meta-item">Publicación: <strong>${journal}</strong></div>
+              <div class="card-meta-item">Citas recibidas: <strong>${cits} citas</strong></div>
+            </div>
+
+            ${conceptsHtml}
+
+            <div class="card-actions-row">
+              <div class="card-actions-left">
+                <button class="card-btn primary" onclick="abrirSidebarLiteratura(${idx})">Inspeccionar Artículo</button>
+                <button class="card-btn" onclick="consultarLiteraturaAgente(${idx}, event)">Consultar con Agente</button>
+                <a href="${escapeHtml(doiUrl)}" target="_blank" rel="noopener" class="card-btn" style="text-decoration:none;">DOI Oficial &nearr;</a>
+                ${pdfUrl ? `<a href="${escapeHtml(pdfUrl)}" target="_blank" rel="noopener" class="card-btn" style="text-decoration:none; color:var(--status-success);">PDF Abierto &nearr;</a>` : ''}
+              </div>
+              <button class="card-btn ${isPinned ? 'pinned' : ''}" onclick="togglePinPatent('${escapeJsAttr(pinId)}', event)">
+                ${isPinned ? 'Guardada' : 'Guardar Semilla'}
+              </button>
+            </div>
+          </article>
         `;
       }).join('');
     }
@@ -7191,7 +7814,7 @@
       const container = document.getElementById('view-cards');
       if (!container) return;
       if (!patents || patents.length === 0) {
-        container.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; padding: 40px; text-align: center;">No se encontraron patentes con estos criterios o filtros. Prueba con otros terminos o reseteando los filtros.</div>`;
+        container.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; padding: 40px; text-align: center;">No se encontraron patentes con estos criterios o filtros. Prueba con otros términos o reseteando los filtros.</div>`;
         return;
       }
 
@@ -7201,38 +7824,35 @@
       container.innerHTML = patents.map((p, idx) => {
         const rawPubNum = p.publication_number || 'N/A';
         const pubNum = escapeHtml(rawPubNum);
-        const title = escapeHtml(p.title || 'Sin titulo registrado');
+        const title = escapeHtml(p.title || 'Sin título registrado');
         const assignee = escapeHtml(p.assignee || 'No especificado / Persona natural');
-        const inventor = escapeHtml(p.inventor || 'No especificado');
         const pubDate = escapeHtml(p.publication_date || 'N/A');
-        const filingDate = p.filing_date ? escapeHtml(p.filing_date) : null;
         const snippet = escapeHtml(p.snippet || '');
-        const isLongSnippet = (p.snippet || '').length > 240;
         const sourceBadge = escapeHtml(p.source_badge || 'google');
         const sourceName = escapeHtml(p.source || 'Google Patents');
         const isPinned = pinnedSet.has(rawPubNum);
 
         const active = isPatentActive(p);
-        let statusClass = active ? 'badge-ok' : 'fto-public-domain';
-        let statusText = active ? escapeHtml(p.legal_status || 'Vigente') : 'Dominio Publico (FTO Libre)';
-        let statusTitle = active ? 'Patente con derechos vigentes' : 'Patente en dominio publico';
+        let statusText = active ? escapeHtml(p.legal_status || 'Vigente (Barrera)') : 'Dominio Público (FTO Libre)';
+        let statusClass = active ? 'active' : 'free';
         const cits = p.forwardCitationCount || 0;
 
-        let thumbHtml = '';
-        if (p.thumbnail) {
-          thumbHtml = `
-            <div class="patent-thumbnail-col">
-              <img src="${escapeHtml(p.thumbnail)}" alt="Fig. Patente" class="patent-thumb-img" onclick="abrirModal('${escapeHtml(p.thumbnail)}', '${pubNum}')" title="Ampliar figura">
-              <span style="font-size: 10.5px; color: var(--text-muted); font-weight: 500;">Figura Tecnica</span>
-            </div>
-          `;
-        } else {
-          thumbHtml = `
-            <div class="patent-thumbnail-col">
-              <div class="no-thumb-box" onclick="abrirSidebarPatente(${idx})" style="cursor:pointer;" title="Abrir ficha">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                <span>Ver Ficha</span>
+        let friendlySummaryHtml = '';
+        if (p.one_sentence_summary) {
+          friendlySummaryHtml = `
+            <div class="card-plain-summary">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                <div>
+                  <strong>Síntesis en Lenguaje Sencillo:</strong>
+                  <span id="friendly-text-${idx}">${escapeHtml(p.one_sentence_summary)}</span>
+                </div>
+                <button class="btn-translate" id="friendly-trans-btn-${idx}" onclick="toggleTraduccionFriendly(${idx})">Traducir</button>
               </div>
+              ${p.industry_tags && p.industry_tags.length ? `
+                <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px;">
+                  ${p.industry_tags.slice(0, 4).map(tag => `<span class="cpc-badge">${escapeHtml(tag.replace(/_/g, ' '))}</span>`).join('')}
+                </div>
+              ` : ''}
             </div>
           `;
         }
@@ -7240,116 +7860,64 @@
         let classifHtml = '';
         const cpcs = p.classifications_cpc || [];
         if (cpcs.length > 0) {
-          const visibleCpcs = cpcs.slice(0, 4);
-          const extraCount = cpcs.length - visibleCpcs.length;
-          classifHtml = '<div class="classif-row"><span class="classif-label">CPC:</span>';
-          visibleCpcs.forEach(c => {
-            classifHtml += `<span class="classif-pill" onclick="refinarConCPC('${escapeHtml(c)}')" title="Filtrar por esta clase CPC">${escapeHtml(c)}</span>`;
+          classifHtml = '<div class="card-cpc-row">';
+          cpcs.slice(0, 5).forEach(c => {
+            classifHtml += `<span class="cpc-badge" onclick="refinarConCPC('${escapeHtml(c)}')" title="Filtrar por esta clase CPC">${escapeHtml(c)}</span>`;
           });
-          if (extraCount > 0) {
-            classifHtml += `<span class="classif-pill" onclick="abrirSidebarPatente(${idx})">+${extraCount} mas</span>`;
+          if (cpcs.length > 5) {
+            classifHtml += `<span class="cpc-badge" onclick="abrirSidebarPatente(${idx})">+${cpcs.length - 5} más</span>`;
           }
           classifHtml += '</div>';
         }
 
-        let friendlySummaryHtml = '';
-        if (p.one_sentence_summary) {
-          friendlySummaryHtml = `
-            <div class="friendly-summary-box">
-              <div class="friendly-summary-title" style="display: flex; justify-content: space-between; align-items: center;">
-                <span>Sintesis en Lenguaje Sencillo:</span>
-                <button class="btn-translate" id="friendly-trans-btn-${idx}" onclick="toggleTraduccionFriendly(${idx})">
-                  <span>Traducir</span>
-                </button>
-              </div>
-              <div id="friendly-text-${idx}">${escapeHtml(p.one_sentence_summary)}</div>
-              ${p.industry_tags && p.industry_tags.length ? `
-                <div class="industry-tags-row">
-                  ${p.industry_tags.slice(0, 4).map(tag => `<span class="badge-industry">${escapeHtml(tag.replace(/_/g, ' '))}</span>`).join('')}
-                </div>
-              ` : ''}
-            </div>
-          `;
-        }
-
-        const espacenetUrl = `https://worldwide.espacenet.com/patent/search?q=${encodeURIComponent(rawPubNum)}`;
-        const officialUrl = p.patent_link || `https://patents.google.com/patent/${encodeURIComponent(rawPubNum)}/en`;
-
         return `
-          <div class="patent-card" id="card-pat-${idx}">
-            <div class="patent-card-layout">
-              <div class="patent-main-content">
-                <div class="patent-header">
-                  <div class="patent-header-left">
-                    <span class="source-tag source-${sourceBadge}">[${sourceName}]</span>
-                    <span class="jurisdiction-badge">${getJurisdictionFlag(rawPubNum)}</span>
-                    <span class="patent-id-badge">${pubNum}</span>
-                    <span class="patent-status-badge ${statusClass}" title="${statusTitle}">${statusText}</span>
-                    ${cits > 0 ? `<span class="patent-citations-badge">Citas: ${cits}</span>` : ''}
-                  </div>
-                  <div style="display:flex; align-items:center; gap:8px;">
-                    <span class="patent-dates-text">
-                      ${filingDate ? `Sol: ${filingDate} &bull; ` : ''}Pub: ${pubDate}
-                    </span>
-                    <button class="btn-pin-patent ${isPinned ? 'pinned' : ''}" onclick="togglePinPatent('${escapeJsAttr(rawPubNum)}', event)" title="${isPinned ? 'Quitar' : 'Guardar'}">
-                      <span>${isPinned ? 'Guardada' : 'Guardar'}</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div class="patent-title-text" style="cursor: pointer;" onclick="abrirSidebarPatente(${idx})" title="Examinar ficha completa en el panel derecho">${title}</div>
-
-                ${friendlySummaryHtml}
-
-                <div class="patent-meta-grid">
-                  <span class="meta-lbl">Titular:</span>
-                  <span class="meta-val assignee-val">${assignee}</span>
-                  <span class="meta-lbl">Inventor(es):</span>
-                  <span class="meta-val">${inventor}</span>
-                </div>
-
-                ${classifHtml}
-
-                ${snippet ? `
-                  <div class="abstract-box">
-                    <div class="abstract-header">
-                      <span class="abstract-label">Resumen / Abstract Oficial</span>
-                      <div style="display:flex; align-items:center; gap:6px;">
-                        ${isLongSnippet ? `<button class="btn-expand-abstract" onclick="toggleExpandAbstract('abstract-text-${idx}', this)">Leer mas</button>` : ''}
-                        <button class="btn-translate" id="trans-btn-${idx}" onclick="toggleTraduccion(${idx})">
-                          <span>Traducir</span>
-                        </button>
-                      </div>
-                    </div>
-                    <div id="abstract-text-${idx}" class="${isLongSnippet ? 'abstract-clamp' : ''}">${snippet}</div>
-                  </div>
-                ` : ''}
-
-                <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                  <div style="display: flex; align-items: center; gap: 10px; font-size: 11.5px;">
-                    <a href="${escapeHtml(officialUrl)}" target="_blank" rel="noopener" style="color: var(--text-medium); text-decoration: none;">Fuente Oficial &nearr;</a>
-                    <a href="${escapeHtml(espacenetUrl)}" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: none;">Espacenet EPO &nearr;</a>
-                  </div>
-
-                  <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-                    <button class="btn-ghost" onclick="rastrearCitacionesPatente('${escapeJsAttr(rawPubNum)}', event)" style="font-size: 11px; padding: 4px 8px;" title="Metodología Snowballing (IBM US7680785B2): Rastrear qué invenciones citan esta patente">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px; margin-right:2px;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                      <span>Snowballing</span>
-                    </button>
-                    <button class="btn-ask-patent" onclick="consultarPatenteAgente(${idx}, event)">
-                      <span>Consultar con Agente</span>
-                    </button>
-                    ${p.pdf ? `<button class="btn-copy-pdf" onclick="copiarEnlacePdf('${escapeHtml(p.pdf)}', this)">Copiar PDF</button>` : ''}
-                    <button class="btn-ghost" onclick="abrirSidebarPatente(${idx})" style="font-size: 11.5px; font-weight: 600; color: var(--brand-primary);">
-                      Ficha y PDF &rarr;
-                    </button>
-                  </div>
-                </div>
+          <article class="patent-card" id="patent-card-${idx}">
+            <div class="card-top-row">
+              <div class="card-badges-left">
+                <span class="patent-id-pill">${pubNum}</span>
+                <span class="fto-pill ${statusClass}">${statusText}</span>
+                <span class="cpc-badge">${sourceName}</span>
               </div>
-
-              ${thumbHtml}
+              <span style="font-size: 11.5px; color: var(--text-muted);">Pub: ${pubDate}</span>
             </div>
-          </div>
+
+            <h2 class="card-title" onclick="abrirSidebarPatente(${idx})" title="Inspeccionar expediente">
+              ${title}
+            </h2>
+
+            ${friendlySummaryHtml}
+
+            ${snippet ? `
+              <div style="font-size: 12px; color: var(--text-medium); line-height: 1.55; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <span style="font-weight: 700; font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Resumen / Abstract Oficial:</span>
+                  <button class="btn-translate" id="trans-btn-${idx}" onclick="toggleTraduccion(${idx})">Traducir</button>
+                </div>
+                <div id="abstract-text-${idx}" class="abstract-clamp">${snippet}</div>
+              </div>
+            ` : ''}
+
+            <div class="card-meta-row">
+              <div class="card-meta-item">Titular: <strong>${assignee}</strong></div>
+              <div class="card-meta-item">Jurisdicción: <strong>${escapeHtml(p.country || 'N/A')}</strong></div>
+              <div class="card-meta-item">Citas hacia adelante: <strong>${cits} citas</strong></div>
+            </div>
+
+            ${classifHtml}
+
+            <div class="card-actions-row">
+              <div class="card-actions-left">
+                <button class="card-btn primary" onclick="abrirSidebarPatente(${idx})">Inspeccionar Expediente</button>
+                <button class="card-btn" onclick="rastrearCitacionesPatente('${escapeJsAttr(rawPubNum)}', event)" title="Metodología Snowballing: Rastrear qué patentes citan esta invención">Snowballing Citas</button>
+                ${p.thumbnail ? `<button class="card-btn" onclick="abrirModal('${escapeHtml(p.thumbnail)}', '${pubNum}')">Lámina Técnica</button>` : ''}
+                <button class="card-btn" onclick="consultarPatenteAgente(${idx}, event)">Consultar con Agente</button>
+                ${p.pdf ? `<button class="card-btn" onclick="copiarEnlacePdf('${escapeHtml(p.pdf)}', this)">Copiar PDF</button>` : ''}
+              </div>
+              <button class="card-btn ${isPinned ? 'pinned' : ''}" onclick="togglePinPatente('${escapeJsAttr(rawPubNum)}', this)">
+                ${isPinned ? 'Guardada' : 'Guardar Semilla'}
+              </button>
+            </div>
+          </article>
         `;
       }).join('');
     }
