@@ -111,7 +111,9 @@ La plataforma centraliza la vigilancia tecnológica, inteligencia competitiva y 
 - [x] El historial de chat aplica la filosofía Antigravity: sin marcos ni bordes visuales pesados, texto fluido con line-height 1.75 y burbuja de usuario redondeada a la derecha.
 - [x] La traza de razonamiento pericial (`AgentActivityTree`) se posiciona **arriba** de la respuesta del perito (en vivo e historial).
 - [x] Redacción progresiva palabra por palabra (typewriter effect) con cursor activo, eliminando la aparición súbita de bloques completos.
-- [x] Modales estrictamente ocultos del flujo del documento (`display: none !important;`) y botones estilizados con tokens monocromáticos.
+- [x] Sistema unificado de modales con Light-Dismiss (tecla Escape y clic en backdrop), backdrop-filter blur, overscroll-behavior contain y auto-enfoque accesible (Modern Web Guidance).
+- [x] Corrección y vinculación de botones de acción en interfaz: creación de proyecto desde onboarding (`crearPrimerProyectoDesdeOnboarding`), copia de dictamen pericial (`copiarAnalisisIa`), limpieza de chat (`limpiarHistorialChatActual`), pantalla completa de expediente (`maximizarInspeccionModal`) y conector de APIs (`abrirAsistenteConectarApi`).
+- [x] Modales estrictamente ocultos del flujo del documento con apertura normalizada (`openModal` / `closeModal`) y botones estilizados con tokens monocromáticos.
 - [x] Barra de inteligencia CPC inicia oculta (`display: none;`) hasta que existan clasificaciones recuperadas.
 - [x] Despliegue 100% autónomo de la barra lateral de inspección cuando el agente recomienda o analiza una patente.
 - [x] Las citas periciales `[DOC:...]` son botones clicables que abren la ficha de inspección lateral.

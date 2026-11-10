@@ -2450,14 +2450,19 @@
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
-      display: none !important;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: none;
       align-items: center;
       justify-content: center;
       z-index: 9999;
       padding: 20px;
+      overscroll-behavior: contain;
     }
-    .modal-overlay.open {
+    .modal-overlay.open,
+    .modal-overlay[style*="display: flex"],
+    .modal-overlay[style*="display:flex"] {
       display: flex !important;
     }
     .abstract-clamp {
@@ -3211,7 +3216,7 @@
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               <span>Mostrar Chat del Agente (<span id="restore-chat-count">0</span>)</span>
             </button>
-            <span id="active-query-pill" style="display:none; font-size:11.5px; color:var(--text-muted); padding: 3px 8px; background:var(--bg-subtle); border-radius:12px; border:1px solid var(--border-color);"></span>
+            <span id="active-query-pill" style="display:none; font-size:11.5px; color:var(--text-muted); padding: 3px 8px; background:var(--bg-subtle); border-radius:12px; border:1px solid var(--border-color);"><span id="active-query-text"></span></span>
           </div>
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
             <button class="btn-csv-export" id="export-csv-btn" onclick="exportarResultadosCsv()" title="Descargar todas las patentes y metadatos con enlaces directos a PDF">
@@ -3737,6 +3742,89 @@
     let isShowingOlderChatHistory = false;
     let lastExecutedQuery = '';
 
+    // =========================================================
+    // CONTROL UNIVERSAL DE MODALES (MODERN WEB GUIDANCE: LIGHT DISMISS & FOCUS)
+    // =========================================================
+    function openModal(modalId) {
+      const modal = typeof modalId === 'string' ? document.getElementById(modalId) : modalId;
+      if (!modal) return;
+      modal.classList.add('open');
+      modal.style.display = 'flex';
+      // Auto-enfoque accesible en el primer input o boton de cierre
+      setTimeout(() => {
+        const focusable = modal.querySelector('input:not([type="hidden"]), select, textarea, button:not(.btn-close-modal)');
+        if (focusable) focusable.focus();
+      }, 50);
+    }
+
+    function closeModal(modalId) {
+      const modal = typeof modalId === 'string' ? document.getElementById(modalId) : modalId;
+      if (!modal) return;
+      modal.classList.remove('open');
+      modal.style.display = 'none';
+    }
+
+    // Funciones de conveniencia y compatibilidad
+    function abrirAsistenteConectarApi(apiNombre = '') {
+      pedirAlAgenteConfigurarApi(apiNombre || 'nueva API de patentes');
+    }
+
+    function copiarAnalisisIa() {
+      const replyEl = document.getElementById('agent-reply-text') || document.querySelector('.agent-chat-bubble-ai') || document.getElementById('agent-streaming-reply-content');
+      const text = replyEl ? replyEl.innerText.trim() : '';
+      if (!text) {
+        alert('No hay dictamen pericial activo para copiar.');
+        return;
+      }
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = event && (event.currentTarget || event.target);
+        if (btn) {
+          const orig = btn.textContent;
+          btn.textContent = 'Copiado!';
+          setTimeout(() => { btn.textContent = orig; }, 1500);
+        }
+      }).catch(() => {
+        alert('No se pudo copiar al portapapeles.');
+      });
+    }
+
+    function limpiarHistorialChatActual() {
+      limpiarChatHistorial();
+    }
+
+    function maximizarInspeccionModal() {
+      const modal = document.getElementById('modal-inspeccion-fullscreen');
+      const body = document.getElementById('modal-fullscreen-body');
+      const title = document.getElementById('modal-fullscreen-title');
+      if (!modal || !body) return;
+      if (currentActivePatentData) {
+        if (title) {
+          title.innerHTML = `<span></span> <span style="font-weight: 700;">Expediente Técnico: ${escapeHtml(currentActivePatentData.publication_number || currentActivePatentData.title)}</span>`;
+        }
+        body.innerHTML = construirDossierHtml(currentActivePatentData);
+      } else {
+        body.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">Selecciona una patente o artículo científico para visualizar su expediente completo en pantalla grande.</div>';
+      }
+      openModal(modal);
+    }
+
+    function cerrarInspeccionModal(e) {
+      if (e && e.target && e.target.id !== 'modal-inspeccion-fullscreen' && !e.target.classList.contains('btn-close-modal')) return;
+      closeModal('modal-inspeccion-fullscreen');
+    }
+
+    // Soporte global de Light-Dismiss con tecla Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.open, .modal-overlay[style*="display: flex"]').forEach(m => closeModal(m));
+        cerrarMenuFiltros();
+        cerrarMenuFuentes();
+        const wsMenu = document.getElementById('workspace-popup-menu');
+        if (wsMenu) wsMenu.classList.remove('show');
+      }
+    });
+
+
     // GESTION DE MODELO Y PROVEEDOR DE IA (Por defecto Gemini Flash Lite oficial)
     let cfgAiProvider = localStorage.getItem('capstone-ai-provider') || 'gemini';
     let cfgAiKey = localStorage.getItem('capstone-ai-key') || '';
@@ -3996,21 +4084,16 @@
     }
 
     function crearNuevoWorkspaceModal() {
-      const modal = document.getElementById('modal-nuevo-proyecto');
       const inputNombre = document.getElementById('input-nuevo-proyecto-nombre');
       const inputQuery = document.getElementById('input-nuevo-proyecto-query');
       if (inputNombre) inputNombre.value = '';
       if (inputQuery) inputQuery.value = '';
-      if (modal) {
-        modal.classList.add('open');
-        setTimeout(() => inputNombre && inputNombre.focus(), 80);
-      }
+      openModal('modal-nuevo-proyecto');
     }
 
     function cerrarModalNuevoProyecto(e) {
       if (e && e.target && e.target !== e.currentTarget && !e.target.classList.contains('btn-close-modal')) return;
-      const modal = document.getElementById('modal-nuevo-proyecto');
-      if (modal) modal.classList.remove('open');
+      closeModal('modal-nuevo-proyecto');
     }
 
     function confirmarCrearNuevoProyecto() {
@@ -5651,13 +5734,12 @@
         `;
       }
 
-      if (modal) modal.style.display = 'flex';
+      openModal('dossier-modal');
     }
 
     function cerrarDossierModal(e) {
       if (e && e.target && e.target.id !== 'dossier-modal' && !e.target.classList.contains('btn-close-modal')) return;
-      const modal = document.getElementById('dossier-modal');
-      if (modal) modal.style.display = 'none';
+      closeModal('dossier-modal');
     }
 
     function imprimirDossier() {
@@ -5708,14 +5790,12 @@
     // GLOSARIO Y MODALES
     // =========================================================
     function abrirGlosarioModal() {
-      const modal = document.getElementById('glossary-modal');
-      if (modal) modal.style.display = 'flex';
+      openModal('glossary-modal');
     }
 
     function cerrarGlosarioModal(e) {
       if (e && e.target && e.target.id !== 'glossary-modal' && !e.target.classList.contains('btn-close-modal')) return;
-      const modal = document.getElementById('glossary-modal');
-      if (modal) modal.style.display = 'none';
+      closeModal('glossary-modal');
     }
 
     function cambiarGlosarioTab(tabName) {
@@ -5739,13 +5819,12 @@
       const title = document.getElementById('modal-patent-title');
       if (src) src.src = imgUrl;
       if (title) title.textContent = `Lamina Tecnica Oficial &bull; ${pubNum}`;
-      if (modal) modal.style.display = 'flex';
+      openModal('image-modal');
     }
 
     function cerrarModal() {
-      const modal = document.getElementById('image-modal');
       const src = document.getElementById('modal-img-src');
-      if (modal) modal.style.display = 'none';
+      closeModal('image-modal');
       if (src) src.src = '';
     }
 
@@ -5753,14 +5832,12 @@
     // MODAL DE APIS Y MODELOS (GOBERNADO POR EL AGENTE)
     // =========================================================
     function abrirSettingsModal() {
-      const modal = document.getElementById('settings-modal');
-      if (modal) modal.style.display = 'flex';
+      openModal('settings-modal');
     }
 
     function cerrarSettingsModal(e) {
       if (e && e.target && e.target.id !== 'settings-modal' && !e.target.classList.contains('btn-close-modal')) return;
-      const modal = document.getElementById('settings-modal');
-      if (modal) modal.style.display = 'none';
+      closeModal('settings-modal');
     }
 
     function pedirAlAgenteConfigurarApi(apiNombre) {
@@ -6133,8 +6210,7 @@
 
     function cerrarComparadorModal(e) {
       if (e && e.target && e.target.id !== 'modal-comparador-patentes' && !e.target.classList.contains('btn-close-modal')) return;
-      const modal = document.getElementById('modal-comparador-patentes');
-      if (modal) modal.classList.remove('open');
+      closeModal('modal-comparador-patentes');
     }
 
     // =========================================================
@@ -6761,7 +6837,7 @@
             </p>
             <div style="display: flex; gap: 8px; justify-content: center; max-width: 460px; margin: 0 auto 16px auto;">
               <input type="text" id="input-onboarding-ws-name" placeholder="Ej. Baterias de Estado Solido 2026" class="ag-prompt-input" style="flex: 1; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px;" onkeydown="if(event.key==='Enter') crearPrimerProyectoDesdeOnboarding()">
-              <button class="ag-pill-btn" onclick="crePrimerProyectoDesdeOnboarding()" style="background: var(--brand-primary); color: #fff; font-weight: 700; border-radius: 8px; padding: 0 16px;">
+              <button class="ag-pill-btn" onclick="crearPrimerProyectoDesdeOnboarding()" style="background: var(--brand-primary); color: #fff; font-weight: 700; border-radius: 8px; padding: 0 16px;">
                 Crear Proyecto
               </button>
             </div>
