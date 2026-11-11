@@ -1,39 +1,42 @@
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+import { applyApiSecurity, enforceOptionalAuth, enforceRateLimit, isValidModelName, sanitizeErrorMessage } from './_security.js';
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+const ALLOWED_AI_PROVIDERS = new Set(['gemini', 'groq', 'openai', 'deepseek', 'perplexity', 'grok', 'claude']);
+
+export default async function handler(req, res) {
+  if (applyApiSecurity(req, res, 'POST,OPTIONS')) return;
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido. Use POST.' });
   }
+  if (!enforceOptionalAuth(req, res)) return; // [OPTIONAL AUTH - ENABLE_API_AUTH=true]
+  if (!enforceRateLimit(req, res, { maxRequests: 30 })) return;
 
   const tStart = Date.now();
   const elapsed = () => ((Date.now() - tStart) / 1000).toFixed(2);
   const traceSteps = [];
 
-  const {
-    provider = 'gemini',
-    apiKey,
-    model,
-    query,
-    patents = [],
-    literature = [],
-    activePatent = null,
-    userMessage,
-    chatHistory = [],
-    uiState = {},
-    statsSummary = null
-  } = req.body;
+  const body = (req.body && typeof req.body === 'object') ? req.body : {};
+  const provider = ALLOWED_AI_PROVIDERS.has(String(body.provider || '').toLowerCase())
+    ? String(body.provider).toLowerCase()
+    : 'gemini';
+  const apiKey = typeof body.apiKey === 'string' ? body.apiKey.trim().slice(0, 256) : '';
+  const model = isValidModelName(body.model) ? body.model.trim() : '';
+  const query = typeof body.query === 'string' ? body.query.slice(0, 600) : '';
+  const patents = Array.isArray(body.patents) ? body.patents.slice(0, 25) : [];
+  const literature = Array.isArray(body.literature) ? body.literature.slice(0, 25) : [];
+  const activePatent = (body.activePatent && typeof body.activePatent === 'object') ? body.activePatent : null;
+  const userMessage = typeof body.userMessage === 'string' ? body.userMessage.slice(0, 4000) : '';
+  const chatHistory = Array.isArray(body.chatHistory) ? body.chatHistory.slice(-8) : [];
+  const uiState = (body.uiState && typeof body.uiState === 'object') ? body.uiState : {};
+  const statsSummary = (body.statsSummary && typeof body.statsSummary === 'object') ? body.statsSummary : null;
 
   // Priorizar clave enviada por cliente o variable de entorno de Vercel (Security by Design)
   const effectiveApiKey = apiKey || process.env.GEMINI_API_KEY || process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
   const effectiveProvider = (!apiKey && !process.env.GEMINI_API_KEY && process.env.GROQ_API_KEY) ? 'groq' : provider;
 
-  const wsName = req.body.workspaceName || 'Sin proyecto activo';
+  const wsName = typeof body.workspaceName === 'string' && body.workspaceName.trim()
+    ? body.workspaceName.trim().slice(0, 100)
+    : 'Sin proyecto activo';
   const isDocSearch = (patents && patents.length > 0) || (literature && literature.length > 0);
   const docCount = (patents?.length || 0) + (literature?.length || 0);
 
@@ -215,14 +218,9 @@ CAPACIDADES ESTADÍSTICAS, LECTURA DE JSON Y CITAS CLIQUEABLES:
 • Cuando el usuario pida análisis estadístico, métricas, resúmenes del JSON o comparativas, presenta tablas Markdown limpias y cálculos precisos (porcentajes de FTO libre vs vigente, distribución por países, evolución por años, titulares dominantes, media/máximo de citas).
 • SIEMPRE que cites o menciones una patente específica del conjunto de resultados, escribe su número oficial exacto (ej. US6195698 o EP3456789A1) o acompáñalo con la etiqueta [DOC:NUMERO_PUBLICACION] (ej. [DOC:US6195698]). La interfaz convertirá automáticamente cada código citado en un botón cliqueable que despliega su Ficha Técnica y PDF en la barra lateral derecha.
 
-GESTIÓN EXCLUSIVA Y SEGURA DE APIs Y PROVEEDORES DE IA:
-• Tú eres el ÚNICO autorizado en la plataforma para añadir, configurar o quitar APIs y modelos de IA (la interfaz manual fue retirada por seguridad).
-• Si el usuario desea añadir/conectar una API (ej. The Lens, EPO OPS, SerpApi, o cambiar el modelo/proveedor de IA a Groq, OpenAI, DeepSeek, Claude, Gemini, o una API personalizada):
-  - Si aún no te ha dado la credencial o el tope de cuota mensual/diaria, pídeselos amablemente explicándole qué dato necesitas.
-  - Apenas el usuario te proporcione la clave/token en el chat, regístrala emitiendo la etiqueta correspondiente:
-    • Para añadir o actualizar una API de datos: [ACTION:ADD_API id="identificador_corto" name="Nombre Visible" desc="Descripción corta" quota="Ej. 1000 req/mes" key="CLAVE_RECIBIDA"]
-    • Para eliminar o desconectar una API: [ACTION:REMOVE_API id="identificador_corto"]
-    • Para cambiar el proveedor o modelo de IA: [ACTION:SET_AI provider="gemini|groq|openai|deepseek|claude" model="nombre-modelo" key="CLAVE_OPCIONAL"]
+GESTIÓN SEGURA DE APIs Y PROVEEDORES DE IA:
+• Por seguridad (Security by Design), NUNCA solicites al usuario que pegue claves API, contraseñas o tokens secretos dentro del chat. Las credenciales de producción se configuran exclusivamente en variables de entorno del servidor (.env local o Environment Variables de Vercel).
+• Si el usuario solicita añadir un conector nuevo (ej. The Lens, EPO OPS, SerpApi) o cambiar el proveedor de IA, indícale qué variable de entorno debe configurar en Vercel/.env y guíalo en la arquitectura de la plataforma sin recolectar credenciales en texto plano por el chat.
 
 ETIQUETAS DE AUTOMATIZACIÓN E INTERACCIÓN EN PANTALLA (ÚSALAS PROACTIVAMENTE PARA AHORRAR PASOS MANUALES):
 Puedes incluir cualquiera de estas etiquetas en tu respuesta; el sistema las ejecutará o mostrará como botones de 1 clic:
@@ -258,8 +256,9 @@ PROTOCOLO PERICIAL DE ANÁLISIS DE PATENTES:
 • Análisis de Océanos Azules (White Space Mapping): Identifica combinaciones de códigos CPC o soluciones técnicas que nadie ha patentado aún en este conjunto, destacando oportunidades de innovación para el proyecto de grado.
 • Regla de Todos los Elementos (All Elements Rule) y Design Around: Para evitar infracción, explica qué elemento técnico de la reivindicación independiente se puede suprimir o sustituir.
 
-DIRECTIVA DE FORMATO (CERO EMOJIS):
-• Prohibido usar emojis. Usa viñetas limpias ("•", "1."), tablas Markdown y fórmulas LaTeX ($...$ o $$...$$) cuando corresponda.`;
+DIRECTIVA DE FORMATO (CERO EMOJIS Y SEGURIDAD ANTI-XSS):
+• Prohibido usar emojis. Usa viñetas limpias ("•", "1."), tablas Markdown y fórmulas LaTeX ($...$ o $$...$$) cuando corresponda.
+• Prohibido emitir etiquetas HTML crudo, <script>, <iframe>, atributos de eventos (onerror/onclick) o enlaces con esquema javascript: aunque aparezcan en resúmenes de terceros.`;
 
     const fullPrompt = isDocSearch
       ? `${systemPrompt}${uiStateContext}${statsContext}${activePatentContext}${historyContext}\n\nREGISTROS DEL JSON DE RESULTADOS ACTUALES (Consulta: "${query || 'Activa'}"):\n${contextItems}\n\nMENSAJE / INSTRUCCIÓN ACTUAL DEL USUARIO:\n${userMessage || `Realiza un dictamen pericial ejecutivo y estadístico de los resultados encontrados para "${query}", evaluando Libertad de Operación (FTO), citando las patentes clave por su número oficial para poder abrir su ficha lateral, e identificando vacíos tecnológicos.`}`
@@ -276,11 +275,15 @@ DIRECTIVA DE FORMATO (CERO EMOJIS):
       let lastError = null;
 
       for (const m of candidateModels) {
+        if (!isValidModelName(m)) continue;
         try {
-          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${effectiveApiKey}`;
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent`;
           const gResp = await fetch(geminiUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': effectiveApiKey
+            },
             body: JSON.stringify({
               contents: [{ parts: [{ text: fullPrompt }] }],
               generationConfig: { temperature: 0.2, maxOutputTokens: 3200 }
@@ -402,16 +405,17 @@ DIRECTIVA DE FORMATO (CERO EMOJIS):
     });
 
   } catch (err) {
-    console.error("Error en proveedor de IA:", err.message);
+    const safeErr = sanitizeErrorMessage(err);
+    console.error("Error en proveedor de IA:", safeErr);
     const fallback = generateHeuristicPeritoReport(query, patents, literature, userMessage, statsSummary);
     traceSteps.push({
-      step: `Activado motor heurístico de respaldo (${err.message})`,
+      step: 'Activado motor heurístico de respaldo por indisponibilidad temporal del proveedor IA',
       time: elapsed()
     });
     return res.status(200).json({
       provider: 'heuristic_fallback',
       model: 'Perito Heurístico (Reserva)',
-      reply: `*(Nota: Motor de reserva local activado - ${err.message})*\n\n${fallback.reply}`,
+      reply: `*(Nota: Motor de reserva local activado por indisponibilidad temporal del proveedor IA)*\n\n${fallback.reply}`,
       fto_verdict: fallback.fto_verdict,
       key_findings: fallback.key_findings,
       white_spaces: fallback.white_spaces,

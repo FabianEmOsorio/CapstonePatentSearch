@@ -6,10 +6,45 @@ import json
 import sys
 import os
 import re
+import hmac
 from concurrent.futures import ThreadPoolExecutor
 
 PORT = 8080
+BIND_HOST = os.environ.get("BIND_HOST", "127.0.0.1")
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+MAX_REQUEST_BODY_BYTES = 1024 * 1024  # 1 MB max body
+ALLOWED_STATIC_PATHS = {'/', '/index.html'}
+ALLOWED_AI_PROVIDERS = {'gemini', 'groq', 'openai', 'deepseek', 'perplexity', 'grok', 'claude', 'heuristic'}
+ALLOWED_SOURCES = {'all', 'google', 'europepmc', 'patentbrief', 'lens', 'epo'}
+
+def sanitize_pub_number(pub_num):
+    cleaned = re.sub(r'[^A-Za-z0-9._-]', '', str(pub_num or '').strip())
+    cleaned = re.sub(r'\.{2,}', '', cleaned)
+    return cleaned or 'N/A'
+
+def safe_http_url(url):
+    if not url or not isinstance(url, str):
+        return None
+    u = url.strip()
+    try:
+        parsed = urllib.parse.urlparse(u)
+        if parsed.scheme in ('http', 'https') and parsed.netloc:
+            return u
+    except Exception:
+        return None
+    return None
+
+def is_valid_model_name(model):
+    if not model or not isinstance(model, str):
+        return False
+    m = model.strip()
+    return bool(re.match(r'^[a-zA-Z0-9._-]{2,64}$', m)) and '..' not in m
+
+def sanitize_error_msg(err):
+    msg = str(err or 'Error interno')
+    msg = re.sub(r'([?&](?:key|api_key|token|secret)=)[^&\s]+', r'\1***', msg, flags=re.I)
+    msg = re.sub(r'(AIza[0-9A-Za-z\-_]{10,}|sk-[0-9A-Za-z\-_]{10,}|gsk_[0-9A-Za-z\-_]{10,})', '***', msg)
+    return msg[:180]
 
 # Cargar variables de entorno desde .env local si existe (sin dependencias externas)
 env_path = os.path.join(DIRECTORY, '.env')
@@ -31,8 +66,11 @@ def extract_patent_classifications(pub_num):
     """Extrae códigos CPC reales desde la página pública de Google Patents de manera concurrente"""
     if not pub_num or pub_num == 'N/A':
         return []
+    safe_pub = sanitize_pub_number(pub_num)
+    if safe_pub == 'N/A' or not re.match(r'^[A-Za-z0-9_-]{3,32}$', safe_pub):
+        return []
     try:
-        url = f'https://patents.google.com/patent/{pub_num}/en'
+        url = f'https://patents.google.com/patent/{urllib.parse.quote(safe_pub, safe="")}/en'
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
         with urllib.request.urlopen(req, timeout=3) as resp:
             html = resp.read().decode('utf-8', errors='ignore')
@@ -58,7 +96,8 @@ def query_google_patents(q):
 
     # 1. Intentar endpoint directo nativo XHR de Google Patents (sin API Key)
     try:
-        encoded_param = urllib.parse.quote_plus(f"q={q}&exp=")
+        inner_q = re.sub(r'[&#]', ' ', q[:500])
+        encoded_param = urllib.parse.quote_plus(f"q={inner_q}&exp=")
         xhr_url = f"https://patents.google.com/xhr/query?url={encoded_param}"
         req = urllib.request.Request(xhr_url, headers={
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
@@ -84,26 +123,29 @@ def query_google_patents(q):
 
                 for item in cluster[0].get('result', [])[:10]:
                     pat = item.get('patent', {})
-                    pub_num = pat.get('publication_number') or pat.get('id', '').replace('patent/', '').replace('/en', '')
+                    raw_pub = pat.get('publication_number') or pat.get('id', '').replace('patent/', '').replace('/en', '')
+                    pub_num = sanitize_pub_number(raw_pub)
                     
                     thumb = pat.get('thumbnail')
-                    thumb_url = f"https://patentimages.storage.googleapis.com/{thumb}" if thumb else None
+                    thumb_url = safe_http_url(f"https://patentimages.storage.googleapis.com/{str(thumb).lstrip('/')}") if thumb else None
                     
                     pdf = pat.get('pdf')
-                    pdf_url = f"https://patentimages.storage.googleapis.com/{pdf}" if pdf else None
+                    pdf_url = safe_http_url(f"https://patentimages.storage.googleapis.com/{str(pdf).lstrip('/')}") if pdf else None
                     
                     figures = []
                     for f in pat.get('figures', []):
                         f_path = f.get('thumbnail') or f.get('full')
                         if f_path:
-                            figures.append(f"https://patentimages.storage.googleapis.com/{f_path}")
+                            fig_url = safe_http_url(f"https://patentimages.storage.googleapis.com/{str(f_path).lstrip('/')}")
+                            if fig_url:
+                                figures.append(fig_url)
                     if thumb_url and thumb_url not in figures:
                         figures.insert(0, thumb_url)
 
                     results.append({
                         "source": "Google Patents",
                         "source_badge": "google",
-                        "publication_number": pub_num or "N/A",
+                        "publication_number": pub_num,
                         "title": (pat.get('title') or 'Sin título registrado').strip(),
                         "snippet": (pat.get('snippet') or '').strip(),
                         "assignee": pat.get('assignee') or 'No especificado',
@@ -114,7 +156,7 @@ def query_google_patents(q):
                         "forwardCitationCount": pat.get('cited_by') or 0,
                         "thumbnail": thumb_url,
                         "figures": figures,
-                        "patent_link": f"https://patents.google.com/patent/{pub_num}/en" if pub_num else None,
+                        "patent_link": f"https://patents.google.com/patent/{urllib.parse.quote(pub_num, safe='')}/en" if pub_num != 'N/A' else None,
                         "pdf": pdf_url,
                         "classifications_cpc": [c['code'] for c in cpc_summaries[:3]],
                         "classifications_ipc": []
@@ -126,8 +168,10 @@ def query_google_patents(q):
         pass
 
     # 2. Fallback: SerpApi Google Patents Engine
+    if not SERPAPI_KEY:
+        return {"results": results, "cpc_summary": cpc_summaries, "total_found": total_found}
     try:
-        target_url = f"https://serpapi.com/search.json?engine=google_patents&q={urllib.parse.quote(q)}&api_key={SERPAPI_KEY}"
+        target_url = f"https://serpapi.com/search.json?engine=google_patents&q={urllib.parse.quote(q[:500])}&api_key={urllib.parse.quote(SERPAPI_KEY)}"
         req = urllib.request.Request(target_url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=10) as resp:
             data = json.loads(resp.read().decode('utf-8'))
@@ -162,10 +206,11 @@ def query_google_patents(q):
                         })
 
             for p in raw_organic:
-                pub_num = p.get('publication_number')
-                if not pub_num and p.get('patent_id'):
+                raw_pub = p.get('publication_number')
+                if not raw_pub and p.get('patent_id'):
                     parts = p.get('patent_id').split('/')
-                    pub_num = parts[1] if len(parts) >= 2 else p.get('patent_id')
+                    raw_pub = parts[1] if len(parts) >= 2 else p.get('patent_id')
+                pub_num = sanitize_pub_number(raw_pub)
 
                 status = "Registrada"
                 if p.get('country_status'):
@@ -176,18 +221,22 @@ def query_google_patents(q):
                 figures = []
                 if p.get('figures'):
                     for fig in p.get('figures'):
-                        figures.append(fig.get('thumbnail') or fig.get('full'))
+                        safe_fig = safe_http_url(fig.get('thumbnail') or fig.get('full'))
+                        if safe_fig:
+                            figures.append(safe_fig)
                 elif p.get('thumbnail'):
-                    figures.append(p.get('thumbnail'))
+                    safe_t = safe_http_url(p.get('thumbnail'))
+                    if safe_t:
+                        figures.append(safe_t)
 
-                extracted_cpcs = cpc_map.get(pub_num, [])
+                extracted_cpcs = cpc_map.get(raw_pub or pub_num, [])
                 if not extracted_cpcs and cpc_summaries:
                     extracted_cpcs = [c['code'] for c in cpc_summaries[:2]]
 
                 results.append({
                     "source": "Google Patents",
                     "source_badge": "google",
-                    "publication_number": pub_num or "N/A",
+                    "publication_number": pub_num,
                     "title": p.get('title', 'Sin título registrado'),
                     "snippet": p.get('snippet', ''),
                     "assignee": p.get('assignee', 'No especificado'),
@@ -196,10 +245,10 @@ def query_google_patents(q):
                     "publication_date": p.get('publication_date') or p.get('grant_date') or 'N/A',
                     "legal_status": status,
                     "forwardCitationCount": p.get('cited_by') or p.get('citations') or 0,
-                    "thumbnail": p.get('thumbnail'),
+                    "thumbnail": safe_http_url(p.get('thumbnail')),
                     "figures": figures,
-                    "patent_link": p.get('patent_link') or (f"https://patents.google.com/patent/{pub_num}/en" if pub_num else None),
-                    "pdf": p.get('pdf'),
+                    "patent_link": safe_http_url(p.get('patent_link')) or (f"https://patents.google.com/patent/{urllib.parse.quote(pub_num, safe='')}/en" if pub_num != 'N/A' else None),
+                    "pdf": safe_http_url(p.get('pdf')),
                     "classifications_cpc": extracted_cpcs,
                     "classifications_ipc": []
                 })
@@ -210,7 +259,7 @@ def query_google_patents(q):
                 total_found = len(results)
 
     except Exception as e:
-        print(f"Error consultando Google Patents / SerpApi: {e}")
+        print(f"Error consultando Google Patents / SerpApi: {sanitize_error_msg(e)}")
 
     return {"results": results, "cpc_summary": cpc_summaries, "total_found": total_found}
 
@@ -223,12 +272,12 @@ def query_europe_pmc(q):
         with urllib.request.urlopen(req, timeout=8) as resp:
             data = json.loads(resp.read().decode('utf-8'))
             for item in data.get('resultList', {}).get('result', []):
-                doc_id = item.get('id', 'N/A')
+                doc_id = sanitize_pub_number(item.get('id', 'N/A'))
                 authors = [a.get('fullName') for a in item.get('authorList', {}).get('author', []) if a.get('fullName')]
                 
                 # PDF directo si está disponible en Europe PMC
-                pdf_url = f"https://europepmc.org/backend/ptservice.cgi?accid={doc_id}&action=viewpdf" if item.get('hasPDF') == 'Y' else None
-                patent_url = f"https://worldwide.espacenet.com/patent/search/family/{doc_id}" if doc_id.startswith('EP') or doc_id.startswith('WO') else f"https://europepmc.org/article/PAT/{doc_id}"
+                pdf_url = f"https://europepmc.org/backend/ptservice.cgi?accid={urllib.parse.quote(doc_id, safe='')}&action=viewpdf" if (item.get('hasPDF') == 'Y' and doc_id != 'N/A') else None
+                patent_url = f"https://worldwide.espacenet.com/patent/search/family/{urllib.parse.quote(doc_id, safe='')}" if doc_id.startswith('EP') or doc_id.startswith('WO') else f"https://europepmc.org/article/PAT/{urllib.parse.quote(doc_id, safe='')}"
                 
                 cits = item.get('citedByCount', 0)
                 try:
@@ -274,9 +323,9 @@ def query_patent_brief(q):
             for item in data.get('patents', [])[:8]:
                 country = item.get('countryCode', 'US')
                 num = item.get('patentNumber', '')
-                pub_num = f"{country}{num}"
+                pub_num = sanitize_pub_number(f"{country}{num}")
                 
-                fig = item.get('figureUrl')
+                fig = safe_http_url(item.get('figureUrl'))
                 figures = [fig] if fig else []
 
                 results.append({
@@ -296,7 +345,7 @@ def query_patent_brief(q):
                     "thumbnail": fig,
                     "figures": figures,
                     "industry_tags": item.get('industryTags', []),
-                    "patent_link": f"https://patents.google.com/patent/{pub_num}/en",
+                    "patent_link": f"https://patents.google.com/patent/{urllib.parse.quote(pub_num, safe='')}/en" if pub_num != 'N/A' else None,
                     "pdf": None,
                     "classifications_cpc": [],
                     "classifications_ipc": []
@@ -383,14 +432,61 @@ def query_openalex(q, page=1):
                 })
             return {"query": q, "total_found": total_count, "results_count": len(works), "organic_results": works}
     except Exception as e:
-        return {"query": q, "total_found": 0, "results_count": 0, "organic_results": [], "error": str(e)}
+        return {"query": q, "total_found": 0, "results_count": 0, "organic_results": [], "error": sanitize_error_msg(e)}
 
 class PatentSearchHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
 
+    def end_headers(self):
+        # Cabeceras base de seguridad en respuestas HTML y APIs
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        self.send_header('X-Frame-Options', 'DENY')
+        self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
+        self.send_header('Permissions-Policy', 'camera=(), geolocation=(), microphone=(self), payment=()')
+        super().end_headers()
+
+    def _get_allowed_origin(self):
+        origin = self.headers.get('Origin', '').strip()
+        allowed = {f"http://localhost:{PORT}", f"http://127.0.0.1:{PORT}"}
+        return origin if origin in allowed else None
+
+    def do_OPTIONS(self):
+        origin = self.headers.get('Origin', '').strip()
+        allowed_origin = self._get_allowed_origin()
+        if origin and not allowed_origin:
+            self.send_json(403, {"error": "Origen no autorizado"})
+            return
+        self.send_response(200)
+        if allowed_origin:
+            self.send_header('Access-Control-Allow-Origin', allowed_origin)
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+            self.send_header('Vary', 'Origin')
+        self.end_headers()
+
+    def _enforce_optional_auth(self):
+        # [OPTIONAL PRODUCTION AUTHENTICATION - DISABLED BY DEFAULT FOR DEMO]
+        # Set ENABLE_API_AUTH=true and APP_ACCESS_TOKEN=<secret> in .env to enable.
+        if os.environ.get('ENABLE_API_AUTH', '').strip().lower() != 'true':
+            return True
+        expected = os.environ.get('APP_ACCESS_TOKEN', '').strip()
+        if not expected:
+            self.send_json(503, {"error": "Autenticación activada sin APP_ACCESS_TOKEN configurado."})
+            return False
+        raw_auth = self.headers.get('Authorization', '')
+        bearer = raw_auth[7:].strip() if raw_auth.lower().startswith('bearer ') else ''
+        provided = (self.headers.get('x-access-token') or bearer or '').strip()
+        if not hmac.compare_digest(expected.encode('utf-8'), provided.encode('utf-8')):
+            self.send_json(401, {"error": "No autorizado. Se requiere token de acceso válido."})
+            return False
+        return True
+
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
+        if parsed.path in ('/api/patents', '/api/literature', '/api/usage', '/api/translate'):
+            if not self._enforce_optional_auth():
+                return
         if parsed.path == '/api/patents':
             self.handle_patents(parsed)
         elif parsed.path == '/api/literature':
@@ -399,11 +495,19 @@ class PatentSearchHandler(http.server.SimpleHTTPRequestHandler):
             self.handle_usage(parsed)
         elif parsed.path == '/api/translate':
             self.handle_translate(parsed)
-        else:
+        elif parsed.path in ALLOWED_STATIC_PATHS:
+            if parsed.path == '/':
+                self.path = '/index.html'
             super().do_GET()
+        else:
+            # Bloqueo estricto de .env, .git, .agents, codigo fuente y archivos ocultos
+            self.send_error(403, "Access denied")
 
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
+        if parsed.path in ('/api/translate', '/api/agent'):
+            if not self._enforce_optional_auth():
+                return
         if parsed.path == '/api/translate':
             self.handle_translate_post(parsed)
         elif parsed.path == '/api/agent':
@@ -411,18 +515,40 @@ class PatentSearchHandler(http.server.SimpleHTTPRequestHandler):
         else:
             self.send_error(404, "Endpoint not found")
 
-    def handle_agent_post(self, parsed):
-        content_len = int(self.headers.get('Content-Length', 0))
-        post_body = self.rfile.read(content_len)
+    def _read_json_body(self):
         try:
-            req_data = json.loads(post_body.decode('utf-8'))
-            provider = req_data.get('provider', 'gemini' if os.environ.get('GEMINI_API_KEY') else 'heuristic')
-            api_key = req_data.get('apiKey', '').strip() or os.environ.get('GEMINI_API_KEY', '').strip() or os.environ.get('GROQ_API_KEY', '').strip()
-            model = req_data.get('model', '')
-            query = req_data.get('query', '')
+            content_len = int(self.headers.get('Content-Length', 0))
+        except (TypeError, ValueError):
+            self.send_json(400, {"error": "Content-Length inválido"})
+            return None
+        if content_len < 0 or content_len > MAX_REQUEST_BODY_BYTES:
+            self.send_json(413, {"error": "Payload demasiado grande (máximo 1 MB)"})
+            return None
+        raw = self.rfile.read(content_len)
+        if not raw:
+            return {}
+        data = json.loads(raw.decode('utf-8'))
+        if not isinstance(data, dict):
+            self.send_json(400, {"error": "Se esperaba un objeto JSON"})
+            return None
+        return data
+
+    def handle_agent_post(self, parsed):
+        try:
+            req_data = self._read_json_body()
+            if req_data is None:
+                return
+            raw_provider = str(req_data.get('provider', 'gemini' if os.environ.get('GEMINI_API_KEY') else 'heuristic')).lower()
+            provider = raw_provider if raw_provider in ALLOWED_AI_PROVIDERS else 'gemini'
+            api_key = str(req_data.get('apiKey') or '').strip()[:256] or os.environ.get('GEMINI_API_KEY', '').strip() or os.environ.get('GROQ_API_KEY', '').strip()
+            raw_model = str(req_data.get('model') or '').strip()
+            model = raw_model if is_valid_model_name(raw_model) else ''
+            query = str(req_data.get('query') or '')[:600]
             patents = req_data.get('patents', [])
+            patents = patents[:25] if isinstance(patents, list) else []
             literature = req_data.get('literature', [])
-            user_msg = req_data.get('userMessage', '')
+            literature = literature[:25] if isinstance(literature, list) else []
+            user_msg = str(req_data.get('userMessage') or '')[:4000]
 
             # Si no hay API key o es heurístico, responder con análisis estructurado sin emojis
             if not api_key:
@@ -460,14 +586,17 @@ Se sugiere utilizar como base de diseño los principios técnicos en dominio pú
                 })
                 return
 
-            ws_name = req_data.get('workspaceName', 'General')
+            ws_name = str(req_data.get('workspaceName', 'General'))[:100]
             ui_state = req_data.get('uiState', {})
             stats_summary = req_data.get('statsSummary', None)
             chat_history = req_data.get('chatHistory', [])
+            chat_history = chat_history[-8:] if isinstance(chat_history, list) else []
             # Si hay API key de Gemini
             if provider == 'gemini':
                 sel_model = 'gemini-2.5-pro' if (model and 'pro' in model) else ('gemini-2.5-flash' if (not model or model in ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-1.5-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite']) else model)
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/{sel_model}:generateContent?key={api_key}"
+                if not is_valid_model_name(sel_model):
+                    sel_model = 'gemini-2.5-flash'
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{urllib.parse.quote(sel_model, safe='')}:generateContent"
                 context_str = "\n".join([f"[{i+1}] ID:{p.get('publication_number')} | Título:{p.get('title')} ({p.get('publication_date')}) | Titular:{p.get('assignee')} | Estado:{p.get('legal_status')} | Fuente:{p.get('source')} | Citas:{p.get('forwardCitationCount', 0)}" for i, p in enumerate(patents[:25])])
                 stats_str = f"\nESTADÍSTICAS EXACTAS DEL JSON:\n{json.dumps(stats_summary, ensure_ascii=False)}" if stats_summary else ""
                 ui_str = f"\nESTADO DE FILTROS UI: {json.dumps(ui_state, ensure_ascii=False)}" if ui_state else ""
@@ -490,14 +619,18 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes y cada botón de la
 - Enfoque de figura técnica: Incluye [ACTION:SHOW_FIGURE id="NUMERO_PUBLICACION" fig=1] para abrir la lámina técnica de una invención.
 - Protocolo FTO y Océanos Azules: Evalúa semáforo FTO (Bajo/Medio/Alto), detecta Océanos Azules (vacíos tecnológicos entre clases CPC) y aplica la Regla de Todos los Elementos (All Elements Rule) para diseño alternativo.
 - Citas cliqueables: Cita las patentes por su código oficial (ej. [DOC:US6195698]) para que el usuario abra su ficha lateral con un clic.
-- Gestión exclusiva de APIs: Eres el único que añade o quita APIs mediante [ACTION:ADD_API id="..." name="..." desc="..." quota="..." key="..."], [ACTION:REMOVE_API id="..."] o [ACTION:SET_AI provider="..." model="..." key="..."].
+- Gestión segura de APIs: NUNCA pidas al usuario pegar claves API o tokens en el chat; guíalo para configurarlas en variables de entorno (.env / Vercel). Prohibido emitir HTML crudo, <script>, <iframe>, onerror o enlaces javascript:.
 {ui_str}{stats_str}{hist_str}"""
                 if context_str:
                     prompt = f"{prompt_pericial_context}\nCon base en estos documentos encontrados para '{query}':\n{context_str}\n\nResponde en Markdown al usuario: {user_msg or 'Haz un dictamen pericial y estadístico de FTO, antecedentes y vacíos tecnológicos.'}\nUsa etiquetas [ACTION:SEARCH query=\"...\"], [ACTION:FILTER_CPC code=\"...\"], [ACTION:AUTO_INSPECT id=\"...\"] o [ACTION:AUTO_PIN ids=\"...\"] cuando ahorren pasos manuales."
                 else:
                     prompt = f"{prompt_pericial_context}\nResponde en Markdown a esta consulta del usuario con rigor técnico, claridad y pedagogía: {user_msg or 'Preséntate y explica en qué puedes asistir.'}\nSi recomiendas una búsqueda de patentes o literatura, incluye la acción [ACTION:SEARCH query=\"...\"] o [ACTION:MODE mode=\"patents|literature\"]."
 
-                req = urllib.request.Request(url, headers={'Content-Type': 'application/json'}, data=json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode('utf-8'))
+                req = urllib.request.Request(
+                    url,
+                    headers={'Content-Type': 'application/json', 'x-goog-api-key': api_key},
+                    data=json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode('utf-8')
+                )
                 with urllib.request.urlopen(req, timeout=15) as resp:
                     data = json.loads(resp.read().decode('utf-8'))
                     text = data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', 'Sin respuesta')
@@ -537,14 +670,18 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes y cada botón de la
                     self.send_json(200, {"provider": provider, "model": model or def_model, "reply": text})
 
         except Exception as e:
-            self.send_json(500, {"error": f"Error en agente de IA: {str(e)}"})
+            self.send_json(500, {"error": f"Error en agente de IA: {sanitize_error_msg(e)}"})
 
     def send_json(self, status_code, data):
         self.send_response(status_code)
         self.send_header('Content-Type', 'application/json; charset=utf-8')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Cache-Control', 'no-store')
+        allowed_origin = self._get_allowed_origin()
+        if allowed_origin:
+            self.send_header('Access-Control-Allow-Origin', allowed_origin)
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+            self.send_header('Vary', 'Origin')
         self.end_headers()
         self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
 
@@ -562,22 +699,23 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes y cada botón de la
             "renewal_date": "Continuo",
             "connected": True
         }
-        try:
-            acc_url = f"https://serpapi.com/account.json?api_key={SERPAPI_KEY}"
-            req = urllib.request.Request(acc_url, headers={'User-Agent': 'Mozilla/5.0'})
-            with urllib.request.urlopen(req, timeout=3) as resp:
-                data = json.loads(resp.read().decode('utf-8'))
-                total = data.get('searches_per_month', 250)
-                used = data.get('this_month_usage', 0)
-                left = data.get('total_searches_left', total - used)
-                serpapi_usage.update({
-                    "used_this_month": used,
-                    "remaining": left,
-                    "percentage_remaining": round((left / total) * 100, 1) if total else 0.0,
-                    "percentage_used": round((used / total) * 100, 1) if total else 0.0,
-                })
-        except Exception:
-            pass
+        if SERPAPI_KEY:
+            try:
+                acc_url = f"https://serpapi.com/account.json?api_key={urllib.parse.quote(SERPAPI_KEY)}"
+                req = urllib.request.Request(acc_url, headers={'User-Agent': 'Mozilla/5.0'})
+                with urllib.request.urlopen(req, timeout=3) as resp:
+                    data = json.loads(resp.read().decode('utf-8'))
+                    total = data.get('searches_per_month', 250)
+                    used = data.get('this_month_usage', 0)
+                    left = data.get('total_searches_left', total - used)
+                    serpapi_usage.update({
+                        "used_this_month": used,
+                        "remaining": left,
+                        "percentage_remaining": round((left / total) * 100, 1) if total else 0.0,
+                        "percentage_used": round((used / total) * 100, 1) if total else 0.0,
+                    })
+            except Exception:
+                pass
 
         europepmc_usage = {
             "name": "Europe PMC (Oficina Europea EPO & WIPO)",
@@ -635,10 +773,10 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes y cada botón de la
 
     def handle_literature(self, parsed):
         qs = urllib.parse.parse_qs(parsed.query)
-        q = qs.get('q', [''])[0].strip()
-        page = qs.get('page', ['1'])[0].strip()
+        q = qs.get('q', [''])[0].strip()[:500]
+        page_raw = qs.get('page', ['1'])[0].strip()
         try:
-            page = int(page)
+            page = max(1, min(100, int(page_raw)))
         except ValueError:
             page = 1
 
@@ -654,20 +792,26 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes y cada botón de la
         if not text:
             self.send_json(400, {"error": "Parámetro 'text' requerido"})
             return
+        if len(text) > 5000:
+            self.send_json(400, {"error": "Texto demasiado largo (máximo 5000 caracteres)"})
+            return
         self.translate_text(text)
 
     def handle_translate_post(self, parsed):
-        content_len = int(self.headers.get('Content-Length', 0))
-        post_body = self.rfile.read(content_len)
         try:
-            req_data = json.loads(post_body.decode('utf-8'))
-            text = req_data.get('text', '').strip()
+            req_data = self._read_json_body()
+            if req_data is None:
+                return
+            text = str(req_data.get('text') or '').strip()
             if not text:
                 self.send_json(400, {"error": "Campo 'text' requerido"})
                 return
+            if len(text) > 5000:
+                self.send_json(400, {"error": "Texto demasiado largo (máximo 5000 caracteres)"})
+                return
             self.translate_text(text)
         except Exception as e:
-            self.send_json(400, {"error": f"JSON inválido: {str(e)}"})
+            self.send_json(400, {"error": f"JSON inválido: {sanitize_error_msg(e)}"})
 
     def translate_text(self, text):
         try:
@@ -678,12 +822,13 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes y cada botón de la
                 translated = ''.join([part[0] for part in raw_data[0] if part and part[0]])
                 self.send_json(200, {"original": text, "translated": translated})
         except Exception as e:
-            self.send_json(500, {"error": f"Error al traducir: {str(e)}"})
+            self.send_json(500, {"error": f"Error al traducir: {sanitize_error_msg(e)}"})
 
     def handle_patents(self, parsed):
         qs = urllib.parse.parse_qs(parsed.query)
-        q = qs.get('q', [''])[0].strip()
-        source = qs.get('source', ['all'])[0].strip().lower()
+        q = qs.get('q', [''])[0].strip()[:500]
+        raw_source = qs.get('source', ['all'])[0].strip().lower()
+        source = raw_source if raw_source in ALLOWED_SOURCES else 'all'
 
         if not q:
             self.send_json(400, {'error': 'Parámetro "q" es requerido'})
@@ -759,9 +904,9 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     daemon_threads = True
 
 if __name__ == '__main__':
-    with ThreadedTCPServer(("", PORT), PatentSearchHandler) as httpd:
+    with ThreadedTCPServer((BIND_HOST, PORT), PatentSearchHandler) as httpd:
         print(f"============================================================")
-        print(f" Servidor Centralizado de Patentes activo en: http://localhost:{PORT}")
+        print(f" Servidor Centralizado de Patentes activo en: http://{BIND_HOST}:{PORT}")
         print(f" Fuentes Conectadas: Google Patents, Europe PMC (EPO/WIPO), PatentBrief")
         print(f" API Endpoints: /api/patents, /api/usage, /api/translate")
         print(f"============================================================")

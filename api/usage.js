@@ -1,10 +1,12 @@
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+import { applyApiSecurity, enforceOptionalAuth, enforceRateLimit } from './_security.js';
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+export default async function handler(req, res) {
+  if (applyApiSecurity(req, res, 'GET,OPTIONS')) return;
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Método no permitido. Use GET.' });
   }
+  if (!enforceOptionalAuth(req, res)) return; // [OPTIONAL AUTH - ENABLE_API_AUTH=true]
+  if (!enforceRateLimit(req, res, { maxRequests: 60 })) return;
 
   const SERPAPI_KEY = process.env.SERPAPI_KEY || "";
   const EPO_KEY = process.env.EPO_KEY || "";

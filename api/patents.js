@@ -1,18 +1,26 @@
+import { applyApiSecurity, enforceOptionalAuth, enforceRateLimit, safeHttpUrl, sanitizePubNumber, sanitizeErrorMessage } from './_security.js';
+
+const ALLOWED_SOURCES = new Set(['all', 'google', 'europepmc', 'patentbrief', 'lens', 'epo']);
+
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+  if (applyApiSecurity(req, res, 'GET,POST,OPTIONS')) return;
+  if (!['GET', 'POST'].includes(req.method)) {
+    return res.status(405).json({ error: 'Método no permitido.' });
   }
+  if (!enforceOptionalAuth(req, res)) return; // [OPTIONAL AUTH - ENABLE_API_AUTH=true]
+  if (!enforceRateLimit(req, res, { maxRequests: 45 })) return;
 
-  const { q, source = 'all' } = req.query;
+  const { q, source: rawSource = 'all' } = req.query || {};
   const SERPAPI_KEY = process.env.SERPAPI_KEY || "";
 
-  if (!q) {
+  if (!q || typeof q !== 'string' || !q.trim()) {
     return res.status(400).json({ error: 'Parámetro de búsqueda "q" es requerido' });
   }
+
+  const safeQ = q.trim().slice(0, 500);
+  const source = ALLOWED_SOURCES.has(String(rawSource).toLowerCase())
+    ? String(rawSource).toLowerCase()
+    : 'all';
 
   const combinedResults = [];
   let cpcSummaries = [];
@@ -26,13 +34,14 @@ export default async function handler(req, res) {
     tasks.push((async () => {
       // Intentar directo primero
       try {
-        const encodedParam = encodeURIComponent(`q=${q}&exp=`);
+        const innerQ = safeQ.replace(/[&#]/g, ' ');
+        const encodedParam = encodeURIComponent(`q=${innerQ}&exp=`);
         const xhrUrl = `https://patents.google.com/xhr/query?url=${encodedParam}`;
         const xhrResp = await fetch(xhrUrl, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
             'Accept': '*/*',
-            'Referer': `https://patents.google.com/?q=${encodeURIComponent(q)}`,
+            'Referer': `https://patents.google.com/?q=${encodeURIComponent(safeQ)}`,
             'X-Requested-With': 'XMLHttpRequest'
           }
         });
@@ -56,14 +65,18 @@ export default async function handler(req, res) {
 
             for (const item of rawResults) {
               const pat = item.patent || {};
-              const pubNum = pat.publication_number || pat.id?.replace('patent/', '').replace('/en', '') || 'N/A';
-              const thumb = pat.thumbnail ? `https://patentimages.storage.googleapis.com/${pat.thumbnail}` : null;
-              const pdf = pat.pdf ? `https://patentimages.storage.googleapis.com/${pat.pdf}` : null;
+              const rawPub = pat.publication_number || pat.id?.replace('patent/', '').replace('/en', '') || 'N/A';
+              const pubNum = sanitizePubNumber(rawPub);
+              const thumb = pat.thumbnail ? safeHttpUrl(`https://patentimages.storage.googleapis.com/${String(pat.thumbnail).replace(/^\/+/, '')}`) : null;
+              const pdf = pat.pdf ? safeHttpUrl(`https://patentimages.storage.googleapis.com/${String(pat.pdf).replace(/^\/+/, '')}`) : null;
               
               const figures = [];
               for (const f of (pat.figures || [])) {
                 const path = f.thumbnail || f.full;
-                if (path) figures.push(`https://patentimages.storage.googleapis.com/${path}`);
+                if (path) {
+                  const figUrl = safeHttpUrl(`https://patentimages.storage.googleapis.com/${String(path).replace(/^\/+/, '')}`);
+                  if (figUrl) figures.push(figUrl);
+                }
               }
               if (thumb && !figures.includes(thumb)) figures.unshift(thumb);
 
@@ -81,7 +94,7 @@ export default async function handler(req, res) {
                 forwardCitationCount: pat.cited_by || 0,
                 thumbnail: thumb,
                 figures,
-                patent_link: `https://patents.google.com/patent/${pubNum}/en`,
+                patent_link: pubNum !== 'N/A' ? `https://patents.google.com/patent/${encodeURIComponent(pubNum)}/en` : null,
                 pdf,
                 classifications_cpc: cpcSummaries.slice(0, 3).map(c => c.code),
                 classifications_ipc: []
@@ -97,7 +110,7 @@ export default async function handler(req, res) {
       // Fallback a SerpApi (si existe SERPAPI_KEY en variables de entorno)
       if (!SERPAPI_KEY) return;
       try {
-        const targetUrl = `https://serpapi.com/search.json?engine=google_patents&q=${encodeURIComponent(q)}&api_key=${SERPAPI_KEY}`;
+        const targetUrl = `https://serpapi.com/search.json?engine=google_patents&q=${encodeURIComponent(safeQ)}&api_key=${encodeURIComponent(SERPAPI_KEY)}`;
         const response = await fetch(targetUrl);
         const data = await response.json();
 
@@ -120,20 +133,23 @@ export default async function handler(req, res) {
               const parts = p.patent_id.split('/');
               pubNum = parts.length >= 2 ? parts[1] : p.patent_id;
             }
+            pubNum = sanitizePubNumber(pubNum);
 
             const figures = [];
             if (p.figures) {
               for (const fig of p.figures) {
-                figures.push(fig.thumbnail || fig.full);
+                const safeFig = safeHttpUrl(fig.thumbnail || fig.full);
+                if (safeFig) figures.push(safeFig);
               }
             } else if (p.thumbnail) {
-              figures.push(p.thumbnail);
+              const safeThumb = safeHttpUrl(p.thumbnail);
+              if (safeThumb) figures.push(safeThumb);
             }
 
             combinedResults.push({
               source: 'Google Patents',
               source_badge: 'google',
-              publication_number: pubNum || 'N/A',
+              publication_number: pubNum,
               title: p.title || 'Sin título registrado',
               snippet: p.snippet || '',
               assignee: p.assignee || 'No especificado',
@@ -142,10 +158,10 @@ export default async function handler(req, res) {
               publication_date: p.publication_date || p.grant_date || 'N/A',
               legal_status: p.country_status ? Object.values(p.country_status)[0] || 'Registrada' : 'Registrada',
               forwardCitationCount: p.cited_by || p.citations || 0,
-              thumbnail: p.thumbnail || null,
+              thumbnail: safeHttpUrl(p.thumbnail),
               figures,
-              patent_link: p.patent_link || (pubNum ? `https://patents.google.com/patent/${pubNum}/en` : null),
-              pdf: p.pdf || null,
+              patent_link: safeHttpUrl(p.patent_link) || (pubNum !== 'N/A' ? `https://patents.google.com/patent/${encodeURIComponent(pubNum)}/en` : null),
+              pdf: safeHttpUrl(p.pdf),
               classifications_cpc: cpcSummaries.slice(0, 3).map(c => c.code),
               classifications_ipc: []
             });
@@ -153,7 +169,7 @@ export default async function handler(req, res) {
         }
         totalFound += data.search_information?.total_results ? parseInt(data.search_information.total_results, 10) : (data.organic_results?.length || 0);
       } catch (err) {
-        console.warn("Google Patents error:", err.message);
+        console.warn("Google Patents error:", sanitizeErrorMessage(err));
       }
     })());
   }
@@ -162,7 +178,7 @@ export default async function handler(req, res) {
   if (source === 'all' || source === 'europepmc') {
     tasks.push((async () => {
       try {
-        const pmcUrl = `https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=SRC:PAT+AND+${encodeURIComponent(q)}&format=json&resultType=core&pageSize=8`;
+        const pmcUrl = `https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=SRC:PAT+AND+${encodeURIComponent(safeQ)}&format=json&resultType=core&pageSize=8`;
         const resp = await fetch(pmcUrl);
         if (resp.ok) {
           const data = await resp.json();
@@ -170,10 +186,12 @@ export default async function handler(req, res) {
           totalFound += data.hitCount || items.length;
 
           for (const item of items) {
-            const docId = item.id || 'N/A';
+            const docId = sanitizePubNumber(item.id || 'N/A');
             const authors = (item.authorList?.author || []).map(a => a.fullName).filter(Boolean);
-            const pdfUrl = item.hasPDF === 'Y' ? `https://europepmc.org/backend/ptservice.cgi?accid=${docId}&action=viewpdf` : null;
-            const patentUrl = (docId.startsWith('EP') || docId.startsWith('WO')) ? `https://worldwide.espacenet.com/patent/search/family/${docId}` : `https://europepmc.org/article/PAT/${docId}`;
+            const pdfUrl = (item.hasPDF === 'Y' && docId !== 'N/A') ? `https://europepmc.org/backend/ptservice.cgi?accid=${encodeURIComponent(docId)}&action=viewpdf` : null;
+            const patentUrl = (docId.startsWith('EP') || docId.startsWith('WO'))
+              ? `https://worldwide.espacenet.com/patent/search/family/${encodeURIComponent(docId)}`
+              : `https://europepmc.org/article/PAT/${encodeURIComponent(docId)}`;
             const cits = parseInt(item.citedByCount || 0, 10) || 0;
             const appDate = item.application?.applicationDate || null;
 
@@ -199,7 +217,7 @@ export default async function handler(req, res) {
           }
         }
       } catch (err) {
-        console.warn("Europe PMC error:", err.message);
+        console.warn("Europe PMC error:", sanitizeErrorMessage(err));
       }
     })());
   }
@@ -208,7 +226,7 @@ export default async function handler(req, res) {
   if (source === 'all' || source === 'patentbrief') {
     tasks.push((async () => {
       try {
-        const briefUrl = `https://patentbrief.org/api/search?q=${encodeURIComponent(q)}`;
+        const briefUrl = `https://patentbrief.org/api/search?q=${encodeURIComponent(safeQ)}`;
         const resp = await fetch(briefUrl);
         if (resp.ok) {
           const data = await resp.json();
@@ -216,8 +234,8 @@ export default async function handler(req, res) {
           totalFound += patents.length;
 
           for (const item of patents.slice(0, 8)) {
-            const pubNum = `${item.countryCode || 'US'}${item.patentNumber || ''}`;
-            const fig = item.figureUrl || null;
+            const pubNum = sanitizePubNumber(`${item.countryCode || 'US'}${item.patentNumber || ''}`);
+            const fig = safeHttpUrl(item.figureUrl);
 
             combinedResults.push({
               source: 'PatentBrief (Tecnología Amigable)',
@@ -235,7 +253,7 @@ export default async function handler(req, res) {
               thumbnail: fig,
               figures: fig ? [fig] : [],
               industry_tags: item.industryTags || [],
-              patent_link: `https://patents.google.com/patent/${pubNum}/en`,
+              patent_link: pubNum !== 'N/A' ? `https://patents.google.com/patent/${encodeURIComponent(pubNum)}/en` : null,
               pdf: null,
               classifications_cpc: [],
               classifications_ipc: []
@@ -243,7 +261,7 @@ export default async function handler(req, res) {
           }
         }
       } catch (err) {
-        console.warn("PatentBrief error:", err.message);
+        console.warn("PatentBrief error:", sanitizeErrorMessage(err));
       }
     })());
   }
@@ -257,7 +275,7 @@ export default async function handler(req, res) {
   await Promise.allSettled(tasks);
 
   return res.status(200).json({
-    query: q,
+    query: safeQ,
     source,
     total_found: totalFound || combinedResults.length,
     results_count: combinedResults.length,

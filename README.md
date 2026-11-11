@@ -64,3 +64,18 @@ CapstonePatentSearch/
 ├── LICENSE            # Licencia del proyecto
 └── README.md          # Documentación técnica
 ```
+
+---
+
+## 5. Seguridad y Control de Acceso Opcional (Producción)
+
+> **Nota para despliegue institucional o evaluación:** La aplicación se mantiene pública por defecto para demostraciones académicas, pero cuenta con una **capa de autenticación y control de cuotas lista para activar** en [`api/_security.js`](api/_security.js) y [`server.py`](server.py).
+
+Para proteger las API Keys del servidor ante consumo externo en una instancia propia de producción:
+
+1. En **Vercel** (*Settings &rarr; Environment Variables*) o `.env`, habilita:
+   - `ENABLE_API_AUTH=true`
+   - `APP_ACCESS_TOKEN=<token-secreto-largo>`
+   - `ALLOWED_ORIGINS=https://tu-dominio.vercel.app`
+2. Los endpoints `/api/*` exigirán automáticamente cabecera `x-access-token: <token>` o `Authorization: Bearer <token>` (comparación en tiempo constante vía `crypto.timingSafeEqual`).
+3. Para bloqueo distribuido de bots en producción, activa **Vercel Firewall Rate Limiting** o conecta **Upstash Redis** en `enforceRateLimit` dentro de [`api/_security.js`](api/_security.js).
