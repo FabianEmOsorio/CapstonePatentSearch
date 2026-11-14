@@ -3942,6 +3942,178 @@
       font-weight: 700;
     }
 
+    /* Toast no bloqueante para retroalimentación rápida */
+    .smit-toast {
+      position: fixed;
+      top: 68px;
+      right: 20px;
+      z-index: 1200;
+      background: var(--bg-elevated);
+      color: var(--text-high);
+      border: 1px solid var(--border-focus);
+      border-left: 4px solid var(--brand-primary);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      font-size: 12.5px;
+      font-weight: 500;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      max-width: min(360px, calc(100vw - 32px));
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-8px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .smit-toast.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .smit-toast.warn { border-left-color: var(--status-warn); }
+    .smit-toast.error { border-left-color: var(--status-danger); }
+    .smit-toast.success { border-left-color: var(--status-success); }
+
+    /* Controles de selección en el comparador lado a lado */
+    .compare-toolbar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding: 10px 12px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+    }
+    .compare-select-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .compare-select-group label {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .compare-select {
+      width: 100%;
+      background: var(--bg-surface);
+      color: var(--text-high);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 6px 8px;
+      font-size: 12px;
+      font-family: inherit;
+    }
+
+    /* Responsividad integral (Tablet / Móvil sin desbordamiento horizontal) */
+    html, body {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    .feed-container,
+    .agent-panel-card,
+    .patent-card,
+    .agent-title-lockup {
+      min-width: 0;
+      max-width: 100%;
+    }
+    .agent-panel-header,
+    .feed-header,
+    .feed-title-wrap,
+    .feed-actions-wrap,
+    .card-badges-left,
+    .card-actions-left,
+    .card-actions-row,
+    .header-actions {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    @media (max-width: 1100px) {
+      .app-main.drawer-open {
+        grid-template-columns: 1fr;
+      }
+      .app-main.drawer-open .inspection-drawer {
+        position: fixed;
+        inset: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100dvh;
+        border-left: none;
+        z-index: 260;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 0 !important;
+      }
+      .app-header {
+        padding: 8px 12px;
+        gap: 8px;
+      }
+      .brand-section {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .brand-info {
+        white-space: normal;
+        min-width: 0;
+      }
+      .brand-info span {
+        display: none;
+      }
+      .engine-switcher {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .engine-option {
+        flex: 1;
+        justify-content: center;
+        padding: 6px 8px;
+        font-size: 11px;
+      }
+      .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .jtbd-strip {
+        padding: 8px 12px;
+      }
+      .feed-container {
+        padding: 14px 12px 156px 12px;
+      }
+      .patent-card {
+        padding: 14px;
+      }
+      .agent-panel-header {
+        padding: 10px 12px;
+      }
+      .agent-reply-body {
+        padding: 12px;
+      }
+      .command-bar-wrapper {
+        width: calc(100% - 16px);
+        bottom: 10px;
+        padding: 8px 10px;
+      }
+      .command-controls-row {
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .active-query-pill {
+        max-width: 220px;
+      }
+      .compare-toolbar {
+        grid-template-columns: 1fr;
+      }
+    }
+
   </style>
   <!-- Motor LaTeX Math (KaTeX) y Markdown (Marked) con Subresource Integrity (SRI) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
@@ -4192,8 +4364,8 @@
         </div>
 
         <div id="inspection-active-view" style="display: none;">
-          <div id="sidebar-body-dossier" class="drawer-pane"></div>
-          <div id="sidebar-body-pdf" class="drawer-pane" style="display: none;"></div>
+          <div id="inspection-dossier-pane" class="drawer-pane"></div>
+          <div id="inspection-pdf-pane" class="drawer-pane" style="display: none;"></div>
         </div>
       </div>
     </aside>
@@ -4233,15 +4405,15 @@
             </div>
             <div class="ag-menu-option" onclick="seleccionarFuenteDirecta('google', event)" id="opt-juris-google">
               <span class="ag-option-label">Google Patents Engine</span>
-              <span class="ag-option-check" id="check-google"></span>
+              <span class="ag-option-check" id="check-google" style="display:none;">✓</span>
             </div>
             <div class="ag-menu-option" onclick="seleccionarFuenteDirecta('europepmc', event)" id="opt-juris-europepmc">
               <span class="ag-option-label">Europe PMC (EPO / WIPO)</span>
-              <span class="ag-option-check" id="check-europepmc"></span>
+              <span class="ag-option-check" id="check-europepmc" style="display:none;">✓</span>
             </div>
             <div class="ag-menu-option" onclick="seleccionarFuenteDirecta('patentbrief', event)" id="opt-juris-patentbrief">
               <span class="ag-option-label">PatentBrief (Tecnología Amigable)</span>
-              <span class="ag-option-check" id="check-patentbrief"></span>
+              <span class="ag-option-check" id="check-patentbrief" style="display:none;">✓</span>
             </div>
           </div>
         </div>
@@ -4272,15 +4444,15 @@
             </div>
             <div class="ag-menu-option" onclick="aplicarOrdenDirecto('citations', event)" id="opt-sort-cits">
               <span class="ag-option-label">Mayor Impacto (Citas hacia adelante)</span>
-              <span class="ag-option-check" id="check-sort-cits"></span>
+              <span class="ag-option-check" id="check-sort-cits" style="display:none;">✓</span>
             </div>
             <div class="ag-menu-option" onclick="aplicarOrdenDirecto('date_desc', event)" id="opt-sort-date">
               <span class="ag-option-label">Más Recientes (Prioridad)</span>
-              <span class="ag-option-check" id="check-sort-date"></span>
+              <span class="ag-option-check" id="check-sort-date" style="display:none;">✓</span>
             </div>
             <div class="ag-menu-option" onclick="aplicarOrdenDirecto('date_asc', event)" id="opt-sort-date-asc">
               <span class="ag-option-label">Más Antiguas (Patentes Seminales)</span>
-              <span class="ag-option-check" id="check-sort-date-asc"></span>
+              <span class="ag-option-check" id="check-sort-date-asc" style="display:none;">✓</span>
             </div>
 
             <div style="display:none;">
@@ -4327,6 +4499,8 @@
   <footer style="text-align: center; padding: 20px; font-size: 11px; color: var(--text-muted); margin-bottom: 90px;">
     Grupo 6 &bull; Fabián Osorio, Mariana Álvarez, Kevin Cruz, Lina Peña &bull; Capstone Ingeniería
   </footer>
+
+  <div id="smit-toast" class="smit-toast" role="status" aria-live="polite"></div>
 
 <!-- Modal de Estado de Conectores (Gestión Exclusiva mediante el Agente Pericial) -->
   <div id="settings-modal" class="modal-overlay" onclick="cerrarSettingsModal(event)">
@@ -4459,40 +4633,6 @@
       <div class="modal-body">
         <img id="modal-img-src" src="" alt="Ilustración Técnica">
       </div>
-    </div>
-  </div>
-
-  <!-- Slide-over Sidebar Drawer para Inspección Rápida de Patente -->
-  <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="cerrarSidebar()"></div>
-  <div id="patent-sidebar" class="patent-sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-header-left" id="sidebar-header-left">
-        <!-- Injected via JS -->
-      </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <a id="sidebar-ext-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn-ghost" style="text-decoration: none; font-size: 11px;">
-           Abrir en pestaña nueva &nearr;
-        </a>
-        <button class="btn-close-sidebar" onclick="cerrarSidebar()" title="Cerrar barra lateral (Esc)">&times;</button>
-      </div>
-    </div>
-
-    <!-- Pestañas del Sidebar: Ficha Nativa vs PDF Oficial Embebido -->
-    <div class="sidebar-tabs-bar">
-      <button id="sb-tab-dossier" class="sb-tab-btn active" onclick="cambiarSidebarTab('dossier')">
-         Ficha Técnica Nativa
-      </button>
-      <button id="sb-tab-pdf" class="sb-tab-btn" onclick="cambiarSidebarTab('pdf')">
-         Documento PDF Oficial
-      </button>
-    </div>
-
-    <div class="sidebar-body" id="sidebar-body-dossier">
-      <!-- Injected via JS -->
-    </div>
-
-    <div class="sidebar-body" id="sidebar-body-pdf" style="display: none; padding: 0; height: calc(100vh - 110px);">
-      <!-- Injected via JS (iframe o fallback) -->
     </div>
   </div>
 
@@ -4687,10 +4827,12 @@
             <div class="glossary-card-title"> Citas hacia adelante (Forward Citations)</div>
             <p>Mide cuántas patentes posteriores tuvieron que citar este documento como antecedente obligado. En el ecosistema de vigilancia e inversión tecnológica, un alto número de citas indica que la invención es una <strong>tecnología pionera o estándar fundamental</strong> de la industria.</p>
           </div>
-        <!-- 5. Pestana Metodologias de Vigilancia y Analisis Pericial -->
+        </div>
+
+        <!-- 5. Pestaña Metodologías de Vigilancia y Análisis Pericial -->
         <div id="gl-pane-metodologias" class="glossary-tab-pane">
           <div class="glossary-card">
-            <div class="glossary-card-title">Citation Snowballing (Rastreo Topológico desde Semilla - US10268731B2)</div>
+            <div class="glossary-card-title">Citation Snowballing (Rastreo Topológico desde Semilla &mdash; US10268731B2)</div>
             <p>Rastreo bidireccional de citaciones para reconstruir la genealogía técnica de una invención (referencia técnica: <em>Patent Mapping</em>, Black Hills IP). Rastrear hacia atrás (<em>Backward Citations</em>) identifica las patentes seminales del estado del arte que la sustentaron; rastrear hacia adelante (<em>Forward Citations</em>) revela competidores que la están derivando, posibles barreras y litigios activos.</p>
           </div>
 
@@ -4700,23 +4842,23 @@
           </div>
 
           <div class="glossary-card">
-            <div class="glossary-card-title">Mapeo de Océanos Azules (White Space Mapping - US9201966B2 / US9836805B2)</div>
+            <div class="glossary-card-title">Mapeo de Océanos Azules (White Space Mapping &mdash; US9201966B2 / US9836805B2)</div>
             <p>Cruce analítico multidimensional entre clasificaciones tecnológicas (CPC/IPC), vigilancia periódica y necesidades funcionales. Permite localizar vacíos de patentabilidad donde no existen patentes vigentes, orientando la investigación y desarrollo (I+D) hacia nichos de libre operación con alta diferenciación comercial.</p>
           </div>
 
           <div class="glossary-card">
-            <div class="glossary-card-title">Metodologia Facetada E-T-S (Entidad - Tecnologia - Solucion)</div>
-            <p>Estructuracion de busqueda formal segun directrices de examen de la EPO (Parte B-III) y MPEP 904 de la USPTO. Descompone el problema tecnico en tres facetas independientes unidas por operadores booleanos (AND, OR, NOT) y truncadores (*), eliminando el 99% del ruido documental de palabras clave ambiguas.</p>
+            <div class="glossary-card-title">Metodología Facetada E-T-S (Entidad &ndash; Tecnología &ndash; Solución)</div>
+            <p>Estructuración de búsqueda formal según directrices de examen de la EPO (Parte B-III) y MPEP 904 de la USPTO. Descompone el problema técnico en tres facetas independientes unidas por operadores booleanos (AND, OR, NOT) y truncadores (*), reduciendo el ruido documental de palabras clave ambiguas.</p>
           </div>
 
           <div class="glossary-card">
-            <div class="glossary-card-title">Filtro Cero (Literatura Cientifica Abierta - OpenAlex)</div>
-            <p>Fase de exploracion previa en mas de 250M de articulos cientificos arbitrados y preprints antes de evaluar patentes comerciales. Permite conocer los principios teoricos y descubrimientos experimentales de frontera no monopolizados mercantilmente.</p>
+            <div class="glossary-card-title">Filtro Cero (Literatura Científica Abierta &mdash; OpenAlex)</div>
+            <p>Fase de exploración previa en más de 250M de artículos científicos arbitrados y preprints antes de evaluar patentes comerciales. Permite conocer los principios teóricos y descubrimientos experimentales de frontera no monopolizados mercantilmente.</p>
           </div>
 
           <div class="glossary-card">
-            <div class="glossary-card-title">Propiedad Intelectual y Software en Colombia (DNDA vs. SIC)</div>
-            <p>Segun la <strong>Decision 486 de la Comunidad Andina (Art. 15, literal e)</strong>, el software puro no se patenta ante la Superintendencia de Industria y Comercio (SIC). Se protege bajo <strong>Derechos de Autor como Soporte Logico (Ley 23 de 1982)</strong> de forma 100% gratuita y virtual ante la <strong>Direccion Nacional de Derecho de Autor (DNDA)</strong> en <code>www.registroenlinea.gov.co</code>.</p>
+            <div class="glossary-card-title">Propiedad Intelectual de SMIT en Colombia (DNDA, Decisión 351 y Decisión 486)</div>
+            <p>Según la <strong>Decisión 486 de la Comunidad Andina (Art. 15)</strong>, los programas de ordenador como tal y los algoritmos en abstracto no se consideran invenciones patentables ante la SIC. El código y la documentación de <strong>SMIT</strong> se protegen desde su creación mediante <strong>Derecho de Autor como soporte lógico (Decisión 351 Art. 23 y Ley 23 de 1982)</strong> con registro gratuito en la <strong>DNDA</strong> (<code>www.registroenlinea.gov.co</code>), mientras los prompts y ecuaciones validadas se resguardan como <strong>Secreto Empresarial (Decisión 486 Art. 260)</strong>.</p>
           </div>
         </div>
       </div>
@@ -4762,6 +4904,20 @@
     let currentRenderedLiterature = [];
     let isShowingOlderChatHistory = false;
     let lastExecutedQuery = '';
+    let lastFetchedQuery = '';
+    let lastFetchedSource = '';
+    let smitToastTimer = null;
+
+    function mostrarNotificacion(mensaje, tipo = 'info') {
+      const el = document.getElementById('smit-toast');
+      if (!el) return;
+      el.className = `smit-toast ${tipo} show`;
+      el.textContent = mensaje;
+      if (smitToastTimer) clearTimeout(smitToastTimer);
+      smitToastTimer = setTimeout(() => {
+        el.classList.remove('show');
+      }, 3600);
+    }
 
     // =========================================================
     // CONTROL UNIVERSAL DE MODALES (MODERN WEB GUIDANCE: LIGHT DISMISS & FOCUS)
@@ -5126,7 +5282,7 @@
       const inputQuery = document.getElementById('input-nuevo-proyecto-query');
       const nombre = inputNombre ? inputNombre.value.trim() : '';
       if (!nombre) {
-        alert('Por favor ingresa un nombre para el nuevo proyecto de vigilancia.');
+        mostrarNotificacion('Ingresa un nombre para el nuevo proyecto de vigilancia.', 'warn');
         if (inputNombre) inputNombre.focus();
         return;
       }
@@ -5164,7 +5320,7 @@
     function eliminarWorkspaceActual() {
       const ws = getActiveWorkspace();
       if (!ws) {
-        alert('No hay un proyecto activo para eliminar.');
+        mostrarNotificacion('No hay un proyecto activo para eliminar.', 'info');
         return;
       }
       eliminarWorkspacePorId(ws.id);
@@ -5295,6 +5451,8 @@
 
     function limpiarConsultaActiva() {
       lastExecutedQuery = '';
+      lastFetchedQuery = '';
+      lastFetchedSource = '';
       const pill = document.getElementById('active-query-pill');
       if (pill) pill.style.display = 'none';
       mostrarZeroState();
@@ -5411,14 +5569,44 @@
       ['all', 'google', 'europepmc', 'patentbrief'].forEach(id => {
         const check = document.getElementById(`check-${id}`);
         if (check) check.style.display = id === src ? 'inline' : 'none';
+        const opt = document.getElementById(`opt-juris-${id}`);
+        if (opt) opt.classList.toggle('selected', id === src);
       });
 
       cerrarMenuFuentes();
-      if (lastExecutedQuery) {
+      const canFilterLocally = Boolean(
+        lastExecutedQuery &&
+        lastFetchedQuery === lastExecutedQuery &&
+        allRetrievedPatents.length > 0 &&
+        (lastFetchedSource === 'all' || lastFetchedSource === src)
+      );
+      if (canFilterLocally) {
+        applyFiltersAndRender();
+      } else if (lastExecutedQuery) {
         buscar(lastExecutedQuery);
       } else {
         applyFiltersAndRender();
       }
+    }
+
+    function applyLiteratureSortAndRender() {
+      if (!allRetrievedLiterature) return;
+      const ws = getActiveWorkspace();
+      const pinnedSet = new Set((ws && ws.pinned) ? ws.pinned : []);
+      let items = [...allRetrievedLiterature];
+      if (isShowingOnlyPinned) {
+        items = items.filter(w => pinnedSet.has(w.doi || w.id || w.title));
+      }
+      if (currentSort === 'date_desc') {
+        items.sort((a, b) => (Number(b.publication_year) || 0) - (Number(a.publication_year) || 0));
+      } else if (currentSort === 'date_asc') {
+        items.sort((a, b) => (Number(a.publication_year) || 9999) - (Number(b.publication_year) || 9999));
+      } else if (currentSort === 'citations_desc') {
+        items.sort((a, b) => (b.cited_by_count || 0) - (a.cited_by_count || 0));
+      }
+      const countBadge = document.getElementById('results-count-badge');
+      if (countBadge) countBadge.textContent = `${items.length} papers`;
+      renderizarLiteratura(items);
     }
 
     function setSort(sortKey, sortLabel) {
@@ -5448,7 +5636,11 @@
       }
 
       cerrarMenuFiltros();
-      applyFiltersAndRender();
+      if (currentEngineMode === 'literature') {
+        applyLiteratureSortAndRender();
+      } else {
+        applyFiltersAndRender();
+      }
     }
 
     function toggleIntelBody() {
@@ -5593,6 +5785,7 @@
     async function buscar(customQuery) {
       const qInput = document.getElementById('query-input');
       const searchBtn = document.getElementById('ag-search-btn');
+      let customSearchTopic = '';
 
       let q = customQuery !== undefined ? customQuery : (qInput ? qInput.value.trim() : '');
       if (!q) {
@@ -5689,6 +5882,8 @@
         rawJsonData = data;
         if (rawOutput) rawOutput.textContent = JSON.stringify(data, null, 2);
         allRetrievedPatents = data.organic_results || [];
+        lastFetchedQuery = q;
+        lastFetchedSource = currentSource;
 
         if (data.cpc_summary && data.cpc_summary.length > 0) {
           if (intelDropdown) intelDropdown.style.display = 'block';
@@ -5894,6 +6089,12 @@
       currentSource = 'all';
       const lbl = document.getElementById('current-source-label');
       if (lbl) lbl.textContent = 'Todas las fuentes';
+      ['all', 'google', 'europepmc', 'patentbrief'].forEach(id => {
+        const check = document.getElementById(`check-${id}`);
+        if (check) check.style.display = id === 'all' ? 'inline' : 'none';
+        const opt = document.getElementById(`opt-juris-${id}`);
+        if (opt) opt.classList.toggle('selected', id === 'all');
+      });
       currentJurisdictionFilter = 'ALL';
       currentStatusFilter = 'all';
 
@@ -5995,6 +6196,11 @@
 
       let filtered = allRetrievedPatents.filter(p => {
         if (isShowingOnlyPinned && !pinnedSet.has(p.publication_number)) return false;
+
+        if (currentSource !== 'all') {
+          const srcBadge = (p.source_badge || 'google').toLowerCase();
+          if (srcBadge !== currentSource) return false;
+        }
 
         if (currentJurisdictionFilter !== 'ALL') {
           const juris = getPatentJurisdiction(p);
@@ -6296,38 +6502,44 @@
     }
 
     function renderizarInspectionDossier() {
-      const activeView = document.getElementById('inspection-active-view');
+      const dossierPane = document.getElementById('inspection-dossier-pane');
+      const pdfPane = document.getElementById('inspection-pdf-pane');
       const p = currentActivePatentData;
-      if (!p || !activeView) return;
-      activeView.innerHTML = construirDossierHtml(p, false);
+      if (!p || !dossierPane) return;
+      dossierPane.innerHTML = construirDossierHtml(p, false);
+      dossierPane.style.display = 'block';
+      if (pdfPane) pdfPane.style.display = 'none';
     }
 
     function renderizarInspectionPdf() {
-      const activeView = document.getElementById('inspection-active-view');
+      const dossierPane = document.getElementById('inspection-dossier-pane');
+      const pdfPane = document.getElementById('inspection-pdf-pane');
       const p = currentActivePatentData;
-      if (!p || !activeView) return;
+      if (!p || !pdfPane) return;
 
       const safePdf = sanitizeHttpUrl(p.pdf);
       const safePatLink = sanitizeHttpUrl(p.patent_link);
       if (safePdf !== '#') {
-        activeView.innerHTML = `
+        pdfPane.innerHTML = `
           <div style="height: 100%; display: flex; flex-direction: column;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px;">
               <span style="color:var(--text-muted); font-weight:600;">Visor de Gaceta / PDF Oficial</span>
-              <a href="${escapeHtml(safePdf)}" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary); font-weight:600; text-decoration:none;">Abrir en pestana nueva &nearr;</a>
+              <a href="${escapeHtml(safePdf)}" target="_blank" rel="noopener noreferrer" style="color:var(--brand-primary); font-weight:600; text-decoration:none;">Abrir en pestaña nueva &nearr;</a>
             </div>
             <iframe src="${escapeHtml(safePdf)}#view=FitH" referrerpolicy="no-referrer" style="width: 100%; height: 520px; border: 1px solid var(--border-color); border-radius: 6px; background: #fff;" title="PDF Oficial"></iframe>
           </div>
         `;
       } else {
-        activeView.innerHTML = `
+        pdfPane.innerHTML = `
           <div style="padding: 36px 14px; text-align: center; color: var(--text-muted);">
-            <div style="font-size: 13px; font-weight: 600; color: var(--text-high); margin-bottom: 6px;">PDF directo no indexado en cache</div>
-            <p style="font-size: 11.5px; line-height: 1.45; margin-bottom: 12px;">El expediente oficial esta disponible directamente en el portal de la oficina de origen.</p>
+            <div style="font-size: 13px; font-weight: 600; color: var(--text-high); margin-bottom: 6px;">PDF directo no indexado en caché</div>
+            <p style="font-size: 11.5px; line-height: 1.45; margin-bottom: 12px;">El expediente oficial está disponible directamente en el portal de la oficina de origen.</p>
             ${safePatLink !== '#' ? `<a href="${escapeHtml(safePatLink)}" target="_blank" rel="noopener noreferrer" class="btn-ghost" style="display:inline-block; font-size: 11.5px; color:var(--brand-primary); font-weight:600; text-decoration: none;">Abrir Expediente en Oficina Oficial &nearr;</a>` : ''}
           </div>
         `;
       }
+      if (dossierPane) dossierPane.style.display = 'none';
+      pdfPane.style.display = 'block';
     }
 
     function abrirSidebarPatente(idx) {
@@ -6336,7 +6548,7 @@
       currentActivePatentData = { ...p, isLiterature: false };
 
       document.querySelectorAll('.patent-card').forEach(c => c.classList.remove('active-inspected-card'));
-      const activeCard = document.getElementById('card-pat-' + idx);
+      const activeCard = document.getElementById('patent-card-' + idx);
       if (activeCard) activeCard.classList.add('active-inspected-card');
 
       const standbyView = document.getElementById('inspection-standby-view');
@@ -6344,45 +6556,9 @@
       if (standbyView && activeView) {
         standbyView.style.display = 'none';
         activeView.style.display = 'block';
-        cambiarInspectionTab('dossier');
       }
-
       abrirColumnaInspeccion();
-      cambiarSidebarTab('dossier');
-      const pubNum = p.publication_number || 'N/A';
-      const sourceBadge = p.source_badge || 'google';
-      const sourceName = p.source || 'Google Patents';
-      const active = isPatentActive(p);
-      const cits = p.forwardCitationCount || 0;
-      const patentLink = p.patent_link || `https://patents.google.com/patent/${pubNum}/en`;
-
-      const sbHeader = document.getElementById('sidebar-header-left');
-      if (sbHeader) {
-        sbHeader.innerHTML = `
-          <span class="source-tag source-${sourceBadge}">[${escapeHtml(sourceName)}]</span>
-          <span class="jurisdiction-badge">${getJurisdictionFlag(pubNum)}</span>
-          <span style="font-family: monospace; font-size: 14px; font-weight: 700; color: var(--text-high);">${escapeHtml(pubNum)}</span>
-          <span class="patent-status-badge ${active ? 'badge-ok' : 'fto-public-domain'}">${active ? escapeHtml(p.legal_status || 'Vigente') : 'Dominio Publico (FTO)'}</span>
-          ${cits > 0 ? `<span class="patent-citations-badge">Citas: ${cits}</span>` : ''}
-        `;
-      }
-      const extBtn = document.getElementById('sidebar-ext-btn');
-      if (extBtn) {
-        extBtn.href = sanitizeHttpUrl(patentLink);
-        extBtn.rel = 'noopener noreferrer';
-      }
-
-      const sbDossier = document.getElementById('sidebar-body-dossier');
-      if (sbDossier) {
-        sbDossier.innerHTML = construirDossierHtml(currentActivePatentData, true);
-      }
-
-      if (window.innerWidth < 1100) {
-        const sb = document.getElementById('patent-sidebar');
-        const bd = document.getElementById('sidebar-backdrop');
-        if (sb) sb.classList.add('open');
-        if (bd) bd.classList.add('open');
-      }
+      cambiarInspectionTab('dossier');
     }
 
     function inspeccionarPatentePorId(pubNum) {
@@ -6462,49 +6638,15 @@
     window.openDrawer = abrirColumnaInspeccion;
 
     function actualizarVistasInspeccion(p) {
+      currentActivePatentData = p;
       const standbyView = document.getElementById('inspection-standby-view');
       const activeView = document.getElementById('inspection-active-view');
       if (standbyView && activeView) {
         standbyView.style.display = 'none';
         activeView.style.display = 'block';
-        cambiarInspectionTab('dossier');
       }
-
-      cambiarSidebarTab('dossier');
-      const pubNum = p.publication_number || 'N/A';
-      const sourceBadge = p.source_badge || 'google';
-      const sourceName = p.source || 'Google Patents';
-      const active = isPatentActive(p);
-      const cits = p.forwardCitationCount || p.cited_by_count || 0;
-      const patentLink = p.patent_link || `https://patents.google.com/patent/${pubNum}/en`;
-
-      const sbHeader = document.getElementById('sidebar-header-left');
-      if (sbHeader) {
-        sbHeader.innerHTML = `
-          <span class="source-tag source-${sourceBadge}">[${escapeHtml(sourceName)}]</span>
-          <span class="jurisdiction-badge">${getJurisdictionFlag(pubNum)}</span>
-          <span style="font-family: monospace; font-size: 14px; font-weight: 700; color: var(--text-high);">${escapeHtml(pubNum)}</span>
-          <span class="patent-status-badge ${active ? 'badge-ok' : 'fto-public-domain'}">${active ? escapeHtml(p.legal_status || 'Vigente') : 'Dominio Publico (FTO)'}</span>
-          ${cits > 0 ? `<span class="patent-citations-badge">Citas: ${cits}</span>` : ''}
-        `;
-      }
-      const extBtn = document.getElementById('sidebar-ext-btn');
-      if (extBtn) {
-        extBtn.href = sanitizeHttpUrl(patentLink);
-        extBtn.rel = 'noopener noreferrer';
-      }
-
-      const sbDossier = document.getElementById('sidebar-body-dossier');
-      if (sbDossier) {
-        sbDossier.innerHTML = construirDossierHtml(p, true);
-      }
-
-      if (window.innerWidth < 1100) {
-        const sb = document.getElementById('patent-sidebar');
-        const bd = document.getElementById('sidebar-backdrop');
-        if (sb) sb.classList.add('open');
-        if (bd) bd.classList.add('open');
-      }
+      abrirColumnaInspeccion();
+      cambiarInspectionTab('dossier');
     }
 
     function resaltarColumnaInspeccion() {
@@ -6521,16 +6663,13 @@
       if (!p) return;
       const pubNum = p.publication_number || 'N/A';
       const promptText = p.isLiterature
-        ? `Explicame en detalle este articulo cientifico (${pubNum}): "${p.title}". Cuales son sus aportes metodologicos, hallazgos clave y como alimenta nuestro estado de la tecnica?`
-        : `Explicame en detalle la patente ${pubNum}: "${p.title}". Que reivindica tecnicamente, cual es su novedad frente a antecedentes y cual es su situacion de Libertad de Operacion (FTO)?`;
+        ? `Explícame en detalle este artículo científico (${pubNum}): "${p.title}". ¿Cuáles son sus aportes metodológicos, hallazgos clave y cómo alimenta nuestro estado de la técnica?`
+        : `Explícame en detalle la patente ${pubNum}: "${p.title}". ¿Qué reivindica técnicamente, cuál es su novedad frente a antecedentes y cuál es su situación de Libertad de Operación (FTO)?`;
       preguntarAlAgente(promptText);
     }
 
     function cerrarSidebar() {
-      const sb = document.getElementById('patent-sidebar');
-      const bd = document.getElementById('sidebar-backdrop');
-      if (sb) sb.classList.remove('open');
-      if (bd) bd.classList.remove('open');
+      cerrarColumnaInspeccion();
     }
 
     // =========================================================
@@ -6538,9 +6677,9 @@
     // =========================================================
     function exportarResultadosCsv() {
       const isLit = currentEngineMode === 'literature';
-      const items = isLit ? allRetrievedLiterature : allRetrievedPatents;
+      const items = isLit ? allRetrievedLiterature : (currentRenderedPatents && currentRenderedPatents.length ? currentRenderedPatents : allRetrievedPatents);
       if (!items || items.length === 0) {
-        alert('No hay resultados disponibles para exportar en este momento.');
+        mostrarNotificacion('Primero realiza una búsqueda para exportar los resultados a CSV.', 'warn');
         return;
       }
 
@@ -7250,21 +7389,59 @@
       const body = document.getElementById('comparador-modal-body');
       if (!modal || !body) return;
 
-      const p1 = (allRetrievedPatents || []).find(p => (p.publication_number || '').toUpperCase() === (id1 || '').toUpperCase()) || { publication_number: id1, title: 'Documento en registro', assignee: 'Asignatario oficial', legal_status: 'Pendiente', snippet: 'Consultar detalles en Google Patents.' };
-      const p2 = (allRetrievedPatents || []).find(p => (p.publication_number || '').toUpperCase() === (id2 || '').toUpperCase()) || { publication_number: id2, title: 'Documento en registro', assignee: 'Asignatario oficial', legal_status: 'Pendiente', snippet: 'Consultar detalles en Google Patents.' };
+      const pool = (allRetrievedPatents && allRetrievedPatents.length > 0) ? allRetrievedPatents : (currentRenderedPatents || []);
+      if (pool.length < 2 && (!id1 || !id2)) {
+        body.innerHTML = `
+          <div style="padding: 32px 16px; text-align: center; color: var(--text-medium);">
+            <div style="font-size: 15px; font-weight: 700; color: var(--text-high); margin-bottom: 8px;">Aún no hay suficientes patentes para comparar</div>
+            <p style="font-size: 13px; max-width: 460px; margin: 0 auto 18px auto; line-height: 1.55;">
+              Ejecuta primero una búsqueda que devuelva al menos 2 patentes para contrastar sus titulares, vigencia FTO, clasificaciones CPC y resumen técnico lado a lado.
+            </p>
+            <button class="control-pill" onclick="cerrarComparadorModal(); explorarEjemploDemo('patents', 'solid state battery electrolyte high energy density')" style="background: var(--brand-primary); color: #fff; border-color: var(--brand-primary); padding: 8px 16px; font-size: 12.5px; font-weight: 600;">
+              Cargar búsqueda de demostración
+            </button>
+          </div>
+        `;
+        openModal(modal);
+        return;
+      }
+
+      const fallback1 = pool[0] || { publication_number: id1 || 'N/A', title: 'Documento en registro', assignee: 'Asignatario oficial', legal_status: 'Pendiente', snippet: 'Consultar detalles en Google Patents.' };
+      const fallback2 = pool[1] || fallback1;
+      const p1 = pool.find(p => (p.publication_number || '').toUpperCase() === (id1 || '').toUpperCase()) || fallback1;
+      const p2 = pool.find(p => (p.publication_number || '').toUpperCase() === (id2 || '').toUpperCase()) || fallback2;
 
       const isP1Active = isPatentActive(p1);
       const isP2Active = isPatentActive(p2);
+
+      const renderOptions = (selectedPub) => pool.map(p => {
+        const pub = p.publication_number || 'N/A';
+        const shortTitle = decodeSafePlainText(p.title || 'Sin título').slice(0, 64);
+        const sel = pub.toUpperCase() === (selectedPub || '').toUpperCase() ? 'selected' : '';
+        return `<option value="${escapeHtml(pub)}" ${sel}>${escapeHtml(pub)} — ${escapeHtml(shortTitle)}</option>`;
+      }).join('');
 
       body.innerHTML = `
         <div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">
           Contraste de antecedentes técnicos, titularidad, vigencia legal (FTO) y clasificaciones cooperativas (CPC).
         </div>
+        ${pool.length >= 2 ? `
+          <div class="compare-toolbar">
+            <div class="compare-select-group">
+              <label for="compare-select-1">Patente Izquierda (Referencia A)</label>
+              <select id="compare-select-1" class="compare-select" onchange="actualizarComparacionDesdeSelectores()">${renderOptions(p1.publication_number)}</select>
+            </div>
+            <div class="compare-select-group">
+              <label for="compare-select-2">Patente Derecha (Referencia B)</label>
+              <select id="compare-select-2" class="compare-select" onchange="actualizarComparacionDesdeSelectores()">${renderOptions(p2.publication_number)}</select>
+            </div>
+          </div>
+        ` : ''}
         <div class="compare-grid">
           <div class="compare-card">
             <div class="compare-header">
               <span class="patent-id-pill">${escapeHtml(p1.publication_number)}</span>
-              <h3 style="font-size:14px; font-weight:700; color:var(--text-high); margin-top:6px;">${escapeHtml(p1.title || 'Sin título')}</h3>
+              <h3 style="font-size:14px; font-weight:700; color:var(--text-high); margin-top:6px;">${escapeHtml(decodeSafePlainText(p1.title || 'Sin título'))}</h3>
             </div>
             <div class="compare-row">
               <span class="compare-lbl">Titular / Asignatario:</span>
@@ -7284,11 +7461,11 @@
             </div>
             <div class="compare-row">
               <span class="compare-lbl">Clasificaciones CPC:</span>
-              <span class="compare-val" style="font-family:monospace; font-size:11px;">${(p1.classifications_cpc || []).slice(0, 4).join(', ') || 'G06N, A63F'}</span>
+              <span class="compare-val" style="font-family:monospace; font-size:11px;">${escapeHtml((p1.classifications_cpc || []).slice(0, 4).join(', ') || 'Sin CPC indexado')}</span>
             </div>
             <div class="compare-row">
               <span class="compare-lbl">Resumen / Extracto Técnico:</span>
-              <div class="compare-val" style="font-size:12px; max-height:140px; overflow-y:auto; line-height:1.5;">${escapeHtml(p1.snippet || p1.one_sentence_summary || 'Resumen disponible en expediente oficial.')}</div>
+              <div class="compare-val" style="font-size:12px; max-height:140px; overflow-y:auto; line-height:1.5;">${escapeHtml(decodeSafePlainText(p1.snippet || p1.one_sentence_summary || 'Resumen disponible en expediente oficial.'))}</div>
             </div>
             <button class="btn-ghost" onclick="cerrarComparadorModal(); inspeccionarPatentePorId('${escapeJsAttr(p1.publication_number)}')" style="margin-top:auto; font-size:11.5px; padding:5px 8px; color:var(--brand-primary); border-color:var(--brand-primary);">
               Examinar Ficha Completa &bull; ${escapeHtml(p1.publication_number)}
@@ -7298,7 +7475,7 @@
           <div class="compare-card">
             <div class="compare-header">
               <span class="patent-id-pill">${escapeHtml(p2.publication_number)}</span>
-              <h3 style="font-size:14px; font-weight:700; color:var(--text-high); margin-top:6px;">${escapeHtml(p2.title || 'Sin título')}</h3>
+              <h3 style="font-size:14px; font-weight:700; color:var(--text-high); margin-top:6px;">${escapeHtml(decodeSafePlainText(p2.title || 'Sin título'))}</h3>
             </div>
             <div class="compare-row">
               <span class="compare-lbl">Titular / Asignatario:</span>
@@ -7318,11 +7495,11 @@
             </div>
             <div class="compare-row">
               <span class="compare-lbl">Clasificaciones CPC:</span>
-              <span class="compare-val" style="font-family:monospace; font-size:11px;">${(p2.classifications_cpc || []).slice(0, 4).join(', ') || 'G06N, A63F'}</span>
+              <span class="compare-val" style="font-family:monospace; font-size:11px;">${escapeHtml((p2.classifications_cpc || []).slice(0, 4).join(', ') || 'Sin CPC indexado')}</span>
             </div>
             <div class="compare-row">
               <span class="compare-lbl">Resumen / Extracto Técnico:</span>
-              <div class="compare-val" style="font-size:12px; max-height:140px; overflow-y:auto; line-height:1.5;">${escapeHtml(p2.snippet || p2.one_sentence_summary || 'Resumen disponible en expediente oficial.')}</div>
+              <div class="compare-val" style="font-size:12px; max-height:140px; overflow-y:auto; line-height:1.5;">${escapeHtml(decodeSafePlainText(p2.snippet || p2.one_sentence_summary || 'Resumen disponible en expediente oficial.'))}</div>
             </div>
             <button class="btn-ghost" onclick="cerrarComparadorModal(); inspeccionarPatentePorId('${escapeJsAttr(p2.publication_number)}')" style="margin-top:auto; font-size:11.5px; padding:5px 8px; color:var(--brand-primary); border-color:var(--brand-primary);">
               Examinar Ficha Completa &bull; ${escapeHtml(p2.publication_number)}
@@ -7331,7 +7508,13 @@
         </div>
       `;
 
-      modal.classList.add('open');
+      openModal(modal);
+    }
+
+    function actualizarComparacionDesdeSelectores() {
+      const s1 = document.getElementById('compare-select-1');
+      const s2 = document.getElementById('compare-select-2');
+      if (s1 && s2) abrirComparadorPatentes(s1.value, s2.value);
     }
 
     function cerrarComparadorModal(e) {
@@ -7946,39 +8129,69 @@
     // =========================================================
     // ZERO STATE HUB INTERACTIVO Y ONBOARDING
     // =========================================================
+    function explorarEjemploDemo(engineMode, query) {
+      if (engineMode && currentEngineMode !== engineMode) {
+        currentEngineMode = engineMode;
+        const btnPatents = document.getElementById('engine-btn-patents');
+        const btnLit = document.getElementById('engine-btn-literature');
+        const sourcePill = document.getElementById('source-pill-btn');
+        const shufflePill = document.getElementById('shuffle-pill-btn');
+        const countryShufflePill = document.getElementById('country-shuffle-pill-btn');
+        if (engineMode === 'literature') {
+          if (btnPatents) btnPatents.classList.remove('active');
+          if (btnLit) btnLit.classList.add('active');
+          if (sourcePill) sourcePill.style.display = 'none';
+          if (shufflePill) shufflePill.style.display = 'none';
+          if (countryShufflePill) countryShufflePill.style.display = 'none';
+        } else {
+          if (btnPatents) btnPatents.classList.add('active');
+          if (btnLit) btnLit.classList.remove('active');
+          if (sourcePill) sourcePill.style.display = 'inline-flex';
+          if (shufflePill) shufflePill.style.display = 'inline-flex';
+          if (countryShufflePill) countryShufflePill.style.display = 'inline-flex';
+        }
+      }
+      buscar(query);
+    }
+
     function mostrarZeroState() {
       cerrarColumnaInspeccion();
       const container = document.getElementById('view-cards');
       if (!container) return;
       const countBadge = document.getElementById('results-count-badge');
-      if (countBadge) countBadge.textContent = '0';
+      if (countBadge) countBadge.textContent = 'Resultados (0)';
       const ws = getActiveWorkspace();
 
-      // Si es un usuario nuevo sin proyectos
       if (!ws) {
         container.innerHTML = `
-          <div class="zero-state-container" id="zero-state-hub" style="max-width: 640px; margin: 40px auto; padding: 28px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; text-align: center;">
-            <div style="margin-bottom: 16px;">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="1.75">
+          <div class="zero-state-container" id="zero-state-hub" style="max-width: 780px; margin: 24px auto; padding: 26px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; text-align: center;">
+            <div style="margin-bottom: 12px;">
+              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="1.75">
                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                 <line x1="12" y1="11" x2="12" y2="17"/>
                 <line x1="9" y1="14" x2="15" y2="14"/>
               </svg>
             </div>
             <h2 style="font-size: 20px; font-weight: 800; color: var(--text-high); margin-bottom: 8px;">
-              Bienvenido a tu Plataforma de Vigilancia Tecnologica
+              SMIT &mdash; Sistema Multifuente de Inteligencia Tecnológica
             </h2>
-            <p style="font-size: 13px; color: var(--text-medium); line-height: 1.5; margin-bottom: 20px;">
-              Para garantizar que tus busquedas, patentes guardadas e historial de chat permanezcan exclusivamente en tu navegador de forma independiente, crea tu primer proyecto de vigilancia:
+            <p style="font-size: 13px; color: var(--text-medium); line-height: 1.55; max-width: 580px; margin: 0 auto 18px auto;">
+              Consulta simultáneamente Google Patents, EPO/WIPO y PatentBrief, detecta clasificaciones CPC dominantes y exporta resultados. Crea un proyecto local si deseas guardar semillas e historial de conversación:
             </p>
-            <div style="display: flex; gap: 8px; justify-content: center; max-width: 460px; margin: 0 auto 16px auto;">
-              <input type="text" id="input-onboarding-ws-name" placeholder="Ej. Baterias de Estado Solido 2026" class="ag-prompt-input" style="flex: 1; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px;" onkeydown="if(event.key==='Enter') crearPrimerProyectoDesdeOnboarding()">
-              <button class="ag-pill-btn" onclick="crearPrimerProyectoDesdeOnboarding()" style="background: var(--brand-primary); color: #fff; font-weight: 700; border-radius: 8px; padding: 0 16px;">
+            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; max-width: 480px; margin: 0 auto 14px auto;">
+              <input type="text" id="input-onboarding-ws-name" placeholder="Ej. Baterías de Estado Sólido 2026" class="ag-prompt-input" style="flex: 1; min-width: 210px; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px;" onkeydown="if(event.key==='Enter') crearPrimerProyectoDesdeOnboarding()">
+              <button class="ag-pill-btn" onclick="crearPrimerProyectoDesdeOnboarding()" style="background: var(--brand-primary); color: #fff; font-weight: 700; border-radius: 8px; padding: 10px 16px;">
                 Crear Proyecto
               </button>
             </div>
-            <div style="font-size: 11.5px; color: var(--text-muted);">
-              Tambien puedes escribir directamente en la barra inferior y se creara tu proyecto de inmediato.
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 18px;">
+              También puedes buscar directo en la barra inferior en modo sesión libre (sin guardar historial) o probar un ejemplo de 1 clic:
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+              <button class="ai-chip-prompt" onclick="explorarEjemploDemo('patents', 'solid state battery electrolyte high energy density')">Baterías de Estado Sólido (Patentes)</button>
+              <button class="ai-chip-prompt" onclick="explorarEjemploDemo('patents', 'robotic actuator soft gripper tactile sensor')">Robótica Blanda (Patentes)</button>
+              <button class="ai-chip-prompt" onclick="explorarEjemploDemo('literature', 'neural network medical image segmentation transformer')">Segmentación Médica IA (OpenAlex)</button>
+              <button class="ai-chip-prompt" onclick="preguntarAlAgente('¿Cómo analiza SMIT la Libertad de Operación (FTO) y las clasificaciones CPC dominantes?')">¿Cómo funciona el análisis FTO?</button>
             </div>
           </div>
         `;
@@ -7988,31 +8201,31 @@
       container.innerHTML = `
         <div class="zero-state-container" id="zero-state-hub">
           <div class="zero-state-hero">
-            <h2 class="zero-state-title">Vigilancia Tecnologica, Inteligencia de Patentes & Literatura</h2>
+            <h2 class="zero-state-title">SMIT &mdash; Vigilancia Tecnológica, Patentes & Literatura</h2>
             <p class="zero-state-subtitle">
-              Proyecto activo: <strong>${escapeHtml(ws.name)}</strong>. Busqueda y auditoria pericial en EPO (Espacenet), USPTO, WIPO (PCT), Google Patents y OpenAlex.
+              Proyecto activo: <strong>${escapeHtml(ws.name)}</strong>. Búsqueda y auditoría pericial en EPO (Espacenet), USPTO, WIPO (PCT), Google Patents y OpenAlex.
             </p>
           </div>
           <div class="zero-state-grid">
-            <div class="zero-state-card" onclick="buscar('solid state battery electrolyte high energy density')">
-              <div class="zero-card-tag">[Materiales & Energia]</div>
-              <div class="zero-card-title">Baterias de Estado Solido</div>
-              <div class="zero-card-desc">Explorar patentes de electrolitos ceramicos, anodes de litio metalico y alta densidad energetica.</div>
+            <div class="zero-state-card" onclick="explorarEjemploDemo('patents', 'solid state battery electrolyte high energy density')">
+              <div class="zero-card-tag">[Materiales & Energía]</div>
+              <div class="zero-card-title">Baterías de Estado Sólido</div>
+              <div class="zero-card-desc">Explorar patentes de electrolitos cerámicos, ánodos de litio metálico y alta densidad energética.</div>
             </div>
-            <div class="zero-state-card" onclick="buscar('robotic actuator soft gripper tactile sensor')">
-              <div class="zero-card-tag">[Robotica & Sensores]</div>
-              <div class="zero-card-title">Robotica Blanda & Actuadores</div>
-              <div class="zero-card-desc">Auditar mecanismos de agarre adaptativo, sensorica tactil y retroalimentacion haptica.</div>
+            <div class="zero-state-card" onclick="explorarEjemploDemo('patents', 'robotic actuator soft gripper tactile sensor')">
+              <div class="zero-card-tag">[Robótica & Sensores]</div>
+              <div class="zero-card-title">Robótica Blanda & Actuadores</div>
+              <div class="zero-card-desc">Auditar mecanismos de agarre adaptativo, sensórica táctil y retroalimentación háptica.</div>
             </div>
-            <div class="zero-state-card" onclick="preguntarAlAgente('Como se evalua la Libertad de Operacion (FTO) segun normas PCT para evitar infraccion de patentes?')">
+            <div class="zero-state-card" onclick="preguntarAlAgente('¿Cómo se evalúa la Libertad de Operación (FTO) y las clasificaciones CPC dominantes antes de comercializar un prototipo?')">
               <div class="zero-card-tag">[Marco Legal & Peritaje FTO]</div>
-              <div class="zero-card-title">Dictamen de Libertad de Operacion</div>
-              <div class="zero-card-desc">Consultar al agente como evaluar el estado de dominio publico vs. antecedentes vigentes.</div>
+              <div class="zero-card-title">Dictamen de Libertad de Operación</div>
+              <div class="zero-card-desc">Consultar al agente cómo evaluar patentes vigentes vs. dominio público y diseño alternativo.</div>
             </div>
-            <div class="zero-state-card" onclick="setEngineMode('literature'); buscar('neural network medical image segmentation transformer')">
-              <div class="zero-card-tag">[OpenAlex &bull; Literatura Cientifica]</div>
-              <div class="zero-card-title">Modelos y Papers Academicos</div>
-              <div class="zero-card-desc">Acceder a mas de 250M+ articulos de investigacion con PDF descargable y revision por pares.</div>
+            <div class="zero-state-card" onclick="explorarEjemploDemo('literature', 'neural network medical image segmentation transformer')">
+              <div class="zero-card-tag">[OpenAlex &bull; Literatura Científica]</div>
+              <div class="zero-card-title">Modelos y Papers Académicos</div>
+              <div class="zero-card-desc">Acceder a más de 250M+ artículos de investigación con PDF descargable y revisión por pares.</div>
             </div>
           </div>
         </div>
@@ -8141,42 +8354,9 @@
       if (standbyView && activeView) {
         standbyView.style.display = 'none';
         activeView.style.display = 'block';
-        cambiarInspectionTab('dossier');
       }
-
-      cambiarSidebarTab('dossier');
-      const isOA = w.is_oa;
-      const oaStatus = escapeHtml((w.oa_status || 'closed').toUpperCase());
-      let oaHtml = isOA 
-        ? `<span class="oa-badge oa-open">Acceso Abierto (${oaStatus})</span>` 
-        : `<span class="oa-badge oa-closed">Suscripcion</span>`;
-
-      const sbHeader = document.getElementById('sidebar-header-left');
-      if (sbHeader) {
-        sbHeader.innerHTML = `
-          <span class="source-tag source-openalex">[OpenAlex Literatura]</span>
-          ${oaHtml}
-          <span class="patent-status-badge badge-pending">${escapeHtml(String(w.publication_year || 'N/A'))}</span>
-          ${w.cited_by_count > 0 ? `<span class="patent-citations-badge">Citas: ${w.cited_by_count}</span>` : ''}
-        `;
-      }
-      const extBtn = document.getElementById('sidebar-ext-btn');
-      if (extBtn) {
-        extBtn.href = sanitizeHttpUrl(w.doi_url || w.landing_url || '#');
-        extBtn.rel = 'noopener noreferrer';
-      }
-
-      const sbDossier = document.getElementById('sidebar-body-dossier');
-      if (sbDossier) {
-        sbDossier.innerHTML = construirDossierHtml(currentActivePatentData, true);
-      }
-
-      if (window.innerWidth < 1100) {
-        const sb = document.getElementById('patent-sidebar');
-        const bd = document.getElementById('sidebar-backdrop');
-        if (sb) sb.classList.add('open');
-        if (bd) bd.classList.add('open');
-      }
+      abrirColumnaInspeccion();
+      cambiarInspectionTab('dossier');
     }
 
     // =========================================================
@@ -8554,7 +8734,7 @@
     function exportarResultadosCSV() { exportarResultadosCsv(); }
     function ejecutarBusquedaDesdePrompt() { buscar(); }
     function toggleDictadoVoz() { toggleVoiceDictation(); }
-    function togglePinPatente(pubNum, btnEl) { togglePinPatent(pubNum, window.event); }
+    function togglePinPatente(pubNum, btnEl, ev) { togglePinPatent(pubNum, ev || (typeof event !== 'undefined' ? event : null)); }
 
     function seleccionarFuenteDirecta(src, e) {
       if (e) e.stopPropagation();
@@ -8605,7 +8785,7 @@
         ? currentRenderedPatents
         : (allRetrievedPatents || []);
       if (pool.length < 2) {
-        alert('Realiza primero una búsqueda que devuelva al menos 2 patentes para compararlas lado a lado.');
+        abrirComparadorPatentes('', '');
         return;
       }
       const ws = getActiveWorkspace();
