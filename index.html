@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0d1117">
-  <title>Buscador de Patentes | Capstone Awake - Céntrika</title>
+  <title>SMIT | Sistema Multifuente de Inteligencia Tecnológica</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230284c7'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='system-ui,sans-serif' font-weight='800' font-size='14' fill='white'%3ESM%3C/text%3E%3C/svg%3E">
   <style>
     /* =========================================================
        SISTEMA DE DISEÑO Y PALETA DE COLORES (CÉNTRIKA & ANTIGRAVITY)
@@ -2924,6 +2925,7 @@
       background-color: var(--bg-canvas);
       color: var(--text-high);
       line-height: 1.6;
+      padding: 0;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
       min-height: 100vh;
@@ -2937,10 +2939,13 @@
     .app-header {
       background: var(--bg-surface);
       border-bottom: 1px solid var(--border-color);
-      padding: 10px 24px;
+      padding: 10px 20px;
+      margin-bottom: 0;
       display: flex;
+      flex-wrap: nowrap;
       align-items: center;
       justify-content: space-between;
+      gap: 12px;
       position: sticky;
       top: 0;
       z-index: 100;
@@ -2951,11 +2956,13 @@
     .brand-section {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
+      min-width: 0;
     }
     .brand-logo-badge {
-      width: 32px;
+      min-width: 34px;
       height: 32px;
+      padding: 0 7px;
       background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
       border-radius: var(--radius-md);
       display: flex;
@@ -2963,8 +2970,13 @@
       justify-content: center;
       color: #fff;
       font-weight: 800;
-      font-size: 14px;
+      font-size: 11.5px;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
       box-shadow: 0 2px 8px rgba(var(--brand-primary-rgb), 0.3);
+    }
+    .brand-info {
+      white-space: nowrap;
     }
     .brand-info h1 {
       font-size: 14px;
@@ -3012,12 +3024,13 @@
       border: 1px solid var(--border-color);
       padding: 3px;
       border-radius: var(--radius-full);
+      flex-shrink: 0;
     }
     .engine-option {
       border: none;
       background: transparent;
-      padding: 6px 14px;
-      font-size: 12px;
+      padding: 6px 12px;
+      font-size: 11.5px;
       font-weight: 600;
       color: var(--text-medium);
       border-radius: var(--radius-full);
@@ -3026,6 +3039,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      white-space: nowrap;
     }
     .engine-option.active {
       background: var(--bg-elevated);
@@ -3037,7 +3051,8 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      flex-shrink: 0;
     }
     .icon-btn {
       background: var(--bg-subtle);
@@ -3051,6 +3066,7 @@
       cursor: pointer;
       color: var(--text-medium);
       transition: all 0.2s ease;
+      flex-shrink: 0;
     }
     .icon-btn:hover {
       background: var(--bg-hover);
@@ -3060,13 +3076,19 @@
     .text-action-btn {
       background: var(--bg-subtle);
       border: 1px solid var(--border-color);
-      padding: 6px 12px;
+      padding: 6px 10px;
       border-radius: var(--radius-md);
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 600;
       color: var(--text-medium);
       cursor: pointer;
       transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    @media (max-width: 1180px) {
+      .app-header {
+        flex-wrap: wrap;
+      }
     }
     .text-action-btn:hover {
       background: var(--bg-hover);
@@ -3502,8 +3524,8 @@
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      width: 90%;
-      max-width: 760px;
+      width: 92%;
+      max-width: 860px;
       background: rgba(16, 20, 29, 0.85);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
@@ -3553,16 +3575,21 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-wrap: wrap;
     }
     .control-pill {
       background: var(--bg-elevated);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-full);
-      padding: 3px 10px;
+      padding: 4px 10px;
       font-size: 11px;
       color: var(--text-medium);
       cursor: pointer;
       font-weight: 500;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
       transition: all 0.15s ease;
     }
     .control-pill:hover {
@@ -3927,10 +3954,10 @@
   <!-- 1. APP HEADER UNIFICADO (1 SOLA LINEA COMPACTA, MAXIMA ERGONOMIA) -->
   <header class="app-header">
     <div class="brand-section">
-      <div class="brand-logo-badge">CP</div>
+      <div class="brand-logo-badge">SMIT</div>
       <div class="brand-info">
-        <h1>Vigilancia y Búsqueda de Patentes</h1>
-        <span>Capstone Ingeniería &bull; Awake &bull; Céntrika</span>
+        <h1>SMIT &mdash; Inteligencia Tecnológica</h1>
+        <span>Sistema Multifuente &bull; Grupo 6 &bull; Awake &bull; UR</span>
       </div>
 
       <!-- Selector de Workspace estilo Pill con Dropdown -->
@@ -4924,11 +4951,13 @@
     function actualizarBotonTema(theme) {
       const icon = document.getElementById('theme-icon');
       const text = document.getElementById('theme-text');
+      const sunSvg = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+      const moonSvg = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
       if (theme === 'dark') {
-        if (icon) icon.textContent = '';
+        if (icon) icon.innerHTML = sunSvg;
         if (text) text.textContent = 'Modo Oscuro';
       } else {
-        if (icon) icon.textContent = '';
+        if (icon) icon.innerHTML = moonSvg;
         if (text) text.textContent = 'Modo Claro';
       }
     }
@@ -5589,7 +5618,7 @@
       const activeQueryPill = document.getElementById('active-query-pill');
       const activeQueryText = document.getElementById('active-query-text');
       if (activeQueryPill && activeQueryText) {
-        activeQueryText.textContent = `Consulta: "${q}"`;
+        activeQueryText.textContent = `"${q}"`;
         activeQueryPill.style.display = 'inline-flex';
       }
 
@@ -6017,10 +6046,10 @@
 
       const countBadge = document.getElementById('results-count-badge');
       if (countBadge) {
-        let tag = '';
-        if (isShuffleActive && currentSource === 'all') tag += ' [Shuffle APIs]';
-        if (isCountryShuffleActive) tag += ' [Shuffle Paises]';
-        countBadge.textContent = tag ? `${filtered.length} (${tag.trim()})` : `${filtered.length}`;
+        let tags = [];
+        if (isShuffleActive && currentSource === 'all') tags.push('Shuffle APIs');
+        if (isCountryShuffleActive) tags.push('Shuffle Países');
+        countBadge.textContent = tags.length ? `Resultados: ${filtered.length} (${tags.join(' · ')})` : `Resultados (${filtered.length})`;
       }
       renderizarPatentes(filtered);
     }
@@ -6121,7 +6150,7 @@
       const inventor = escapeHtml(p.inventor || 'No especificado');
       const pubDate = escapeHtml(p.publication_date || 'N/A');
       const filingDate = p.filing_date ? escapeHtml(p.filing_date) : null;
-      const snippet = escapeHtml(p.snippet || '');
+      const snippet = escapeHtml(decodeSafePlainText(p.snippet || ''));
       const sourceName = escapeHtml(p.source || (isLit ? 'OpenAlex' : 'Google Patents'));
       const act = isPatentActive(p);
       const cits = p.forwardCitationCount || p.cited_by_count || 0;
@@ -6140,7 +6169,7 @@
             </div>
             <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px;">
               ${validFigs.map(f => `
-                <img src="${escapeHtml(f)}" style="height: 135px; border: 1px solid var(--border-color); border-radius: 6px; background: #fff; cursor: pointer; padding: 4px;" onclick="abrirModal('${escapeJsAttr(f)}', '${escapeJsAttr(rawPubNum)}')" title="Ampliar lamina tecnica">
+                <img src="${escapeHtml(f)}" style="flex-shrink: 0; min-width: 84px; height: 112px; width: auto; object-fit: contain; border: 1px solid var(--border-color); border-radius: 6px; background: #fff; cursor: pointer; padding: 4px;" onclick="abrirModal('${escapeJsAttr(f)}', '${escapeJsAttr(rawPubNum)}')" title="Ampliar lamina tecnica">
               `).join('')}
             </div>
           </div>
@@ -7411,8 +7440,8 @@
             delimiters: [
               { left: '$$', right: '$$', display: true },
               { left: '$', right: '$', display: false },
-              { left: '\(', right: '\)', display: false },
-              { left: '\[', right: '\]', display: true }
+              { left: '\\(', right: '\\)', display: false },
+              { left: '\\[', right: '\\]', display: true }
             ],
             throwOnError: false
           });
@@ -7453,17 +7482,9 @@
 
         tokenIdx = Math.min(totalTokens, tokenIdx + tokensPerTick);
         const currentSlice = tokens.slice(0, tokenIdx).join('');
-
-        let previewHtml = '';
-        if (typeof marked !== 'undefined' && marked.parse) {
-          try {
-            previewHtml = sanitizeRenderedHtml(marked.parse(currentSlice));
-          } catch (e) {
-            previewHtml = escapeHtml(currentSlice).replace(/\n/g, '<br>');
-          }
-        } else {
-          previewHtml = escapeHtml(currentSlice).replace(/\n/g, '<br>');
-        }
+        // Ocultar etiquetas parciales mientras se escribe token a token y renderizar citas/acciones completadas
+        const safeSlice = currentSlice.replace(/\[(?:ACTION|DOC)[^\]]*$/i, '');
+        const previewHtml = formatearTextoConCitasYAcciones(safeSlice);
 
         targetElement.innerHTML = previewHtml + '<span class="agent-typing-cursor"></span>';
 
@@ -7610,15 +7631,15 @@
       });
 
       text = text.replace(/\[ACTION:AUTO_PIN\s+ids=["'](.*?)["']\]/gi, (match, ids) => {
-        return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('auto_pin', '${escapeJsAttr(ids)}')">&#128204; Guardar patentes clave como semillas</button></div>`);
+        return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('auto_pin', '${escapeJsAttr(ids)}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Guardar patentes clave como semillas</button></div>`);
       });
 
       text = text.replace(/\[ACTION:AUTO_EXPORT\s+type=["'](.*?)["']\]/gi, (match, type) => {
-        return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('auto_export', '${escapeJsAttr(type)}')">&#128196; Generar ${escapeHtml(type.toUpperCase())}</button></div>`);
+        return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('auto_export', '${escapeJsAttr(type)}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Generar ${escapeHtml(type.toUpperCase())}</button></div>`);
       });
 
       text = text.replace(/\[ACTION:SEARCH\s+query=["'](.*?)["']\]/gi, (match, q) => {
-        return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('search', '${escapeJsAttr(q)}')">&#128269; Ejecutar busqueda: "<strong>${escapeHtml(q)}</strong>"</button></div>`);
+        return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('search', '${escapeJsAttr(q)}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Ejecutar busqueda: "<strong>${escapeHtml(q)}</strong>"</button></div>`);
       });
 
       text = text.replace(/\[ACTION:FILTER_CPC\s+code=["'](.*?)["']\]/gi, (match, code) => {
@@ -8176,10 +8197,10 @@
       container.innerHTML = patents.map((p, idx) => {
         const rawPubNum = p.publication_number || 'N/A';
         const pubNum = escapeHtml(rawPubNum);
-        const title = escapeHtml(p.title || 'Sin título registrado');
+        const title = escapeHtml(decodeSafePlainText(p.title || 'Sin título registrado'));
         const assignee = escapeHtml(p.assignee || 'No especificado / Persona natural');
         const pubDate = escapeHtml(p.publication_date || 'N/A');
-        const snippet = escapeHtml(p.snippet || '');
+        const snippet = escapeHtml(decodeSafePlainText(p.snippet || ''));
         const sourceBadge = escapeHtml(p.source_badge || 'google');
         const sourceName = escapeHtml(p.source || 'Google Patents');
         const isPinned = pinnedSet.has(rawPubNum);
@@ -8452,6 +8473,18 @@
 
       cleanNode(doc.body);
       return doc.body.innerHTML;
+    }
+
+    function decodeSafePlainText(raw) {
+      if (raw === null || raw === undefined) return '';
+      const str = String(raw);
+      if (typeof DOMParser !== 'undefined') {
+        try {
+          const doc = new DOMParser().parseFromString(str, 'text/html');
+          return (doc.body && doc.body.textContent) ? doc.body.textContent : str;
+        } catch (e) {}
+      }
+      return str.replace(/<[^>]+>/g, '');
     }
 
     function escapeHtml(text) {
