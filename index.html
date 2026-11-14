@@ -635,10 +635,77 @@
     }
     .zero-state-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
-      max-width: 880px;
+      max-width: 820px;
       margin: 0 auto;
+    }
+    @media (max-width: 640px) {
+      .zero-state-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .zero-suggestions-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      max-width: 820px;
+      margin: 0 auto 12px auto;
+      padding: 0 2px;
+    }
+    .zero-suggestions-label-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      text-align: left;
+    }
+    .zero-suggestions-badge {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.45px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(0, 112, 243, 0.12);
+      color: var(--brand-primary);
+      border: 1px solid rgba(0, 112, 243, 0.25);
+    }
+    .zero-suggestions-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .zero-suggestions-refresh-btn {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 5px 11px;
+      border-radius: 7px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-high);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .zero-suggestions-refresh-btn:hover {
+      border-color: var(--brand-primary);
+      color: var(--brand-primary);
+    }
+    .zero-suggestions-refresh-btn:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+    .chat-handoff-badge {
+      font-size: 10.5px;
+      color: var(--brand-primary);
+      background: rgba(0, 112, 243, 0.1);
+      border: 1px solid rgba(0, 112, 243, 0.2);
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-bottom: 5px;
+      display: inline-block;
+      font-weight: 600;
     }
     .zero-state-card {
       background-color: var(--bg-surface);
@@ -4950,7 +5017,7 @@
       const replyEl = document.getElementById('agent-reply-text') || document.querySelector('.agent-chat-bubble-ai') || document.getElementById('agent-streaming-reply-content');
       const text = replyEl ? replyEl.innerText.trim() : '';
       if (!text) {
-        alert('No hay dictamen pericial activo para copiar.');
+        mostrarNotificacion('No hay dictamen pericial activo para copiar.', 'info');
         return;
       }
       navigator.clipboard.writeText(text).then(() => {
@@ -4960,8 +5027,9 @@
           btn.textContent = 'Copiado!';
           setTimeout(() => { btn.textContent = orig; }, 1500);
         }
+        mostrarNotificacion('Dictamen copiado al portapapeles.', 'ok');
       }).catch(() => {
-        alert('No se pudo copiar al portapapeles.');
+        mostrarNotificacion('No se pudo copiar al portapapeles.', 'warn');
       });
     }
 
@@ -5097,11 +5165,114 @@
     function toggleTheme() {
       const current = document.documentElement.getAttribute('data-theme') || 'dark';
       const target = current === 'dark' ? 'light' : 'dark';
+      setThemeMode(target);
+    }
+
+    function setThemeMode(theme) {
+      const target = (theme === 'light' || theme === 'dark') ? theme : 'dark';
       document.documentElement.setAttribute('data-theme', target);
       try {
         localStorage.setItem('capstone-theme', target);
       } catch (e) {}
       actualizarBotonTema(target);
+      return target;
+    }
+
+    // =========================================================
+    // MEMORIA PERSISTENTE DEL USUARIO Y MAPA DE PROYECTOS
+    // =========================================================
+    const USER_PROFILE_STORAGE_KEY = 'capstone_user_profile_' + userUuid;
+    let cachedDynamicSuggestions = null;
+    let cachedSuggestionsSignature = '';
+    let isFetchingSuggestions = false;
+
+    function cargarPerfilUsuario() {
+      try {
+        const raw = localStorage.getItem(USER_PROFILE_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : null;
+        if (parsed && typeof parsed === 'object') {
+          return {
+            topicCounts: parsed.topicCounts && typeof parsed.topicCounts === 'object' ? parsed.topicCounts : {},
+            cpcCounts: parsed.cpcCounts && typeof parsed.cpcCounts === 'object' ? parsed.cpcCounts : {},
+            recentQueries: Array.isArray(parsed.recentQueries) ? parsed.recentQueries : [],
+            notes: Array.isArray(parsed.notes) ? parsed.notes : []
+          };
+        }
+      } catch (e) {}
+      return { topicCounts: {}, cpcCounts: {}, recentQueries: [], notes: [] };
+    }
+
+    function guardarPerfilUsuario(profile) {
+      try {
+        localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(profile));
+      } catch (e) {}
+    }
+
+    function registrarActividadUsuario(opts = {}) {
+      const profile = cargarPerfilUsuario();
+      const rawQuery = String(opts.query || '').trim();
+      if (rawQuery && !esPreguntaConversacional(rawQuery) && rawQuery.length >= 3) {
+        const cleanTopic = rawQuery.replace(/\s+CPC:[A-Z0-9\/]+/gi, '').trim().slice(0, 80);
+        if (cleanTopic.length >= 3) {
+          profile.topicCounts[cleanTopic] = (profile.topicCounts[cleanTopic] || 0) + 1;
+        }
+        profile.recentQueries = [rawQuery, ...profile.recentQueries.filter(q => q !== rawQuery)].slice(0, 12);
+      }
+      const cpcList = Array.isArray(opts.cpcs) ? opts.cpcs : [];
+      cpcList.slice(0, 6).forEach(code => {
+        const cleanCpc = String(code || '').trim().toUpperCase().slice(0, 16);
+        if (cleanCpc) {
+          profile.cpcCounts[cleanCpc] = (profile.cpcCounts[cleanCpc] || 0) + 1;
+        }
+      });
+      if (opts.note) {
+        const cleanNote = String(opts.note).trim().slice(0, 180);
+        if (cleanNote && !profile.notes.includes(cleanNote)) {
+          profile.notes = [cleanNote, ...profile.notes].slice(0, 15);
+        }
+      }
+      // Acotar tamaño de diccionarios para evitar crecimiento ilimitado en localStorage
+      const trimCounts = (obj, maxEntries) => Object.fromEntries(
+        Object.entries(obj).sort((a, b) => b[1] - a[1]).slice(0, maxEntries)
+      );
+      profile.topicCounts = trimCounts(profile.topicCounts, 25);
+      profile.cpcCounts = trimCounts(profile.cpcCounts, 25);
+      guardarPerfilUsuario(profile);
+    }
+
+    function obtenerPerfilUsuarioParaAgente() {
+      const profile = cargarPerfilUsuario();
+      const topTopics = Object.entries(profile.topicCounts || {})
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8)
+        .map(([topic, count]) => ({ topic, count }));
+      const topCpcs = Object.entries(profile.cpcCounts || {})
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8)
+        .map(([code, count]) => ({ code, count }));
+      return {
+        topTopics,
+        topCpcs,
+        recentQueries: (profile.recentQueries || []).slice(0, 8),
+        notes: (profile.notes || []).slice(0, 10)
+      };
+    }
+
+    function obtenerResumenWorkspacesParaAgente() {
+      return (workspaces || []).slice(0, 10).map(w => ({
+        id: w.id,
+        name: w.name,
+        isActive: w.id === activeWorkspaceId,
+        query: w.query || '',
+        pinnedCount: Array.isArray(w.pinned) ? w.pinned.length : 0,
+        pinnedIds: Array.isArray(w.pinned) ? w.pinned.slice(0, 8) : [],
+        recentMessages: Array.isArray(w.chatHistory)
+          ? w.chatHistory.slice(-4).map(m => ({
+              role: m.role === 'user' ? 'user' : 'assistant',
+              content: String(m.content || '').slice(0, 260)
+            }))
+          : []
+      }));
     }
 
     function actualizarBotonTema(theme) {
@@ -5180,8 +5351,8 @@
       }).join('');
     }
 
-    function seleccionarWorkspace(wsId) {
-      activeWorkspaceId = wsId;
+    function seleccionarWorkspace(wsId, options = {}) {
+      activeWorkspaceId = wsId || null;
       guardarWorkspacesState();
 
       const ws = getActiveWorkspace();
@@ -5189,14 +5360,40 @@
       if (ws) {
         if (label) label.textContent = `Proyecto: ${ws.name}`;
         actualizarContadorPinned();
-        renderizarHistorialChatActual();
+        if (!options.preservePanel) {
+          renderizarHistorialChatActual();
+        }
         if (ws.query && ws.query.trim()) {
-          buscar(ws.query);
+          buscar(ws.query, { skipAgent: !!options.skipAgent });
         } else {
+          lastExecutedQuery = '';
+          lastFetchedQuery = '';
+          lastFetchedSource = '';
+          allRetrievedPatents = [];
+          allRetrievedLiterature = [];
+          currentRenderedPatents = [];
+          currentRenderedLiterature = [];
+          const activeQueryPill = document.getElementById('active-query-pill');
+          if (activeQueryPill) activeQueryPill.style.display = 'none';
+          const intelDropdown = document.getElementById('intel-dropdown');
+          if (intelDropdown) intelDropdown.style.display = 'none';
+          const rawOutput = document.getElementById('raw-output');
+          if (rawOutput) rawOutput.textContent = '';
           mostrarZeroState();
         }
       } else {
         if (label) label.textContent = 'Sin Proyecto';
+        actualizarContadorPinned();
+        if (!options.preservePanel) {
+          renderizarHistorialChatActual();
+        }
+        lastExecutedQuery = '';
+        lastFetchedQuery = '';
+        lastFetchedSource = '';
+        allRetrievedPatents = [];
+        allRetrievedLiterature = [];
+        const activeQueryPill = document.getElementById('active-query-pill');
+        if (activeQueryPill) activeQueryPill.style.display = 'none';
         mostrarZeroState();
       }
 
@@ -5204,6 +5401,55 @@
       if (menu) menu.classList.remove('show');
       const caret = document.getElementById('workspace-caret');
       if (caret) caret.style.transform = 'rotate(0deg)';
+    }
+
+    function encontrarWorkspacePorNombreOId(ref) {
+      if (!ref) return null;
+      const clean = String(ref).trim().toLowerCase();
+      if (!clean) return null;
+      return workspaces.find(w => w.id === ref || w.name.toLowerCase() === clean)
+        || workspaces.find(w => w.name.toLowerCase().includes(clean))
+        || null;
+    }
+
+    function crearProyectoDirecto(nombre, query = '', options = {}) {
+      const cleanName = String(nombre || '').trim().slice(0, 80);
+      if (!cleanName) return null;
+      const existing = encontrarWorkspacePorNombreOId(cleanName);
+      if (existing) {
+        if (query && !existing.query) existing.query = String(query).trim();
+        seleccionarWorkspace(existing.id, options);
+        return existing;
+      }
+      const newWs = {
+        id: 'ws_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        name: cleanName,
+        query: String(query || '').trim(),
+        pinned: [],
+        chatHistory: []
+      };
+      workspaces.push(newWs);
+      activeWorkspaceId = newWs.id;
+      guardarWorkspacesState();
+      seleccionarWorkspace(newWs.id, options);
+      return newWs;
+    }
+
+    function renombrarProyecto(targetRef, newName, newQuery) {
+      const ws = targetRef ? encontrarWorkspacePorNombreOId(targetRef) : getActiveWorkspace();
+      if (!ws) return null;
+      const cleanNewName = String(newName || '').trim().slice(0, 80);
+      if (cleanNewName) ws.name = cleanNewName;
+      if (newQuery !== undefined && newQuery !== null && String(newQuery).trim() !== '') {
+        ws.query = String(newQuery).trim();
+      }
+      guardarWorkspacesState();
+      if (ws.id === activeWorkspaceId) {
+        const label = document.getElementById('current-workspace-label');
+        if (label) label.textContent = `Proyecto: ${ws.name}`;
+        if (!ws.query) mostrarZeroState();
+      }
+      return ws;
     }
 
     function actualizarContadorPinned() {
@@ -5326,12 +5572,14 @@
       eliminarWorkspacePorId(ws.id);
     }
 
-    function eliminarWorkspacePorId(wsId, event) {
+    function eliminarWorkspacePorId(wsId, event, skipConfirm = false) {
       if (event) event.stopPropagation();
       const ws = workspaces.find(w => w.id === wsId);
-      if (!ws) return;
-      const confirmDelete = confirm(`¿Deseas eliminar permanentemente el proyecto "${ws.name}" con todas sus patentes guardadas y su historial de chat?`);
-      if (!confirmDelete) return;
+      if (!ws) return false;
+      if (!skipConfirm) {
+        const confirmDelete = confirm(`¿Deseas eliminar permanentemente el proyecto "${ws.name}" con todas sus patentes guardadas y su historial de chat?`);
+        if (!confirmDelete) return false;
+      }
 
       workspaces = workspaces.filter(w => w.id !== wsId);
       if (activeWorkspaceId === wsId) {
@@ -5340,23 +5588,20 @@
       guardarWorkspacesState();
 
       if (activeWorkspaceId) {
-        seleccionarWorkspace(activeWorkspaceId);
+        seleccionarWorkspace(activeWorkspaceId, { skipAgent: true });
       } else {
-        const label = document.getElementById('current-workspace-label');
-        if (label) label.textContent = 'Sin Proyecto';
-        actualizarContadorPinned();
-        renderizarHistorialChatActual();
-        mostrarZeroState();
+        seleccionarWorkspace(null, { skipAgent: true });
       }
 
       const menu = document.getElementById('workspace-popup-menu');
       if (menu) menu.classList.remove('show');
+      return true;
     }
 
     function exportarWorkspaceActual() {
       const ws = getActiveWorkspace();
       if (!ws) {
-        alert('No hay proyecto activo para exportar.');
+        mostrarNotificacion('No hay proyecto activo para exportar.', 'info');
         return;
       }
       const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(ws, null, 2));
@@ -5366,6 +5611,7 @@
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+      mostrarNotificacion(`Proyecto "${ws.name}" exportado correctamente.`, 'ok');
     }
 
     // =========================================================
@@ -5386,8 +5632,9 @@
     // =========================================================
     // MODO DE MOTOR (PATENTES vs LITERATURA)
     // =========================================================
-    function setEngineMode(mode) {
-      currentEngineMode = mode;
+    function setEngineMode(mode, options = {}) {
+      const normalized = mode === 'literature' ? 'literature' : 'patents';
+      currentEngineMode = normalized;
       const btnPatents = document.getElementById('engine-btn-patents');
       const btnLit = document.getElementById('engine-btn-literature');
       const qInput = document.getElementById('query-input');
@@ -5397,7 +5644,7 @@
       const intelDropdown = document.getElementById('intel-dropdown');
       const activeFiltersBar = document.getElementById('active-filters-container');
 
-      if (mode === 'patents') {
+      if (normalized === 'patents') {
         if (btnPatents) btnPatents.classList.add('active');
         if (btnLit) btnLit.classList.remove('active');
         if (sourcePill) sourcePill.style.display = 'inline-flex';
@@ -5416,7 +5663,7 @@
       }
 
       if (lastExecutedQuery) {
-        buscar(lastExecutedQuery);
+        buscar(lastExecutedQuery, { skipAgent: !!options.skipAgent });
       } else {
         mostrarZeroState();
       }
@@ -5782,7 +6029,7 @@
     // =========================================================
     // MOTOR PRINCIPAL DE BUSQUEDA
     // =========================================================
-    async function buscar(customQuery) {
+    async function buscar(customQuery, options = {}) {
       const qInput = document.getElementById('query-input');
       const searchBtn = document.getElementById('ag-search-btn');
       let customSearchTopic = '';
@@ -5793,13 +6040,40 @@
         return;
       }
 
+      // Si es pregunta o comando conversacional directo al Agente, no contaminar ws.query ni abrir chip de búsqueda
+      if (!options.forceSearch && esPreguntaConversacional(q)) {
+        const needsSearchFirst = allRetrievedPatents.length === 0
+          && !/\b(proyecto|tema|modo|oscur|clar|glosario|dossier|json|tarjeta|mapa|filtro|recuerda|sugerenc|recomend|otros chats|otro proyecto|bot[oó]n)\b/i.test(q)
+          && /(patente|inven|tecnolog|prometedor|mejor|papers)/i.test(q);
+        if (needsSearchFirst) {
+          let cleanTopic = q
+            .replace(/[¿?]/g, '')
+            .replace(/\b(cu[aá]l es|cu[aá]les son|mue[s|z]tra|mue[s|z]trame|busca|encuentra|la|el|las|los|de|sobre|patente|patentes|m[aá]s prometedora|mejor|mejores)\b/gi, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          if (!cleanTopic || cleanTopic.length < 3) cleanTopic = q;
+          customSearchTopic = cleanTopic;
+        } else {
+          if (qInput) {
+            qInput.value = '';
+            if (searchBtn) searchBtn.classList.remove('active');
+          }
+          if (!options.skipAgent) {
+            consultarAgenteIA(q, currentEngineMode === 'literature' ? allRetrievedLiterature : allRetrievedPatents, false, q);
+          }
+          return;
+        }
+      }
+
       // Si hay proyecto activo seleccionado por el usuario, actualizamos su consulta
       let ws = getActiveWorkspace();
       if (ws) {
         ws.query = q;
         guardarWorkspacesState();
       }
-      // Si no hay proyecto activo (ws es null), el sistema opera en modo sesión libre limpia sin crear proyectos fantasma en localStorage.
+
+      // Registrar tema en el perfil persistente del usuario
+      registrarActividadUsuario({ query: customSearchTopic || q });
 
       // Vaciado inmediato del campo de texto y actualización del chip de consulta activa
       lastExecutedQuery = q;
@@ -5817,24 +6091,6 @@
 
       // Sincronizar filtros si la consulta contiene directivas explícitas
       sincronizarFiltrosConMensajeUsuario(q);
-
-      // Si es pregunta conversacional pero pide buscar o ver patentes y aun no hay patentes cargadas:
-      if (esPreguntaConversacional(q)) {
-        const needsSearchFirst = allRetrievedPatents.length === 0 && /(patente|inven|tecnolog|prometedor|mejor|papers)/i.test(q);
-        if (needsSearchFirst) {
-          let cleanTopic = q
-            .replace(/[¿?]/g, '')
-            .replace(/\b(cu[aá]l es|cu[aá]les son|mue[s|z]tra|mue[s|z]trame|busca|encuentra|la|el|las|los|de|sobre|patente|patentes|m[aá]s prometedora|mejor|mejores)\b/gi, ' ')
-            .replace(/\s+/g, ' ')
-            .trim();
-          if (!cleanTopic || cleanTopic.length < 3) cleanTopic = q;
-          // Dejamos que el flujo continue hacia la busqueda en APIs con cleanTopic, preservando la instruccion del usuario
-          customSearchTopic = cleanTopic;
-        } else {
-          consultarAgenteIA(q, allRetrievedPatents, false, q);
-          return;
-        }
-      }
 
       restaurarModoTriColumna();
 
@@ -5861,7 +6117,11 @@
 
           AgentActivityTree.logStep('literature_fetched', `Recuperados ${allRetrievedLiterature.length} papers de OpenAlex en tiempo real`);
           renderizarLiteratura(allRetrievedLiterature);
-          consultarAgenteIA(q, allRetrievedLiterature, false, q);
+          if (!options.skipAgent) {
+            consultarAgenteIA(q, allRetrievedLiterature, false, q);
+          } else {
+            AgentActivityTree.finish();
+          }
         } catch (err) {
           cardsContainer.innerHTML = `<div style="color: var(--status-danger); font-size: 13px; padding: 20px;">Error consultando literatura científica: ${escapeHtml(err.message)}</div>`;
           if (rawOutput) rawOutput.textContent = JSON.stringify({ error: err.message }, null, 2);
@@ -5876,7 +6136,7 @@
 
       try {
         const apiQuery = typeof customSearchTopic !== 'undefined' && customSearchTopic ? customSearchTopic : q;
-      const res = await fetch(`/api/patents?q=${encodeURIComponent(apiQuery)}&source=${encodeURIComponent(currentSource)}`);
+        const res = await fetch(`/api/patents?q=${encodeURIComponent(apiQuery)}&source=${encodeURIComponent(currentSource)}`);
         const data = await res.json();
 
         rawJsonData = data;
@@ -5886,6 +6146,7 @@
         lastFetchedSource = currentSource;
 
         if (data.cpc_summary && data.cpc_summary.length > 0) {
+          registrarActividadUsuario({ cpcs: data.cpc_summary.map(c => c.code) });
           if (intelDropdown) intelDropdown.style.display = 'block';
           const cntEl = document.getElementById('intel-badge-count');
           if (cntEl) cntEl.textContent = `${data.cpc_summary.length} clases detectadas`;
@@ -5905,7 +6166,11 @@
 
         AgentActivityTree.logStep('patents_fetched', `Recuperadas ${allRetrievedPatents.length} patentes oficiales (${currentSource})`);
         applyFiltersAndRender();
-        consultarAgenteIA(q, allRetrievedPatents, false, q);
+        if (!options.skipAgent) {
+          consultarAgenteIA(q, allRetrievedPatents, false, q);
+        } else {
+          AgentActivityTree.finish();
+        }
 
       } catch (err) {
         cardsContainer.innerHTML = `<div style="color: var(--status-danger); font-size: 13px; padding: 20px;">Error al conectar con la API de patentes: ${escapeHtml(err.message)}</div>`;
@@ -7321,7 +7586,7 @@
       const qInput = document.getElementById('query-input');
 
       if (!SpeechRec) {
-        alert('Tu navegador actual no soporta Web Speech API nativa. Por favor prueba en Google Chrome o Microsoft Edge.');
+        mostrarNotificacion('Tu navegador actual no soporta Web Speech API nativa. Prueba en Chrome o Edge.', 'warn');
         return;
       }
 
@@ -7544,7 +7809,8 @@
     // CONMUTADOR RÁPIDO DE MODELO (FLASH vs PRO)
     // =========================================================
     function alternarModeloIa() {
-      const isPro = (cfgAiModel || '').includes('pro');
+      const current = cfgAiModel || 'gemini-2.5-flash';
+      const isPro = current.toLowerCase().includes('pro');
       cfgAiModel = isPro ? 'gemini-2.5-flash' : 'gemini-2.5-pro';
       try {
         localStorage.setItem('capstone-ai-model', cfgAiModel);
@@ -7554,7 +7820,24 @@
         tag.textContent = cfgAiModel;
         tag.title = isPro ? 'Modelo: Gemini 2.5 Flash (Ultra Rápido / 1.500 req/día)' : 'Modelo: Gemini 2.5 Pro (Máximo Razonamiento Pericial / 50 req/día)';
       }
-      alert(`Modelo conmutado a: ${cfgAiModel}\n${!isPro ? 'Modo de Máximo Razonamiento Pericial activado (análisis profundo de reivindicaciones y FTO).' : 'Modo Flash activado (respuestas instantáneas con cuota de 1.500 peticiones diarias).'}`);
+      mostrarNotificacion(
+        `Modelo conmutado a ${cfgAiModel} (${!isPro ? 'Máximo Razonamiento Pericial' : 'Modo Flash instantáneo'}).`,
+        'ok'
+      );
+    }
+
+    function establecerTierModeloIa(tier) {
+      const targetPro = String(tier || '').toLowerCase() === 'pro';
+      cfgAiModel = targetPro ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
+      try {
+        localStorage.setItem('capstone-ai-model', cfgAiModel);
+      } catch (e) {}
+      const tag = document.getElementById('ai-active-model-tag');
+      if (tag) {
+        tag.textContent = cfgAiModel;
+        tag.title = !targetPro ? 'Modelo: Gemini 2.5 Flash (Ultra Rápido / 1.500 req/día)' : 'Modelo: Gemini 2.5 Pro (Máximo Razonamiento Pericial / 50 req/día)';
+      }
+      return cfgAiModel;
     }
 
     function toggleChatHistoryOlder() {
@@ -7708,8 +7991,12 @@
       const timeStr = msg.timestamp ? `<span class="chat-turn-time">${escapeHtml(msg.timestamp)}</span>` : '';
 
       if (isUser) {
+        const handoffBadge = msg.handoffFrom
+          ? `<div class="chat-handoff-badge">Continuación desde proyecto: ${escapeHtml(msg.handoffFrom)}</div>`
+          : '';
         return `
           <div class="chat-turn-user-wrap">
+            ${handoffBadge}
             <div class="chat-turn-user-bubble">
               ${escapeHtml(maskSensitiveTokens(msg.content))}
             </div>
@@ -7778,6 +8065,17 @@
     // =========================================================
     // COMPILACION DE MARKDOWN, CITAS CLIQUEABLES Y ACCIONES
     // =========================================================
+    function parseActionAttrs(raw) {
+      const attrs = {};
+      if (!raw) return attrs;
+      const re = /([a-zA-Z0-9_]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s\]]+))/g;
+      let m;
+      while ((m = re.exec(raw)) !== null) {
+        attrs[m[1].toLowerCase()] = m[2] !== undefined ? m[2] : (m[3] !== undefined ? m[3] : (m[4] || ''));
+      }
+      return attrs;
+    }
+
     function formatearTextoConCitasYAcciones(rawText) {
       if (!rawText) return '';
       let text = String(rawText);
@@ -7788,49 +8086,118 @@
         return token;
       };
 
-      // 1. Reemplazar acciones y citas por marcadores seguros antes de compilar Markdown
-      text = text.replace(/\[ACTION:AUTO_FILTER\s+([^\]]+)\]/gi, (match, attrs) => {
-        return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('auto_filter', '${escapeJsAttr(attrs)}')">&#9881; Aplicar filtros sugeridos por el Agente</button></div>`);
-      });
+      // 1. Reemplazar todas las acciones [ACTION:...] por botones o insignias limpias antes de compilar Markdown
+      text = text.replace(/\[ACTION:([A-Z_]+)(?:\s+([^\]]+))?\]/gi, (match, rawVerb, rawAttrs) => {
+        const verb = String(rawVerb || '').toUpperCase();
+        const attrs = parseActionAttrs(rawAttrs || '');
 
-      text = text.replace(/\[ACTION:AUTO_INSPECT\s+id=["'](.*?)["']\]/gi, (match, id) => {
-        return pushWidget(`<div class="ai-auto-inspect-banner"><span style="font-weight:700;">&#8599; Desplegando en barra lateral:</span> <strong>${escapeHtml(id)}</strong> <button class="btn-ghost" onclick="inspeccionarPatentePorId('${escapeJsAttr(id)}')" style="font-size:11px; margin-left:6px; color:var(--brand-primary); text-decoration:underline;">Reabrir Ficha</button></div>`);
-      });
-
-      text = text.replace(/\[ACTION:COMPARE\s+ids=["'](.*?)["']\]/gi, (match, ids) => {
-        const parts = ids.split(',').map(s => s.trim());
-        const id1 = parts[0] || '';
-        const id2 = parts[1] || '';
-        return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="abrirComparadorPatentes('${escapeJsAttr(id1)}', '${escapeJsAttr(id2)}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><rect x="2" y="3" width="9" height="18" rx="1"/><rect x="13" y="3" width="9" height="18" rx="1"/></svg> Comparar lado a lado: <strong>${escapeHtml(id1)}</strong> vs <strong>${escapeHtml(id2)}</strong></button></div>`);
-      });
-
-      text = text.replace(/\[ACTION:SHOW_FIGURE\s+id=["'](.*?)["'](?:\s+fig=["']?(\d+)["']?)?\]/gi, (match, pubNum, figNum) => {
-        const fig = parseInt(figNum, 10) || 1;
-        return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="mostrarFiguraTecnicaPatente('${escapeJsAttr(pubNum)}', ${fig})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg> Ver Lámina Técnica: Fig. ${fig} &bull; <strong>${escapeHtml(pubNum)}</strong></button></div>`);
-      });
-
-      text = text.replace(/\[ACTION:SNOWBALL\s+id=["'](.*?)["']\]/gi, (match, pubNum) => {
-        return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="rastrearCitacionesPatente('${escapeJsAttr(pubNum)}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Rastrear Citaciones en Cascada (Snowballing): <strong>${escapeHtml(pubNum)}</strong></button></div>`);
-      });
-
-      text = text.replace(/\[ACTION:AUTO_PIN\s+ids=["'](.*?)["']\]/gi, (match, ids) => {
-        return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('auto_pin', '${escapeJsAttr(ids)}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Guardar patentes clave como semillas</button></div>`);
-      });
-
-      text = text.replace(/\[ACTION:AUTO_EXPORT\s+type=["'](.*?)["']\]/gi, (match, type) => {
-        return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('auto_export', '${escapeJsAttr(type)}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Generar ${escapeHtml(type.toUpperCase())}</button></div>`);
-      });
-
-      text = text.replace(/\[ACTION:SEARCH\s+query=["'](.*?)["']\]/gi, (match, q) => {
-        return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('search', '${escapeJsAttr(q)}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Ejecutar busqueda: "<strong>${escapeHtml(q)}</strong>"</button></div>`);
-      });
-
-      text = text.replace(/\[ACTION:FILTER_CPC\s+code=["'](.*?)["']\]/gi, (match, code) => {
-        return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('filter_cpc', '${escapeJsAttr(code)}')">&#9889; Refinar por CPC: <strong>${escapeHtml(code)}</strong></button></div>`);
-      });
-
-      text = text.replace(/\[ACTION:MODE\s+mode=["'](.*?)["']\]/gi, (match, mode) => {
-        return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('mode', '${escapeJsAttr(mode)}')">&#8644; Cambiar a modo: <strong>${escapeHtml(mode)}</strong></button></div>`);
+        if (verb === 'AUTO_FILTER') {
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('auto_filter', '${escapeJsAttr(rawAttrs || '')}')">&#9881; Aplicar filtros en barra</button></div>`);
+        }
+        if (verb === 'RESET_FILTERS') {
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('reset_filters', '')">&#8635; Restablecer filtros</button></div>`);
+        }
+        if (verb === 'AUTO_INSPECT') {
+          const id = attrs.id || '';
+          return pushWidget(`<div class="ai-auto-inspect-banner"><span style="font-weight:700;">&#8599; Desplegando en barra lateral:</span> <strong>${escapeHtml(id)}</strong> <button class="btn-ghost" onclick="inspeccionarPatentePorId('${escapeJsAttr(id)}')" style="font-size:11px; margin-left:6px; color:var(--brand-primary); text-decoration:underline;">Reabrir Ficha</button></div>`);
+        }
+        if (verb === 'CLOSE_INSPECT') {
+          return pushWidget(`<div class="ai-auto-inspect-banner"><span>Panel de inspección lateral cerrado</span></div>`);
+        }
+        if (verb === 'COMPARE') {
+          const parts = (attrs.ids || '').split(',').map(s => s.trim()).filter(Boolean);
+          const id1 = parts[0] || '';
+          const id2 = parts[1] || '';
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="abrirComparadorPatentes('${escapeJsAttr(id1)}', '${escapeJsAttr(id2)}')">Comparar lado a lado: <strong>${escapeHtml(id1)}</strong> vs <strong>${escapeHtml(id2)}</strong></button></div>`);
+        }
+        if (verb === 'SHOW_FIGURE') {
+          const pubNum = attrs.id || '';
+          const fig = parseInt(attrs.fig, 10) || 1;
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="mostrarFiguraTecnicaPatente('${escapeJsAttr(pubNum)}', ${fig})">Ver Lámina Técnica: Fig. ${fig} &bull; <strong>${escapeHtml(pubNum)}</strong></button></div>`);
+        }
+        if (verb === 'SNOWBALL') {
+          const pubNum = attrs.id || '';
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="rastrearCitacionesPatente('${escapeJsAttr(pubNum)}')">Rastrear Citaciones (Snowballing): <strong>${escapeHtml(pubNum)}</strong></button></div>`);
+        }
+        if (verb === 'AUTO_PIN') {
+          const ids = attrs.ids || '';
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('auto_pin', '${escapeJsAttr(ids)}')">Guardar semillas en proyecto</button></div>`);
+        }
+        if (verb === 'UNPIN') {
+          const ids = attrs.ids || '';
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('unpin', '${escapeJsAttr(ids)}')">Quitar de semillas</button></div>`);
+        }
+        if (verb === 'AUTO_EXPORT') {
+          const type = attrs.type || 'csv';
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('auto_export', '${escapeJsAttr(type)}')">Abrir / Generar ${escapeHtml(type.toUpperCase())}</button></div>`);
+        }
+        if (verb === 'SEARCH') {
+          const q = attrs.query || '';
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('search', '${escapeJsAttr(q)}')">Ejecutar búsqueda: "<strong>${escapeHtml(q)}</strong>"</button></div>`);
+        }
+        if (verb === 'CLEAR_QUERY') {
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('clear_query', '')">Volver al inicio del proyecto</button></div>`);
+        }
+        if (verb === 'FILTER_CPC') {
+          const code = attrs.code || '';
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('filter_cpc', '${escapeJsAttr(code)}')">Refinar por CPC: <strong>${escapeHtml(code)}</strong></button></div>`);
+        }
+        if (verb === 'MODE') {
+          const mode = attrs.mode || 'patents';
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('mode', '${escapeJsAttr(mode)}')">Cambiar a modo: <strong>${escapeHtml(mode === 'literature' ? 'Literatura Científica' : 'Patentes Tecnológicas')}</strong></button></div>`);
+        }
+        if (verb === 'SET_THEME') {
+          const th = attrs.theme || 'toggle';
+          const label = th === 'light' ? 'Modo Claro' : (th === 'dark' ? 'Modo Oscuro' : 'Alternar Tema');
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('set_theme', '${escapeJsAttr(th)}')">Tema visual: <strong>${escapeHtml(label)}</strong></button></div>`);
+        }
+        if (verb === 'SET_VIEW') {
+          const v = attrs.view || 'cards';
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('set_view', '${escapeJsAttr(v)}')">Vista: <strong>${escapeHtml(v === 'raw' ? 'JSON en Crudo' : 'Tarjetas')}</strong></button></div>`);
+        }
+        if (verb === 'TOGGLE_INTEL') {
+          const open = attrs.open !== 'false';
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('toggle_intel', '${open ? 'true' : 'false'}')">${open ? 'Desplegar' : 'Plegar'} clasificaciones CPC/IPC</button></div>`);
+        }
+        if (verb === 'OPEN_MODAL') {
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('open_modal', '${escapeJsAttr(rawAttrs || '')}')">Abrir ventana: <strong>${escapeHtml(attrs.modal || 'glossary')}</strong></button></div>`);
+        }
+        if (verb === 'CREATE_PROJECT') {
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('create_project', '${escapeJsAttr(rawAttrs || '')}')">Abrir proyecto nuevo: <strong>${escapeHtml(attrs.name || 'Proyecto')}</strong></button></div>`);
+        }
+        if (verb === 'SWITCH_PROJECT') {
+          const nm = attrs.name || 'none';
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('switch_project', '${escapeJsAttr(nm)}')">Ir al proyecto: <strong>${escapeHtml(nm === 'none' ? 'Sin Proyecto' : nm)}</strong></button></div>`);
+        }
+        if (verb === 'RENAME_PROJECT') {
+          return pushWidget(`<div class="ai-auto-inspect-banner">Proyecto actualizado: <strong>${escapeHtml(attrs.new_name || attrs.name || 'Activo')}</strong></div>`);
+        }
+        if (verb === 'DELETE_PROJECT') {
+          const nm = attrs.name || '';
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('delete_project', '${escapeJsAttr(nm)}')">Confirmar eliminación de proyecto: <strong>${escapeHtml(nm)}</strong></button></div>`);
+        }
+        if (verb === 'JTBD') {
+          const step = attrs.step || 'ecuacion';
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('jtbd', '${escapeJsAttr(step)}')">Ejecutar Ruta JTBD: <strong>${escapeHtml(step.toUpperCase())}</strong></button></div>`);
+        }
+        if (verb === 'SET_MODEL') {
+          const tier = attrs.tier || 'flash';
+          return pushWidget(`<div class="ai-auto-inspect-banner">Modelo IA configurado: <strong>${escapeHtml(tier === 'pro' ? 'Gemini 2.5 Pro' : 'Gemini 2.5 Flash')}</strong></div>`);
+        }
+        if (verb === 'PANEL') {
+          return pushWidget(`<div class="ai-auto-inspect-banner">Control de panel IA: <strong>${escapeHtml(attrs.action || 'restore')}</strong></div>`);
+        }
+        if (verb === 'TOGGLE_VOICE') {
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('toggle_voice', '')">Activar / detener dictado por voz</button></div>`);
+        }
+        if (verb === 'REMEMBER_USER') {
+          const note = attrs.note || '';
+          return pushWidget(`<div class="ai-auto-inspect-banner">Preferencia recordada en tu perfil: <strong>${escapeHtml(note)}</strong></div>`);
+        }
+        if (verb === 'REFRESH_SUGGESTIONS') {
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('refresh_suggestions', '')">Actualizar tarjetas de sugerencias</button></div>`);
+        }
+        return '';
       });
 
       // 2. Citas Cliqueables [DOC:US6195698]
@@ -7880,18 +8247,133 @@
       }
     }
 
+    function aplicarFiltrosDesdeAtributos(rawAttrs) {
+      const attrs = typeof rawAttrs === 'object' && rawAttrs !== null ? rawAttrs : parseActionAttrs(rawAttrs);
+      if (attrs.source) {
+        const sMap = {
+          all: 'Todas las fuentes',
+          google: 'Google Patents',
+          europepmc: 'Europe PMC (EPO/WIPO)',
+          patentbrief: 'PatentBrief'
+        };
+        if (sMap[attrs.source]) seleccionarFuente(attrs.source, sMap[attrs.source]);
+      }
+      if (attrs.jurisdiction) {
+        const jMap = { ALL: 'Todas las regiones', US: 'EE.UU. (US)', EP: 'Europa (EP)', WO: 'WIPO (WO)', OTHER: 'Otras regiones' };
+        setJurisdictionFilter(attrs.jurisdiction.toUpperCase(), jMap[attrs.jurisdiction.toUpperCase()] || attrs.jurisdiction);
+      }
+      if (attrs.status) {
+        const stMap = { all: 'Todos los estados', active: 'Solo Vigentes', inactive: 'Solo Dominio Público' };
+        setStatusFilter(attrs.status, stMap[attrs.status] || attrs.status);
+      }
+      if (attrs.year_from !== undefined && document.getElementById('filter-year-from')) {
+        document.getElementById('filter-year-from').value = String(attrs.year_from || '');
+      }
+      if (attrs.year_to !== undefined && document.getElementById('filter-year-to')) {
+        document.getElementById('filter-year-to').value = String(attrs.year_to || '');
+      }
+      if (attrs.sort) {
+        const sortMap = { relevance: 'Relevancia', date_desc: 'Más Recientes', date_asc: 'Más Antiguas', citations_desc: 'Más Citadas' };
+        setSort(attrs.sort, sortMap[attrs.sort] || attrs.sort);
+      }
+      if (attrs.shuffle_api) {
+        const want = attrs.shuffle_api === 'on' || attrs.shuffle_api === 'true';
+        if (want !== isShuffleActive) toggleShuffle();
+      }
+      if (attrs.shuffle_country) {
+        const wantC = attrs.shuffle_country === 'on' || attrs.shuffle_country === 'true';
+        if (wantC !== isCountryShuffleActive) toggleCountryShuffle();
+      }
+      if (attrs.only_pinned) {
+        const wantP = attrs.only_pinned === 'on' || attrs.only_pinned === 'true';
+        if (wantP !== isShowingOnlyPinned) togglePinnedPatentsView();
+      }
+      applyFiltersAndRender();
+    }
+
     function ejecutarAccionAgente(action, val) {
-      if (action === 'search') {
-        buscar(val);
-      } else if (action === 'filter_cpc') {
-        refinarConCPC(val);
-      } else if (action === 'mode') {
+      const a = String(action || '').toLowerCase();
+      if (a === 'search') {
+        buscar(val, { forceSearch: true });
+      } else if (a === 'clear_query') {
+        limpiarConsultaActiva();
+      } else if (a === 'filter_cpc') {
+        const q = lastExecutedQuery || '';
+        const newQ = `${q} CPC:${val}`.trim();
+        buscar(newQ, { forceSearch: true });
+      } else if (a === 'mode') {
         setEngineMode(val);
-      } else if (action === 'auto_export') {
+      } else if (a === 'set_theme') {
+        if (val === 'toggle') toggleTheme();
+        else setThemeMode(val);
+        mostrarNotificacion(`Tema cambiado a ${document.documentElement.getAttribute('data-theme') === 'light' ? 'Modo Claro' : 'Modo Oscuro'}.`, 'ok');
+      } else if (a === 'set_view') {
+        cambiarVista(val === 'raw' ? 'raw' : 'cards');
+      } else if (a === 'toggle_intel') {
+        const wantOpen = val !== 'false';
+        if (wantOpen !== isIntelOpen) toggleIntelBody();
+      } else if (a === 'open_modal') {
+        const attrs = parseActionAttrs(val);
+        const modal = (attrs.modal || val || 'glossary').toLowerCase();
+        if (modal === 'glossary') {
+          abrirGlosarioModal();
+          if (attrs.tab) cambiarGlosarioTab(attrs.tab);
+        } else if (modal === 'dossier') {
+          abrirDossierModal();
+        } else if (modal === 'settings') {
+          abrirSettingsModal();
+        } else if (modal === 'compare') {
+          abrirComparadorModal();
+        } else if (modal === 'new_project') {
+          crearNuevoWorkspaceModal();
+        }
+      } else if (a === 'create_project') {
+        const attrs = parseActionAttrs(val);
+        const ws = crearProyectoDirecto(attrs.name || val, attrs.query || '', { skipAgent: true });
+        if (ws) mostrarNotificacion(`Proyecto "${ws.name}" creado y activado.`, 'ok');
+      } else if (a === 'switch_project') {
+        if (val === 'none') {
+          seleccionarWorkspace(null, { skipAgent: true });
+          mostrarNotificacion('Cambiado a modo Sin Proyecto.', 'ok');
+        } else {
+          const target = encontrarWorkspacePorNombreOId(val);
+          if (target) {
+            seleccionarWorkspace(target.id, { skipAgent: true });
+            mostrarNotificacion(`Proyecto "${target.name}" abierto.`, 'ok');
+          } else {
+            mostrarNotificacion(`No se encontró el proyecto "${val}".`, 'warn');
+          }
+        }
+      } else if (a === 'delete_project') {
+        const target = val ? encontrarWorkspacePorNombreOId(val) : getActiveWorkspace();
+        if (target) {
+          const ok = eliminarWorkspacePorId(target.id, null, false);
+          if (ok) mostrarNotificacion(`Proyecto "${target.name}" eliminado.`, 'ok');
+        }
+      } else if (a === 'jtbd') {
+        if (val === 'ecuacion') lanzarAsistenteJTBDEcuacion();
+        else if (val === 'pct') lanzarAsistenteJTBDPCT();
+        else if (val === 'fto') lanzarAsistenteJTBDFTO();
+        else if (val === 'bi') lanzarAsistenteJTBDBI();
+      } else if (a === 'toggle_voice') {
+        toggleVoiceDictation();
+      } else if (a === 'refresh_suggestions') {
+        cachedDynamicSuggestions = null;
+        mostrarZeroState();
+        actualizarSugerenciasConIA(true);
+      } else if (a === 'auto_export') {
         if (val === 'dossier') abrirDossierModal();
-        else exportarResultadosCsv();
-      } else if (action === 'auto_pin') {
-        const ws = getActiveWorkspace();
+        else if (val === 'print_dossier') {
+          abrirDossierModal();
+          setTimeout(() => { if (typeof imprimirDossier === 'function') imprimirDossier(); }, 250);
+        } else {
+          exportarResultadosCsv();
+        }
+      } else if (a === 'auto_pin') {
+        let ws = getActiveWorkspace();
+        if (!ws) {
+          ws = crearProyectoDirecto('Semillas Guardadas', lastExecutedQuery || '', { skipAgent: true, preservePanel: true });
+        }
         if (ws) {
           const ids = val.split(',').map(s => s.trim()).filter(Boolean);
           if (!ws.pinned) ws.pinned = [];
@@ -7901,16 +8383,201 @@
           guardarWorkspacesState();
           actualizarContadorPinned();
           applyFiltersAndRender();
-          alert(`Se guardaron ${ids.length} patentes clave como documentos semilla.`);
+          mostrarNotificacion(`Se guardaron ${ids.length} documentos como semilla en "${ws.name}".`, 'ok');
         }
-      } else if (action === 'auto_filter') {
-        // Parsear atributos sencillos
-        if (val.includes('status="active"')) setStatusFilter('active', 'Solo Activas');
-        if (val.includes('status="inactive"')) setStatusFilter('inactive', 'Solo Inactivas');
-        if (val.includes('source="europepmc"')) seleccionarFuente('europepmc', 'Europe PMC (EPO/WIPO)');
-        if (val.includes('source="google"')) seleccionarFuente('google', 'Google Patents');
-        applyFiltersAndRender();
+      } else if (a === 'unpin') {
+        const ws = getActiveWorkspace();
+        if (ws && Array.isArray(ws.pinned)) {
+          const rm = new Set(val.split(',').map(s => s.trim()).filter(Boolean));
+          ws.pinned = ws.pinned.filter(id => !rm.has(id));
+          guardarWorkspacesState();
+          actualizarContadorPinned();
+          applyFiltersAndRender();
+          mostrarNotificacion('Documentos retirados de semillas.', 'info');
+        }
+      } else if (a === 'auto_filter') {
+        aplicarFiltrosDesdeAtributos(val);
+        mostrarNotificacion('Filtros actualizados según tu solicitud.', 'ok');
+      } else if (a === 'reset_filters') {
+        resetearTodosLosFiltros();
+        mostrarNotificacion('Filtros restablecidos.', 'ok');
       }
+    }
+
+    function aplicarDirectivasAgente(replyText, userText, bridgeCtx = {}) {
+      if (!replyText) return { switchedWorkspace: false, targetWsId: bridgeCtx.originWsId || null, clearedChat: false };
+      let switchedWorkspace = false;
+      let clearedChat = false;
+      let targetWsId = bridgeCtx.originWsId || null;
+
+      const re = /\[ACTION:([A-Z_]+)(?:\s+([^\]]+))?\]/gi;
+      let match;
+      while ((match = re.exec(replyText)) !== null) {
+        const verb = String(match[1] || '').toUpperCase();
+        const rawAttrs = match[2] || '';
+        const attrs = parseActionAttrs(rawAttrs);
+
+        if (verb === 'SET_THEME') {
+          if (attrs.theme === 'toggle') toggleTheme();
+          else setThemeMode(attrs.theme || 'dark');
+        } else if (verb === 'CREATE_PROJECT' && attrs.name) {
+          const newWs = crearProyectoDirecto(attrs.name, attrs.query || '', { skipAgent: true, preservePanel: true });
+          if (newWs) {
+            targetWsId = newWs.id;
+            switchedWorkspace = (newWs.id !== bridgeCtx.originWsId);
+          }
+        } else if (verb === 'SWITCH_PROJECT') {
+          const nameRef = attrs.name || '';
+          if (nameRef.toLowerCase() === 'none' || nameRef.toLowerCase() === 'sin proyecto') {
+            seleccionarWorkspace(null, { skipAgent: true, preservePanel: true });
+            targetWsId = null;
+            switchedWorkspace = (bridgeCtx.originWsId !== null);
+          } else {
+            const target = encontrarWorkspacePorNombreOId(nameRef);
+            if (target) {
+              seleccionarWorkspace(target.id, { skipAgent: true, preservePanel: true });
+              targetWsId = target.id;
+              switchedWorkspace = (target.id !== bridgeCtx.originWsId);
+            } else if (nameRef.trim()) {
+              mostrarNotificacion(`No existe el proyecto "${nameRef}". Puedes crearlo indicando su nombre.`, 'warn');
+            }
+          }
+        } else if (verb === 'RENAME_PROJECT') {
+          renombrarProyecto(attrs.name || '', attrs.new_name || '', attrs.new_query);
+        } else if (verb === 'DELETE_PROJECT' && attrs.name) {
+          const hasExplicitDelete = /\b(elimina|borra|quita|suprime)\b/i.test(userText || '');
+          const target = encontrarWorkspacePorNombreOId(attrs.name);
+          if (target && hasExplicitDelete) {
+            const wasActive = target.id === targetWsId;
+            eliminarWorkspacePorId(target.id, null, true);
+            if (wasActive) {
+              targetWsId = activeWorkspaceId;
+              switchedWorkspace = true;
+            }
+            mostrarNotificacion(`Proyecto "${target.name}" eliminado correctamente.`, 'ok');
+          }
+        } else if (verb === 'MODE' && attrs.mode) {
+          setEngineMode(attrs.mode, { skipAgent: true });
+        } else if (verb === 'SET_VIEW' && attrs.view) {
+          cambiarVista(attrs.view === 'raw' ? 'raw' : 'cards');
+        } else if (verb === 'TOGGLE_INTEL') {
+          const wantOpen = attrs.open !== 'false';
+          if (wantOpen !== isIntelOpen) toggleIntelBody();
+        } else if (verb === 'OPEN_MODAL') {
+          const m = (attrs.modal || 'glossary').toLowerCase();
+          if (m === 'glossary') {
+            abrirGlosarioModal();
+            if (attrs.tab) cambiarGlosarioTab(attrs.tab);
+          } else if (m === 'dossier') {
+            abrirDossierModal();
+          } else if (m === 'settings') {
+            abrirSettingsModal();
+          } else if (m === 'compare') {
+            abrirComparadorModal();
+          } else if (m === 'new_project') {
+            crearNuevoWorkspaceModal();
+          }
+        } else if (verb === 'AUTO_EXPORT') {
+          const t = (attrs.type || 'csv').toLowerCase();
+          if (t === 'dossier') abrirDossierModal();
+          else if (t === 'print_dossier') {
+            abrirDossierModal();
+            setTimeout(() => { if (typeof imprimirDossier === 'function') imprimirDossier(); }, 250);
+          } else {
+            exportarResultadosCsv();
+          }
+        } else if (verb === 'JTBD') {
+          if (attrs.step === 'bi') {
+            abrirDossierModal();
+          }
+        } else if (verb === 'SET_MODEL' && attrs.tier) {
+          establecerTierModeloIa(attrs.tier);
+        } else if (verb === 'PANEL') {
+          const pa = (attrs.action || '').toLowerCase();
+          if (pa === 'minimize') cerrarPanelIa();
+          else if (pa === 'restore') mostrarPanelIa();
+          else if (pa === 'copy') setTimeout(() => copiarAnalisisIa(), 150);
+          else if (pa === 'clear') {
+            const curWs = getActiveWorkspace();
+            if (curWs) {
+              curWs.chatHistory = [];
+              guardarWorkspacesState();
+            } else {
+              sessionChatHistory = [];
+            }
+            clearedChat = true;
+          }
+        } else if (verb === 'TOGGLE_VOICE') {
+          toggleVoiceDictation();
+        } else if (verb === 'SEARCH' && attrs.query) {
+          setTimeout(() => {
+            buscar(attrs.query, { skipAgent: true, forceSearch: true });
+          }, 120);
+        } else if (verb === 'CLEAR_QUERY') {
+          limpiarConsultaActiva();
+        } else if (verb === 'AUTO_FILTER') {
+          aplicarFiltrosDesdeAtributos(attrs);
+        } else if (verb === 'RESET_FILTERS') {
+          resetearTodosLosFiltros();
+        } else if (verb === 'FILTER_CPC' && attrs.code) {
+          setTimeout(() => {
+            const q = lastExecutedQuery || '';
+            buscar(`${q} CPC:${attrs.code}`.trim(), { skipAgent: true, forceSearch: true });
+          }, 120);
+        } else if (verb === 'AUTO_INSPECT' && attrs.id) {
+          const pubId = attrs.id.trim();
+          const wantTab = attrs.tab === 'pdf' ? 'pdf' : 'dossier';
+          const wantFull = attrs.fullscreen === 'true';
+          setTimeout(() => {
+            inspeccionarPatentePorId(pubId);
+            cambiarInspectionTab(wantTab);
+            if (wantFull) maximizarInspeccionModal();
+          }, 180);
+        } else if (verb === 'CLOSE_INSPECT') {
+          cerrarColumnaInspeccion();
+        } else if (verb === 'COMPARE' && attrs.ids) {
+          const pts = attrs.ids.split(',').map(s => s.trim()).filter(Boolean);
+          if (pts[0] || pts[1]) {
+            setTimeout(() => abrirComparadorPatentes(pts[0] || '', pts[1] || ''), 180);
+          }
+        } else if (verb === 'SNOWBALL' && attrs.id) {
+          setTimeout(() => rastrearCitacionesPatente(attrs.id.trim()), 180);
+        } else if (verb === 'SHOW_FIGURE' && attrs.id) {
+          const fig = parseInt(attrs.fig, 10) || 1;
+          setTimeout(() => mostrarFiguraTecnicaPatente(attrs.id.trim(), fig), 180);
+        } else if (verb === 'AUTO_PIN' && attrs.ids) {
+          let pinWs = targetWsId ? workspaces.find(w => w.id === targetWsId) : getActiveWorkspace();
+          if (!pinWs) {
+            pinWs = crearProyectoDirecto('Semillas Guardadas', lastExecutedQuery || '', { skipAgent: true, preservePanel: true });
+            if (pinWs) { targetWsId = pinWs.id; switchedWorkspace = true; }
+          }
+          if (pinWs) {
+            if (!pinWs.pinned) pinWs.pinned = [];
+            attrs.ids.split(',').map(s => s.trim()).filter(Boolean).forEach(id => {
+              if (!pinWs.pinned.includes(id)) pinWs.pinned.push(id);
+            });
+            guardarWorkspacesState();
+            actualizarContadorPinned();
+            applyFiltersAndRender();
+          }
+        } else if (verb === 'UNPIN' && attrs.ids) {
+          const pinWs = targetWsId ? workspaces.find(w => w.id === targetWsId) : getActiveWorkspace();
+          if (pinWs && Array.isArray(pinWs.pinned)) {
+            const rm = new Set(attrs.ids.split(',').map(s => s.trim()).filter(Boolean));
+            pinWs.pinned = pinWs.pinned.filter(id => !rm.has(id));
+            guardarWorkspacesState();
+            actualizarContadorPinned();
+            applyFiltersAndRender();
+          }
+        } else if (verb === 'REMEMBER_USER' && attrs.note) {
+          registrarActividadUsuario({ note: attrs.note });
+        } else if (verb === 'REFRESH_SUGGESTIONS') {
+          cachedDynamicSuggestions = null;
+          setTimeout(() => actualizarSugerenciasConIA(true), 120);
+        }
+      }
+
+      return { switchedWorkspace, targetWsId, clearedChat };
     }
 
     // =========================================================
@@ -7949,51 +8616,61 @@
       AgentActivityTree.start(query);
 
       const isLit = currentEngineMode === 'literature';
-      const ws = getActiveWorkspace();
+      const originWs = getActiveWorkspace();
+      const originWsId = originWs ? originWs.id : null;
+      const originWsName = originWs ? originWs.name : 'Sin Proyecto';
       const userText = explicitUserMsg || query;
 
-      // Registrar mensaje en el historial del proyecto o en la sesión libre
+      // Registrar mensaje en el historial del proyecto de origen o sesión libre
       const userTurnObj = {
         role: 'user',
         content: userText,
         timestamp: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })
       };
-      if (ws) {
-        if (!ws.chatHistory) ws.chatHistory = [];
-        ws.chatHistory.push(userTurnObj);
+      if (originWs) {
+        if (!originWs.chatHistory) originWs.chatHistory = [];
+        originWs.chatHistory.push(userTurnObj);
         guardarWorkspacesState();
       } else {
         sessionChatHistory.push(userTurnObj);
       }
       renderizarHistorialChatActual();
 
-      // Preparar estado de la UI y estadisticas de los resultados para el prompt
       const uiState = {
         engineMode: currentEngineMode,
-        activeSource: currentSource,
-        activeStatusFilter: currentStatusFilter,
-        activeJurisdiction: currentJurisdictionFilter,
-        activeSort: currentSort,
-        isShuffleActive,
-        isCountryShuffleActive,
-        activeQuery: lastExecutedQuery
+        selectedSource: currentSource,
+        statusFilter: currentStatusFilter,
+        jurisdictionFilter: currentJurisdictionFilter,
+        selectedSort: currentSort,
+        yearFrom: document.getElementById('filter-year-from')?.value || '',
+        yearTo: document.getElementById('filter-year-to')?.value || '',
+        shuffleApi: isShuffleActive,
+        shuffleCountry: isCountryShuffleActive,
+        onlyPinned: isShowingOnlyPinned,
+        pinnedIds: originWs && Array.isArray(originWs.pinned) ? originWs.pinned.slice(0, 12) : [],
+        activeQuery: lastExecutedQuery,
+        theme: document.documentElement.getAttribute('data-theme') || 'dark',
+        viewTab: currentTab || 'cards'
       };
 
       const statsSummary = calcularEstadisticasResultados(results || [], isLit);
 
       try {
         const payload = {
+          intent: 'chat',
           provider: cfgAiProvider,
           apiKey: cfgAiKey,
-          model: cfgAiModel || 'gemini-3.5-flash-lite',
-          workspaceName: ws ? ws.name : 'General',
+          model: cfgAiModel || 'gemini-2.5-flash',
+          workspaceName: originWs ? originWs.name : 'Sin proyecto activo',
           query: query,
           activePatent: currentActivePatentData,
           patents: isLit ? [] : (results ? results.slice(0, 15) : []),
           literature: isLit ? (results ? results.slice(0, 15) : []) : [],
           statsSummary: statsSummary,
           uiState: uiState,
-          chatHistory: ws ? ws.chatHistory.slice(-8) : [],
+          userProfile: obtenerPerfilUsuarioParaAgente(),
+          workspacesContext: obtenerResumenWorkspacesParaAgente(),
+          chatHistory: originWs ? originWs.chatHistory.slice(-10) : sessionChatHistory.slice(-10),
           userMessage: userText
         };
 
@@ -8006,43 +8683,72 @@
 
         AgentActivityTree.finish(data.trace_steps || null);
 
-        // Despliegue de la respuesta palabra por palabra sin explosiones abruptas
         const replyWrap = document.getElementById('agent-streaming-reply-wrap');
         const replyContent = document.getElementById('agent-streaming-reply-content');
         if (replyWrap) replyWrap.style.display = 'flex';
 
         typewriterRenderMarkdown(data.reply || 'Sin respuesta devuelta.', replyContent, () => {
-          // Despliegue autonomo de la barra lateral si el Agente emitio AUTO_INSPECT o el usuario solicito la patente mas prometedora
-          let autoInspectPubNum = data.auto_inspect_id;
-          if (!autoInspectPubNum && data.reply) {
-            const matchAim = data.reply.match(/\[ACTION:AUTO_INSPECT\s+id=["'](.*?)["']\]/i);
-            if (matchAim) autoInspectPubNum = matchAim[1].trim();
-            else if (/(mue[s|z]tra|abre|inspecciona|la m[aá]s prometedora|la mejor patente|cu[aá]l es la patente|patente destacada)/i.test(userText)) {
-              const firstDoc = data.reply.match(/\[DOC:([A-Za-z0-9_-]+)\]/i);
+          // Ejecutar todas las directivas UI / Proyectos emitidas por el Agente
+          const directiveResult = aplicarDirectivasAgente(
+            data.reply || '',
+            userText,
+            { originWsId, originWsName, userTurnObj }
+          );
+
+          // Compatibilidad adicional si el backend devolvió auto_inspect_id o el usuario pidió ver la mejor patente sin etiqueta explícita
+          if (!/\[ACTION:AUTO_INSPECT/i.test(data.reply || '')) {
+            let autoInspectPubNum = data.auto_inspect_id;
+            if (!autoInspectPubNum && /(mue[s|z]tra|abre|inspecciona|la m[aá]s prometedora|la mejor patente|cu[aá]l es la patente|patente destacada)/i.test(userText)) {
+              const firstDoc = (data.reply || '').match(/\[DOC:([A-Za-z0-9_-]+)\]/i);
               if (firstDoc) autoInspectPubNum = firstDoc[1].trim();
             }
-          }
-          if (autoInspectPubNum) {
-            setTimeout(() => {
-              inspeccionarPatentePorId(autoInspectPubNum);
-            }, 200);
+            if (autoInspectPubNum) {
+              setTimeout(() => inspeccionarPatentePorId(autoInspectPubNum), 200);
+            }
           }
 
-          // Guardar respuesta del perito en el proyecto o en la sesion libre
-          const totalElapsed = AgentActivityTree.startTime ? ((Date.now() - AgentActivityTree.startTime) / 1000).toFixed(1) : '2.4';
-          const assistantTurnObj = {
-            role: 'assistant',
-            content: data.reply || 'Sin respuesta devuelta.',
-            fto_verdict: data.fto_verdict || null,
-            trace_steps: (AgentActivityTree.steps && AgentActivityTree.steps.length) ? AgentActivityTree.steps : (data.trace_steps || []),
-            total_time: totalElapsed,
-            timestamp: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })
-          };
-          if (ws) {
-            ws.chatHistory.push(assistantTurnObj);
-            guardarWorkspacesState();
-          } else {
-            sessionChatHistory.push(assistantTurnObj);
+          if (!directiveResult.clearedChat) {
+            const totalElapsed = AgentActivityTree.startTime ? ((Date.now() - AgentActivityTree.startTime) / 1000).toFixed(1) : '2.4';
+            const assistantTurnObj = {
+              role: 'assistant',
+              content: data.reply || 'Sin respuesta devuelta.',
+              fto_verdict: data.fto_verdict || null,
+              trace_steps: (AgentActivityTree.steps && AgentActivityTree.steps.length) ? AgentActivityTree.steps : (data.trace_steps || []),
+              total_time: totalElapsed,
+              timestamp: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })
+            };
+
+            const destWs = directiveResult.targetWsId
+              ? workspaces.find(w => w.id === directiveResult.targetWsId)
+              : null;
+
+            if (directiveResult.switchedWorkspace) {
+              // Continuidad sin cortes: transferir el turno actual al proyecto recién abierto para que la respuesta aparezca en su chat
+              if (destWs) {
+                if (!destWs.chatHistory) destWs.chatHistory = [];
+                const bridgeUserTurn = { ...userTurnObj, handoffFrom: originWsName };
+                destWs.chatHistory.push(bridgeUserTurn);
+                destWs.chatHistory.push(assistantTurnObj);
+                guardarWorkspacesState();
+              } else {
+                sessionChatHistory.push({ ...userTurnObj, handoffFrom: originWsName });
+                sessionChatHistory.push(assistantTurnObj);
+              }
+            } else if (destWs) {
+              destWs.chatHistory.push(assistantTurnObj);
+              guardarWorkspacesState();
+            } else if (!originWsId && activeWorkspaceId === null) {
+              sessionChatHistory.push(assistantTurnObj);
+            } else {
+              const activeWsNow = getActiveWorkspace();
+              if (activeWsNow) {
+                if (!activeWsNow.chatHistory) activeWsNow.chatHistory = [];
+                activeWsNow.chatHistory.push(assistantTurnObj);
+                guardarWorkspacesState();
+              } else {
+                sessionChatHistory.push(assistantTurnObj);
+              }
+            }
           }
 
           const liveContainer = document.getElementById('agent-active-live-container');
@@ -8058,13 +8764,16 @@
             `;
           }
 
-          panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          if (panel && !/\[ACTION:PANEL\s+action=["']minimize["']\]/i.test(data.reply || '')) {
+            panel.classList.add('active');
+            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
         });
 
       } catch (err) {
         AgentActivityTree.finish();
-        if (ws) {
-          ws.chatHistory.push({
+        if (originWs) {
+          originWs.chatHistory.push({
             role: 'assistant',
             content: `Error al conectar con el motor pericial de IA: ${err.message}.`,
             timestamp: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })
@@ -8076,7 +8785,7 @@
     }
 
     function preguntarAlAgente(pregunta) {
-      consultarAgenteIA(pregunta, allRetrievedPatents, false, pregunta);
+      consultarAgenteIA(pregunta, currentEngineMode === 'literature' ? allRetrievedLiterature : allRetrievedPatents, false, pregunta);
     }
 
     function consultarPatenteAgente(idx, event) {
@@ -8106,17 +8815,53 @@
         /^hola\b/,
         /^buenos d[ií]as\b/,
         /^buenas\b/,
-        /^qu[eé]\s+(es|significa|diferencia|requisitos|haces|puedes|hace)\b/,
-        /^expl[ií]came\b/,
+        /^qu[eé]\s+(es|significa|diferencia|requisitos|haces|puedes|hace|son|bot[oó]n|sirve|hablamos|vimos)\b/,
+        /^expl[ií]ca(me|nos)?\b/,
         /^c[oó]mo\b/,
-        /^cu[aá]l\b/,
-        /^qu[ií]en\b/,
-        /^ay[uú]dame\b/,
+        /^cu[aá]l(es)?\b/,
+        /^qu[ií]en(es)?\b/,
+        /^ay[uú]da(me)?\b/,
         /^a[ñn]ade\b/,
         /^conecta\b/,
         /^agrega\b/,
         /^puedes\b/,
-        /^para qu[eé] sirve\b/
+        /^para qu[eé] sirve\b/,
+        /^cambia(r|me)?\b/,
+        /^p[aá]sa(te|me)\b/,
+        /^alterna\b/,
+        /^activa\b/,
+        /^desactiva\b/,
+        /^abre\b/,
+        /^cierra\b/,
+        /^ingr[eé]sa(me)?\b/,
+        /^entra(r|me)?\b/,
+        /^ve\s+a(l)?\b/,
+        /^crea(r|me)?\b/,
+        /^elimina(r)?\b/,
+        /^borra(r)?\b/,
+        /^renombra(r)?\b/,
+        /^modifica(r)?\b/,
+        /^edita(r)?\b/,
+        /^dame\b/,
+        /^mu[eé]stra(me)?\b/,
+        /^ense[nñ]a(me)?\b/,
+        /^exporta(r)?\b/,
+        /^imprime\b/,
+        /^compara(r)?\b/,
+        /^filtra(r)?\b/,
+        /^ordena(r)?\b/,
+        /^reinicia(r)?\b/,
+        /^restablece\b/,
+        /^limpia(r)?\b/,
+        /^minimiza\b/,
+        /^maximiza\b/,
+        /^recu[eé]rda(me|te)?\b/,
+        /^guarda(r|me)?\b/,
+        /^recomi[eé]nda(me)?\b/,
+        /^sugi[eé]re(me)?\b/,
+        /^actualiza(r)?\b/,
+        /^revisa(r)?\b/,
+        /\b(otros?\s+chats?|otro\s+proyecto)\b/
       ];
       return patrones.some(p => p.test(qLower));
     }
@@ -8127,8 +8872,180 @@
     }
 
     // =========================================================
-    // ZERO STATE HUB INTERACTIVO Y ONBOARDING
+    // ZERO STATE HUB INTERACTIVO Y SUGERENCIAS PERSONALIZADAS
     // =========================================================
+    function obtenerSugerenciasLocales() {
+      const ws = getActiveWorkspace();
+      const wsName = ws ? ws.name : 'tu proyecto';
+      const profile = obtenerPerfilUsuarioParaAgente();
+      const items = [];
+
+      if (profile.topTopics.length > 0) {
+        const t1 = profile.topTopics[0];
+        items.push({
+          tag: '[Sugerencia &bull; Tu tema frecuente]',
+          title: `Profundizar en: ${t1.topic.slice(0, 28)}`,
+          desc: `Sugerencia basada en tus ${t1.count} consultas previas en patentes y vigilancia tecnológica.`,
+          mode: 'patents',
+          kind: 'search',
+          query: t1.topic
+        });
+      }
+      if (profile.topCpcs.length > 0) {
+        const c1 = profile.topCpcs[0];
+        const baseTopic = profile.topTopics[0]?.topic || 'technological innovation';
+        items.push({
+          tag: `[Sugerencia &bull; CPC ${c1.code}]`,
+          title: `Vigilancia clase ${c1.code}`,
+          desc: 'Explorar antecedentes vigentes y dominio público dentro de tu clasificación CPC más consultada.',
+          mode: 'patents',
+          kind: 'search',
+          query: `${baseTopic} CPC:${c1.code}`
+        });
+      }
+      if (profile.topTopics.length > 1) {
+        const t2 = profile.topTopics[1];
+        items.push({
+          tag: '[Sugerencia &bull; OpenAlex]',
+          title: `Papers sobre ${t2.topic.slice(0, 26)}`,
+          desc: 'Contrastar artículos académicos abiertos relacionados con tu historial de búsqueda.',
+          mode: 'literature',
+          kind: 'search',
+          query: t2.topic
+        });
+      }
+
+      const defaults = [
+        {
+          tag: '[Sugerencia &bull; Materiales & Energía]',
+          title: 'Baterías de Estado Sólido',
+          desc: 'Explorar patentes de electrolitos cerámicos, ánodos de litio metálico y alta densidad energética.',
+          mode: 'patents',
+          kind: 'search',
+          query: 'solid state battery electrolyte high energy density'
+        },
+        {
+          tag: '[Sugerencia &bull; Robótica & Sensores]',
+          title: 'Robótica Blanda & Actuadores',
+          desc: 'Auditar mecanismos de agarre adaptativo, sensórica táctil y retroalimentación háptica.',
+          mode: 'patents',
+          kind: 'search',
+          query: 'robotic actuator soft gripper tactile sensor'
+        },
+        {
+          tag: '[Sugerencia &bull; Análisis Pericial]',
+          title: `Estrategia FTO para ${ws ? ws.name.slice(0, 20) : 'tu proyecto'}`,
+          desc: 'Pedir al agente una ecuación E-T-S y ruta de Libertad de Operación adaptada al proyecto.',
+          mode: 'patents',
+          kind: 'agent',
+          query: `Propón 3 líneas de búsqueda concretas y una ecuación E-T-S inicial adaptada al proyecto "${wsName}" y a mis temas más consultados.`
+        },
+        {
+          tag: '[Sugerencia &bull; OpenAlex]',
+          title: 'Modelos y Papers Académicos',
+          desc: 'Acceder a más de 250M+ artículos de investigación con PDF descargable antes de patentar.',
+          mode: 'literature',
+          kind: 'search',
+          query: profile.topTopics[0]?.topic || 'neural network medical image segmentation transformer'
+        }
+      ];
+
+      for (const d of defaults) {
+        if (items.length >= 4) break;
+        if (!items.some(ex => ex.query === d.query)) items.push(d);
+      }
+      return items.slice(0, 4);
+    }
+
+    function obtenerFirmaSugerencias() {
+      const ws = getActiveWorkspace();
+      const profile = obtenerPerfilUsuarioParaAgente();
+      return JSON.stringify({
+        ws: ws ? ws.name : 'none',
+        topics: profile.topTopics.slice(0, 3).map(t => t.topic),
+        cpcs: profile.topCpcs.slice(0, 2).map(c => c.code)
+      });
+    }
+
+    function renderizarGridSugerencias(items) {
+      const grid = document.getElementById('zero-suggestions-grid');
+      if (!grid || !Array.isArray(items) || items.length === 0) return;
+      window._currentZeroSuggestions = items;
+      grid.innerHTML = items.slice(0, 4).map((s, idx) => `
+        <div class="zero-state-card" onclick="ejecutarSugerenciaCard(${idx})">
+          <div class="zero-card-tag">${escapeHtml(String(s.tag || '[Sugerencia]').replace(/&bull;/g, '•'))}</div>
+          <div class="zero-card-title">${escapeHtml(s.title || 'Sugerencia')}</div>
+          <div class="zero-card-desc">${escapeHtml(s.desc || '')}</div>
+        </div>
+      `).join('');
+    }
+
+    function ejecutarSugerenciaCard(idx) {
+      const list = window._currentZeroSuggestions || obtenerSugerenciasLocales();
+      const item = list[idx];
+      if (!item) return;
+      if (item.kind === 'agent') {
+        preguntarAlAgente(item.query);
+      } else {
+        explorarEjemploDemo(item.mode || 'patents', item.query);
+      }
+    }
+
+    async function actualizarSugerenciasConIA(force = false) {
+      const sig = obtenerFirmaSugerencias();
+      if (!force && cachedDynamicSuggestions && cachedSuggestionsSignature === sig) {
+        renderizarGridSugerencias(cachedDynamicSuggestions);
+        return;
+      }
+      if (isFetchingSuggestions) return;
+      isFetchingSuggestions = true;
+
+      const btn = document.getElementById('btn-refresh-suggestions');
+      const statusBadge = document.getElementById('zero-suggestions-badge-text');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Generando sugerencias...';
+      }
+
+      try {
+        const ws = getActiveWorkspace();
+        const res = await fetch('/api/agent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            intent: 'generate_suggestions',
+            provider: cfgAiProvider,
+            apiKey: cfgAiKey,
+            model: cfgAiModel || 'gemini-2.5-flash',
+            workspaceName: ws ? ws.name : 'Sin proyecto activo',
+            userProfile: obtenerPerfilUsuarioParaAgente(),
+            workspacesContext: obtenerResumenWorkspacesParaAgente()
+          })
+        });
+        const data = await res.json();
+        if (data && Array.isArray(data.suggestions) && data.suggestions.length > 0) {
+          cachedDynamicSuggestions = data.suggestions.slice(0, 4);
+          cachedSuggestionsSignature = sig;
+          renderizarGridSugerencias(cachedDynamicSuggestions);
+          if (statusBadge && data.provider && !String(data.provider).includes('heuristic')) {
+            statusBadge.textContent = 'Sugerencias personalizadas con IA';
+          }
+          if (force) {
+            mostrarNotificacion('Sugerencias de investigación actualizadas.', 'ok');
+          }
+        }
+      } catch (e) {
+        // Mantiene tarjetas locales sin interrumpir al usuario
+      } finally {
+        isFetchingSuggestions = false;
+        const btnNow = document.getElementById('btn-refresh-suggestions');
+        if (btnNow) {
+          btnNow.disabled = false;
+          btnNow.textContent = 'Actualizar ideas con IA';
+        }
+      }
+    }
+
     function explorarEjemploDemo(engineMode, query) {
       if (engineMode && currentEngineMode !== engineMode) {
         currentEngineMode = engineMode;
@@ -8151,7 +9068,7 @@
           if (countryShufflePill) countryShufflePill.style.display = 'inline-flex';
         }
       }
-      buscar(query);
+      buscar(query, { forceSearch: true });
     }
 
     function mostrarZeroState() {
@@ -8161,10 +9078,15 @@
       const countBadge = document.getElementById('results-count-badge');
       if (countBadge) countBadge.textContent = 'Resultados (0)';
       const ws = getActiveWorkspace();
+      const profile = obtenerPerfilUsuarioParaAgente();
+      const hasHistory = profile.topTopics.length > 0 || profile.topCpcs.length > 0;
+      const initialItems = (cachedDynamicSuggestions && cachedSuggestionsSignature === obtenerFirmaSugerencias())
+        ? cachedDynamicSuggestions
+        : obtenerSugerenciasLocales();
 
       if (!ws) {
         container.innerHTML = `
-          <div class="zero-state-container" id="zero-state-hub" style="max-width: 780px; margin: 24px auto; padding: 26px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; text-align: center;">
+          <div class="zero-state-container" id="zero-state-hub" style="max-width: 820px; margin: 24px auto; padding: 26px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; text-align: center;">
             <div style="margin-bottom: 12px;">
               <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="1.75">
                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
@@ -8178,23 +9100,24 @@
             <p style="font-size: 13px; color: var(--text-medium); line-height: 1.55; max-width: 580px; margin: 0 auto 18px auto;">
               Consulta simultáneamente Google Patents, EPO/WIPO y PatentBrief, detecta clasificaciones CPC dominantes y exporta resultados. Crea un proyecto local si deseas guardar semillas e historial de conversación:
             </p>
-            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; max-width: 480px; margin: 0 auto 14px auto;">
+            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; max-width: 480px; margin: 0 auto 20px auto;">
               <input type="text" id="input-onboarding-ws-name" placeholder="Ej. Baterías de Estado Sólido 2026" class="ag-prompt-input" style="flex: 1; min-width: 210px; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px;" onkeydown="if(event.key==='Enter') crearPrimerProyectoDesdeOnboarding()">
               <button class="ag-pill-btn" onclick="crearPrimerProyectoDesdeOnboarding()" style="background: var(--brand-primary); color: #fff; font-weight: 700; border-radius: 8px; padding: 10px 16px;">
                 Crear Proyecto
               </button>
             </div>
-            <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 18px;">
-              También puedes buscar directo en la barra inferior en modo sesión libre (sin guardar historial) o probar un ejemplo de 1 clic:
+            <div class="zero-suggestions-header">
+              <div class="zero-suggestions-label-group">
+                <span class="zero-suggestions-badge" id="zero-suggestions-badge-text">Sugerencias de investigación</span>
+                <span class="zero-suggestions-hint">${hasHistory ? 'Adaptadas automáticamente según tus temas más consultados (haz clic para buscar):' : 'Ideas iniciales para explorar o preguntar al Agente (se adaptan a tu historial):'}</span>
+              </div>
+              <button class="zero-suggestions-refresh-btn" id="btn-refresh-suggestions" onclick="actualizarSugerenciasConIA(true)">Actualizar ideas con IA</button>
             </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
-              <button class="ai-chip-prompt" onclick="explorarEjemploDemo('patents', 'solid state battery electrolyte high energy density')">Baterías de Estado Sólido (Patentes)</button>
-              <button class="ai-chip-prompt" onclick="explorarEjemploDemo('patents', 'robotic actuator soft gripper tactile sensor')">Robótica Blanda (Patentes)</button>
-              <button class="ai-chip-prompt" onclick="explorarEjemploDemo('literature', 'neural network medical image segmentation transformer')">Segmentación Médica IA (OpenAlex)</button>
-              <button class="ai-chip-prompt" onclick="preguntarAlAgente('¿Cómo analiza SMIT la Libertad de Operación (FTO) y las clasificaciones CPC dominantes?')">¿Cómo funciona el análisis FTO?</button>
-            </div>
+            <div class="zero-state-grid" id="zero-suggestions-grid"></div>
           </div>
         `;
+        renderizarGridSugerencias(initialItems);
+        actualizarSugerenciasConIA(false);
         return;
       }
 
@@ -8206,30 +9129,18 @@
               Proyecto activo: <strong>${escapeHtml(ws.name)}</strong>. Búsqueda y auditoría pericial en EPO (Espacenet), USPTO, WIPO (PCT), Google Patents y OpenAlex.
             </p>
           </div>
-          <div class="zero-state-grid">
-            <div class="zero-state-card" onclick="explorarEjemploDemo('patents', 'solid state battery electrolyte high energy density')">
-              <div class="zero-card-tag">[Materiales & Energía]</div>
-              <div class="zero-card-title">Baterías de Estado Sólido</div>
-              <div class="zero-card-desc">Explorar patentes de electrolitos cerámicos, ánodos de litio metálico y alta densidad energética.</div>
+          <div class="zero-suggestions-header">
+            <div class="zero-suggestions-label-group">
+              <span class="zero-suggestions-badge" id="zero-suggestions-badge-text">Sugerencias de investigación</span>
+              <span class="zero-suggestions-hint">${hasHistory ? 'Personalizadas por la IA según los temas que más consultas:' : 'Punto de partida recomendado para iniciar este proyecto (haz clic para ejecutar):'}</span>
             </div>
-            <div class="zero-state-card" onclick="explorarEjemploDemo('patents', 'robotic actuator soft gripper tactile sensor')">
-              <div class="zero-card-tag">[Robótica & Sensores]</div>
-              <div class="zero-card-title">Robótica Blanda & Actuadores</div>
-              <div class="zero-card-desc">Auditar mecanismos de agarre adaptativo, sensórica táctil y retroalimentación háptica.</div>
-            </div>
-            <div class="zero-state-card" onclick="preguntarAlAgente('¿Cómo se evalúa la Libertad de Operación (FTO) y las clasificaciones CPC dominantes antes de comercializar un prototipo?')">
-              <div class="zero-card-tag">[Marco Legal & Peritaje FTO]</div>
-              <div class="zero-card-title">Dictamen de Libertad de Operación</div>
-              <div class="zero-card-desc">Consultar al agente cómo evaluar patentes vigentes vs. dominio público y diseño alternativo.</div>
-            </div>
-            <div class="zero-state-card" onclick="explorarEjemploDemo('literature', 'neural network medical image segmentation transformer')">
-              <div class="zero-card-tag">[OpenAlex &bull; Literatura Científica]</div>
-              <div class="zero-card-title">Modelos y Papers Académicos</div>
-              <div class="zero-card-desc">Acceder a más de 250M+ artículos de investigación con PDF descargable y revisión por pares.</div>
-            </div>
+            <button class="zero-suggestions-refresh-btn" id="btn-refresh-suggestions" onclick="actualizarSugerenciasConIA(true)">Actualizar ideas con IA</button>
           </div>
+          <div class="zero-state-grid" id="zero-suggestions-grid"></div>
         </div>
       `;
+      renderizarGridSugerencias(initialItems);
+      actualizarSugerenciasConIA(false);
     }
 
     // =========================================================
@@ -8564,7 +9475,7 @@
 
     function copiarEnlacePdf(pdfUrl, btnEl) {
       if (!pdfUrl) {
-        alert('Esta patente no tiene enlace directo a PDF registrado.');
+        mostrarNotificacion('Esta patente no tiene enlace directo a PDF registrado.', 'info');
         return;
       }
       navigator.clipboard.writeText(pdfUrl).then(() => {
