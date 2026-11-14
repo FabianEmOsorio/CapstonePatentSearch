@@ -4690,18 +4690,18 @@
         <!-- 5. Pestana Metodologias de Vigilancia y Analisis Pericial -->
         <div id="gl-pane-metodologias" class="glossary-tab-pane">
           <div class="glossary-card">
-            <div class="glossary-card-title">Citation Snowballing (Rastreo Topologico en Cascada - IBM US7680785B2)</div>
-            <p>Rastreo bidireccional de citaciones para reconstruir la genealogia tecnica de una invencion. Rastrear hacia atras (<em>Backward Citations</em>) identifica las patentes seminales del estado del arte que la sustentaron; rastrear hacia adelante (<em>Forward Citations</em>) revela competidores que la estan derivando, posibles barreras y litigios activos.</p>
+            <div class="glossary-card-title">Citation Snowballing (Rastreo Topológico desde Semilla - US10268731B2)</div>
+            <p>Rastreo bidireccional de citaciones para reconstruir la genealogía técnica de una invención (referencia técnica: <em>Patent Mapping</em>, Black Hills IP). Rastrear hacia atrás (<em>Backward Citations</em>) identifica las patentes seminales del estado del arte que la sustentaron; rastrear hacia adelante (<em>Forward Citations</em>) revela competidores que la están derivando, posibles barreras y litigios activos.</p>
           </div>
 
           <div class="glossary-card">
-            <div class="glossary-card-title">Regla de Todos los Elementos (All Elements Rule - 35 U.S.C. 103 / Art. 56 CPE)</div>
-            <p>Principio rector de Libertad de Operacion (FTO). Una patente solo se infringe si un producto competidor incorpora <strong>todos y cada uno</strong> de los elementos de su reivindicacion independiente. Omitir o sustituir sustancialmente al menos un elemento esencial permite un <em>Design Around</em> (diseno alternativo) legalmente viable sin infringir derechos exclusivos.</p>
+            <div class="glossary-card-title">Regla de Todos los Elementos (35 U.S.C. 103 / Art. 56 CPE &bull; US11947605B2)</div>
+            <p>Principio rector de Libertad de Operación (FTO). Una patente solo se infringe si un producto competidor incorpora <strong>todos y cada uno</strong> de los elementos de su reivindicación independiente. Omitir o sustituir sustancialmente al menos un elemento esencial permite un <em>Design Around</em> (diseño alternativo) legalmente viable (automatización de desglose por elemento documentada en <code>US11947605B2</code>, IPwe).</p>
           </div>
 
           <div class="glossary-card">
-            <div class="glossary-card-title">Mapeo de Oceanos Azules (White Space Mapping - US8442998B2)</div>
-            <p>Cruce analitico multidimensional entre clasificaciones tecnologicas (CPC/IPC) y necesidades funcionales. Permite localizar vacios de patentabilidad donde no existen patentes vigentes, orientando la investigacion y desarrollo (I+D) hacia nichos de libre operacion con alta diferenciacion comercial.</p>
+            <div class="glossary-card-title">Mapeo de Océanos Azules (White Space Mapping - US9201966B2 / US9836805B2)</div>
+            <p>Cruce analítico multidimensional entre clasificaciones tecnológicas (CPC/IPC), vigilancia periódica y necesidades funcionales. Permite localizar vacíos de patentabilidad donde no existen patentes vigentes, orientando la investigación y desarrollo (I+D) hacia nichos de libre operación con alta diferenciación comercial.</p>
           </div>
 
           <div class="glossary-card">
@@ -6208,7 +6208,7 @@
               </button>
             </div>
             <div style="font-size: 11.5px; color: var(--text-muted); line-height: 1.45;">
-              Recupera las patentes y competidores que citan este antecedente (Patente IBM US7680785B2).
+              Recupera las patentes y competidores que citan este antecedente (metodología de expansión desde semilla US10268731B2).
             </div>
             <div style="margin-top: 8px; pt-1; border-top: 1px dashed rgba(0, 112, 243, 0.15); display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 11px; font-weight: 600; color: var(--text-high);">Regla de Todos los Elementos:</span>
@@ -7166,7 +7166,7 @@
       if (!pubNum) return;
       const citesQuery = `cites:${pubNum}`;
       buscar(citesQuery);
-      consultarAgenteIA(citesQuery, allRetrievedPatents, false, `Aplica la metodologia de analisis topologico de citaciones (IBM US7680785B2 / Citation Snowballing) sobre la patente semilla [DOC:${pubNum}]: que desarrollos tecnologicos o competidores la estan citando en estos resultados y que novedades tecnicas aportaron?`);
+      consultarAgenteIA(citesQuery, allRetrievedPatents, false, `Aplica la metodologia de analisis topologico de citaciones (Citation Snowballing / referencia US10268731B2) sobre la patente semilla [DOC:${pubNum}]: que desarrollos tecnologicos o competidores la estan citando en estos resultados y que novedades tecnicas aportaron?`);
     }
 
     function auditarAllElementsRule(pubNum) {

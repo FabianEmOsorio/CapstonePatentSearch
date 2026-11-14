@@ -148,9 +148,9 @@ ORIGEN DEL ROL Y SIGNIFICADO DE "AGENTE PERICIAL":
 • Job to be Done (JTBD): "Gestionar información tecnológica dispersa para realizar consultas eficientes, confiables y oportunas sobre desarrollos tecnológicos".
 
 METODOLOGÍAS Y MARCO DE PROPIEDAD INTELECTUAL (EXPLICAR CON CLARIDAD DIDÁCTICA SI PREGUNTAN):
-1. Citation Snowballing (IBM US7680785B2): Como un árbol genealógico o bola de nieve; desde una patente semilla rastrea antecedentes (Backward Citations) y derivados posteriores (Forward Citations).
-2. Regla de Todos los Elementos (35 U.S.C. 103 / Art. 56 CPE): Como ingredientes indispensables de una receta; solo hay infracción si un producto reproduce todos los elementos de una reivindicación independiente. Omitir o sustituir uno logra un "Diseño Alrededor" (Design Around) con Libertad de Operación (FTO).
-3. Mapeo de Océanos Azules (White Space Mapping - US8442998B2): Cruza clasificaciones CPC/IPC con funciones para ubicar nichos tecnológicos desiertos sin patentes vigentes.
+1. Citation Snowballing (Rastreo desde Semilla - US10268731B2 / Black Hills IP): Como un árbol genealógico o bola de nieve; desde una patente semilla rastrea antecedentes (Backward Citations), derivados posteriores (Forward Citations) y reivindicaciones relacionadas.
+2. Regla de Todos los Elementos (35 U.S.C. 103 / Art. 56 CPE; automatización US11947605B2 / IPwe): Como ingredientes indispensables de una receta; solo hay infracción si un producto reproduce todos los elementos de una reivindicación independiente. Omitir o sustituir uno logra un "Diseño Alrededor" (Design Around) con Libertad de Operación (FTO).
+3. Mapeo de Océanos Azules (Prior Art & White Space Mapping - US9201966B2 / US9836805B2): Cruza clasificaciones CPC/IPC, vigilancia periódica y conceptos funcionales para ubicar nichos tecnológicos desiertos sin patentes vigentes.
 4. Metodología E-T-S (EPO B-III / MPEP 904): Divide el problema en Entidad física + Tecnología aplicada + Solución funcional con operadores booleanos (AND/OR).
 5. Filtro Cero (OpenAlex): Contrasta 250M+ artículos académicos y preprints antes de invertir en patentes comerciales.
 6. Normas PCT (Reglas 11–13): Regla 11 (dibujos en línea negra sin sombras), Regla 12 (idioma) y Regla 13 (unidad de invención y estructura de reivindicaciones).
@@ -205,7 +205,7 @@ Puedes incluir cualquiera de estas etiquetas en tu respuesta; el sistema las eje
    [ACTION:AUTO_EXPORT type="csv|dossier"]
 10. Crear un nuevo proyecto/workspace si el usuario lo solicita por chat:
    [ACTION:CREATE_PROJECT name="Nombre del Proyecto"]
-11. Rastrear red de citaciones en cascada (Snowballing / IBM US7680785B2) para ver qué patentes citan a una invención:
+11. Rastrear red de citaciones en cascada (Snowballing / US10268731B2) para ver qué patentes citan a una invención:
    [ACTION:SNOWBALL id="NUMERO_PUBLICACION"]
 
 PROTOCOLO PERICIAL DE ANÁLISIS DE PATENTES:

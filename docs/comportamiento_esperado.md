@@ -82,7 +82,7 @@ La plataforma centraliza la vigilancia tecnológica, inteligencia competitiva y 
 2. **Qué procesa el sistema**: Conmuta entre `gemini-2.5-flash` (alta velocidad, cuota de 1.500 req/día) y `gemini-2.5-pro` (máxima profundidad de análisis pericial y árbol de reivindicaciones, cuota de 50 req/día), persistiendo la preferencia en `localStorage`.
 
 ### 2.12. Métodos Avanzados de Búsqueda de Patentes (Snowballing & All Elements Rule)
-1. **Topología de Citaciones en Cascada (Citation Snowballing / IBM US7680785B2)**: El usuario o el agente (`[ACTION:SNOWBALL id="PUB_NUM"]`) puede disparar una búsqueda de citaciones sobre cualquier patente semilla para auditar qué invenciones y competidores derivaron de ella (`cites:PUB_NUM`).
+1. **Topología de Citaciones en Cascada (Citation Snowballing / US10268731B2)**: El usuario o el agente (`[ACTION:SNOWBALL id="PUB_NUM"]`) puede disparar una búsqueda de citaciones sobre cualquier patente semilla para auditar qué invenciones y competidores derivaron de ella (`cites:PUB_NUM`).
 2. **Auditoría de Nivel Inventivo (All Elements Rule / 35 U.S.C. 103)**: Desde la ficha de inspección técnica, se desglosa la reivindicación 1 en elementos $A + B + C$ para identificar cómo aplicar diseño alternativo (*Design Around*) suprimiendo o alterando componentes esenciales.
 3. **Registro Gubernamental de Propiedad Intelectual**: Documentado el procedimiento oficial ante la DNDA (Dirección Nacional de Derecho de Autor) en `docs/guia_registro_propiedad_intelectual_dnda.md`.
 
@@ -90,7 +90,7 @@ La plataforma centraliza la vigilancia tecnológica, inteligencia competitiva y 
 
 ### 2.13. Explicación Pedagógica de Metodologías Bajo Demanda (Explain-on-Demand)
 1. **Qué hace el usuario**: Pregunta por chat "¿qué metodologías usas?", "¿cómo buscas patentes?", "¿qué es snowballing?", "¿qué es la regla de todos los elementos?" o "¿cómo registro los derechos de autor de mi software?".
-2. **Qué procesa el sistema**: El Agente Pericial despliega una explicación estructurada utilizando analogías cotidianas, citas normativas y patentes de referencia (IBM US7680785B2, 35 U.S.C. 103, Decisión 486 CAN Art. 15e, Ley 23/1982 de DNDA) sin jerga incomprensible, orientando al usuario de forma didáctica y emitiendo las acciones de interfaz correspondientes si procede.
+2. **Qué procesa el sistema**: El Agente Pericial despliega una explicación estructurada utilizando analogías cotidianas, citas normativas y patentes reales de referencia (`US10268731B2`, `US11947605B2`, `US9201966B2`, `US9836805B2`, 35 U.S.C. 103, Decisión 351 Art. 23, Decisión 486 CAN Art. 15, Ley 23/1982 de DNDA) sin jerga incomprensible, orientando al usuario de forma didáctica y emitiendo las acciones de interfaz correspondientes si procede.
 
 ---
 
