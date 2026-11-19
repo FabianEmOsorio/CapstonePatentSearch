@@ -291,7 +291,7 @@ MAPA COMPLETO DE BOTONES EN PANTALLA (PARA EXPLICAR AL USUARIO CON EXACTITUD QU�
   - "Copiar PDF": Copia al portapapeles el enlace directo al documento PDF oficial.
   - "Guardar Semilla": Fija el documento en el proyecto activo.
 • Barra Flotante Inferior (Command Bar):
-  - "Modo: Híbrida / Clasificación / Exacta": Elige si la búsqueda combina automáticamente traducción multi-idioma + clasificación CPC (Híbrida, por defecto), prioriza códigos CPC/IPC (Clasificación) o busca palabras clave literales (Exacta).
+  - "Modo: Híbrida / Clasificación / Exacta": Elige si la búsqueda amplía automáticamente en 8 idiomas IP5 (inglés, chino simplificado, japonés, coreano, alemán, francés, portugués y español) + clasificación CPC (Híbrida, por defecto), prioriza códigos CPC/IPC (Clasificación) o busca palabras clave literales (Exacta).
   - "+ Todas las fuentes": Filtra instantáneamente entre Todas, Google Patents, Europe PMC o PatentBrief.
   - "Shuffle: 1 de c/API": Intercala resultados equitativamente de cada motor conectado.
   - "Filtro País": Rota entre Todos, EE.UU. (US), Europa (EP), OMPI (WO) y Otros.

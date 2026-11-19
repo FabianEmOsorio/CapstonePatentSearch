@@ -130,11 +130,16 @@ export default async function handler(req, res) {
           const cpcCode = plan.applied_cpcs[(safePage - 2) % Math.max(1, plan.applied_cpcs.length)]?.code || '';
           pagePrimaryQ = cpcCode ? `${cpcCode} "${synTerm}"` : `"${synTerm}"`;
         }
-        const primaryBatch = await fetchGoogleXhrBatch(
-          pagePrimaryQ,
-          plan.search_mode === 'classification' ? 'classification' : (plan.search_mode === 'exact' ? 'exact' : 'multilingual'),
-          10
-        );
+        const [primaryBatch, asianBatchInitial] = await Promise.all([
+          fetchGoogleXhrBatch(
+            pagePrimaryQ,
+            plan.search_mode === 'classification' ? 'classification' : (plan.search_mode === 'exact' ? 'exact' : 'multilingual'),
+            10
+          ),
+          (plan.search_mode !== 'exact' && plan.asian_ip5_query)
+            ? fetchGoogleXhrBatch(plan.asian_ip5_query, 'native-ip5-cjk', 6)
+            : Promise.resolve(null)
+        ]);
 
         let classBatch = null;
         if (plan.search_mode !== 'exact') {
@@ -172,13 +177,14 @@ export default async function handler(req, res) {
 
         const primaryItems = primaryBatch?.results || [];
         const classItems = classBatch?.results || [];
+        const asianItems = asianBatchInitial?.results || [];
         const mergedGoogle = [];
         const seenGoogle = new Set();
 
-        // Intercalar para combinar coincidencias multilingües y por clasificación CPC sin duplicados
-        const maxLen = Math.max(primaryItems.length, classItems.length);
+        // Intercalar para combinar coincidencias multilingües, por clasificación CPC y nativas IP5 asiáticas (CN/JP/KR)
+        const maxLen = Math.max(primaryItems.length, classItems.length, asianItems.length);
         for (let i = 0; i < maxLen; i++) {
-          for (const candidate of [primaryItems[i], classItems[i]]) {
+          for (const candidate of [primaryItems[i], classItems[i], asianItems[i]]) {
             if (!candidate) continue;
             if (!seenGoogle.has(candidate.publication_number)) {
               seenGoogle.add(candidate.publication_number);
@@ -189,7 +195,7 @@ export default async function handler(req, res) {
 
         if (mergedGoogle.length > 0) {
           combinedResults.push(...mergedGoogle);
-          googleTotalFound = Math.max(primaryBatch?.total_found || 0, classBatch?.total_found || 0, mergedGoogle.length);
+          googleTotalFound = Math.max(primaryBatch?.total_found || 0, classBatch?.total_found || 0, asianBatchInitial?.total_found || 0, mergedGoogle.length);
           return;
         }
       } catch (err) {
@@ -404,6 +410,7 @@ export default async function handler(req, res) {
       search_mode: plan.search_mode,
       detected_language: plan.detected_language,
       english_core: plan.english_core,
+      translations_by_lang: plan.translations_by_lang || {},
       expanded_terms: plan.expanded_terms,
       applied_cpcs: plan.applied_cpcs,
       effective_query_google: plan.google_query,

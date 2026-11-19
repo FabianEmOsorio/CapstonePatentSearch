@@ -6283,7 +6283,9 @@
         classification: 'Prioridad por Clasificación Técnica (CPC/IPC)',
         exact: 'Palabras Clave Exactas'
       };
-      const terms = Array.isArray(meta.expanded_terms) ? meta.expanded_terms.slice(0, 5) : [];
+      const terms = Array.isArray(meta.expanded_terms) ? meta.expanded_terms.slice(0, 6) : [];
+      const langMap = (meta.translations_by_lang && typeof meta.translations_by_lang === 'object') ? meta.translations_by_lang : {};
+      const langEntries = Object.entries(langMap).filter(([, val]) => Boolean(val));
       const cpcs = Array.isArray(meta.applied_cpcs) ? meta.applied_cpcs.slice(0, 4) : [];
       const totalEst = Number(meta.total_global_estimated || 0);
       const totalTxt = totalEst > 0
@@ -6296,8 +6298,8 @@
           <div>
             <strong style="color: var(--text-high);">Estrategia: ${escapeHtml(modeNames[meta.search_mode] || meta.search_mode || 'Híbrida')}</strong>
             ${meta.detected_language && meta.detected_language !== 'en' && meta.detected_language !== 'direct'
-              ? ` <span style="opacity:0.8;">(${escapeHtml(meta.detected_language.toUpperCase())} &rarr; EN: "${escapeHtml(meta.english_core || '')}")</span>`
-              : ''}
+              ? ` <span style="opacity:0.8;">(${escapeHtml(meta.detected_language.toUpperCase())} &rarr; ${langEntries.length ? `${langEntries.length} idiomas IP5` : `EN: "${escapeHtml(meta.english_core || '')}"`})</span>`
+              : (langEntries.length ? ` <span style="opacity:0.8;">(${langEntries.length} idiomas IP5)</span>` : '')}
             &nbsp;&bull;&nbsp; ${totalTxt}
           </div>
           <div style="display:flex; gap:6px; flex-wrap:wrap;">
@@ -6305,9 +6307,15 @@
             ${meta.search_mode !== 'exact' ? `<button class="zone-jump-link" onclick="setSearchMode('exact')">Modo Exacto</button>` : `<button class="zone-jump-link" onclick="setSearchMode('hybrid')">Activar Multi-idioma + CPC</button>`}
           </div>
         </div>
+        ${langEntries.length > 0 ? `
+          <div class="search-expansion-chips">
+            <span style="font-size:11px; color:var(--text-muted);">Idiomas IP5 consultados (${langEntries.length}):</span>
+            ${langEntries.map(([code, txt]) => `<span class="exp-term-chip" title="Traducción en ${escapeHtml(code.toUpperCase())}"><strong>${escapeHtml(code.toUpperCase())}:</strong> ${escapeHtml(txt)}</span>`).join('')}
+          </div>
+        ` : ''}
         ${terms.length > 0 || cpcs.length > 0 ? `
           <div class="search-expansion-chips">
-            ${terms.length > 0 ? `<span style="font-size:11px; color:var(--text-muted);">Términos globales:</span>${terms.map(t => `<span class="exp-term-chip">${escapeHtml(t)}</span>`).join('')}` : ''}
+            ${terms.length > 0 ? `<span style="font-size:11px; color:var(--text-muted);">Términos / sinónimos:</span>${terms.map(t => `<span class="exp-term-chip">${escapeHtml(t)}</span>`).join('')}` : ''}
             ${cpcs.length > 0 ? `<span style="font-size:11px; color:var(--text-muted); margin-left:4px;">CPC aplicadas:</span>${cpcs.map(c => `<span class="exp-cpc-chip" onclick="refinarConCPC('${escapeJsAttr(c.code)}')" title="${escapeHtml(c.label || '')}">${escapeHtml(c.code)}</span>`).join('')}` : ''}
           </div>
         ` : ''}
@@ -10079,6 +10087,7 @@
         const safePdf = sanitizeHttpUrl(p.pdf);
         const strategyLabels = {
           classification: 'Vía Clasificación CPC',
+          'native-ip5-cjk': 'Nativa IP5 (CN/JP/KR)',
           multilingual: 'Vía Multi-idioma',
           hybrid: 'Híbrida'
         };

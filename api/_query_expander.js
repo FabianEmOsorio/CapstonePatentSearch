@@ -67,10 +67,21 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 2000) {
   }
 }
 
-async function translateFreeGoogle(query) {
+const IP5_TARGET_LANGS = [
+  { code: 'en', tl: 'en', label: 'EN' },
+  { code: 'zh', tl: 'zh-CN', label: 'ZH' },
+  { code: 'ja', tl: 'ja', label: 'JA' },
+  { code: 'ko', tl: 'ko', label: 'KO' },
+  { code: 'de', tl: 'de', label: 'DE' },
+  { code: 'fr', tl: 'fr', label: 'FR' },
+  { code: 'pt', tl: 'pt', label: 'PT' },
+  { code: 'es', tl: 'es', label: 'ES' }
+];
+
+async function translateFreeSingle(query, tl = 'en') {
   try {
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(query)}`;
-    const resp = await fetchWithTimeout(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, 1600);
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(tl)}&dt=t&q=${encodeURIComponent(query)}`;
+    const resp = await fetchWithTimeout(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, 1700);
     if (!resp.ok) return null;
     const data = await resp.json();
     const translated = Array.isArray(data?.[0])
@@ -79,12 +90,33 @@ async function translateFreeGoogle(query) {
     const srcLang = typeof data?.[2] === 'string' ? data[2] : 'auto';
     if (!translated.trim()) return null;
     return {
+      code: tl === 'zh-CN' ? 'zh' : tl,
       detected_language: srcLang,
-      english_core: cleanQuoteTerm(translated)
+      text: cleanQuoteTerm(translated)
     };
   } catch (e) {
     return null;
   }
+}
+
+async function translateMultiLangFree(query, existingByLang = {}) {
+  const missing = IP5_TARGET_LANGS.filter(l => !existingByLang[l.code]);
+  if (missing.length === 0) return { detected_language: 'auto', byLang: existingByLang };
+
+  const settled = await Promise.allSettled(
+    missing.map(l => translateFreeSingle(query, l.tl))
+  );
+  let detectedLang = 'auto';
+  const out = { ...existingByLang };
+  for (const res of settled) {
+    if (res.status === 'fulfilled' && res.value && res.value.text) {
+      out[res.value.code] = res.value.text;
+      if (detectedLang === 'auto' && res.value.detected_language && res.value.detected_language !== 'auto') {
+        detectedLang = res.value.detected_language;
+      }
+    }
+  }
+  return { detected_language: detectedLang, byLang: out };
 }
 
 async function expandWithGemini(query, apiKey) {
@@ -93,8 +125,18 @@ Input query: "${query}"
 
 Return exact JSON schema:
 {
-  "detected_language": "es|en|pt|fr|de|auto",
+  "detected_language": "es|en|zh|ja|ko|de|fr|pt|auto",
   "english_core": "concise English canonical technical term (2-4 words)",
+  "translations": {
+    "en": "English technical phrase",
+    "zh": "Simplified Chinese patent technical phrase (中文)",
+    "ja": "Japanese patent phrase (日本語)",
+    "ko": "Korean patent phrase (한국어)",
+    "de": "German patent phrase",
+    "fr": "French patent phrase",
+    "pt": "Portuguese patent phrase",
+    "es": "Spanish patent phrase"
+  },
   "synonyms": ["3 to 5 concise English patent synonyms or broader functional equivalents"],
   "cpc_codes": [{"code": "4-to-9 char CPC group or subgroup like F04D or F04D13/06", "label": "short Spanish description max 48 chars"}]
 }
@@ -110,10 +152,10 @@ Only include real standard CPC codes.`;
       },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 360 }
+        generationConfig: { temperature: 0.1, maxOutputTokens: 520 }
       })
     },
-    2500 + 700
+    3200
   );
   if (!resp.ok) return null;
   const data = await resp.json();
@@ -175,6 +217,7 @@ export async function buildEnrichedSearchPlan(rawQuery, rawMode = 'hybrid', opti
   let detectedLang = 'auto';
   let englishCore = '';
   const synSet = new Set();
+  const translationsByLang = {};
   const cpcMap = new Map();
   explicitCpcs.forEach(code => cpcMap.set(code, `Clasificación aplicada ${code}`));
   let expansionSource = 'heuristic';
@@ -186,6 +229,12 @@ export async function buildEnrichedSearchPlan(rawQuery, rawMode = 'hybrid', opti
       if (aiPlan && aiPlan.english_core) {
         detectedLang = String(aiPlan.detected_language || 'auto').slice(0, 12);
         englishCore = cleanQuoteTerm(aiPlan.english_core);
+        if (aiPlan.translations && typeof aiPlan.translations === 'object') {
+          for (const { code } of IP5_TARGET_LANGS) {
+            const val = cleanQuoteTerm(aiPlan.translations[code]);
+            if (val) translationsByLang[code] = val;
+          }
+        }
         if (Array.isArray(aiPlan.synonyms)) {
           aiPlan.synonyms.forEach(s => {
             const ct = cleanQuoteTerm(s);
@@ -200,25 +249,33 @@ export async function buildEnrichedSearchPlan(rawQuery, rawMode = 'hybrid', opti
             }
           });
         }
-        expansionSource = 'gemini+cpc';
+        expansionSource = 'gemini+ip5+cpc';
       }
     } catch (e) {
       // Fallback silencioso
     }
   }
 
-  // Fallback rápido gratuito cuando no hay LLM o falló
-  if (!englishCore) {
-    const tr = await translateFreeGoogle(expansionInput);
-    if (tr && tr.english_core) {
-      detectedLang = tr.detected_language || 'auto';
-      englishCore = tr.english_core;
-      expansionSource = cpcMap.size > 0 ? 'translate+cpc' : 'translate+heuristic';
-    } else {
-      englishCore = cleanQuoteTerm(expansionInput);
-      detectedLang = /[áéíóúñ¿¡]/i.test(expansionInput) ? 'es' : 'en';
+  // Completar en paralelo todos los idiomas IP5 faltantes (EN, ZH, JA, KO, DE, FR, PT, ES) con traductor gratuito
+  const needLangs = IP5_TARGET_LANGS.filter(l => !translationsByLang[l.code]);
+  if (needLangs.length > 0) {
+    const mlRes = await translateMultiLangFree(expansionInput, translationsByLang);
+    Object.assign(translationsByLang, mlRes.byLang);
+    if (!englishCore && translationsByLang.en) {
+      englishCore = translationsByLang.en;
+    }
+    if (detectedLang === 'auto' && mlRes.detected_language && mlRes.detected_language !== 'auto') {
+      detectedLang = mlRes.detected_language;
+    }
+    if (expansionSource === 'heuristic') {
+      expansionSource = cpcMap.size > 0 ? 'translate-ip5+cpc' : 'translate-ip5+heuristic';
     }
   }
+  if (!englishCore) {
+    englishCore = cleanQuoteTerm(expansionInput);
+    if (detectedLang === 'auto') detectedLang = /[áéíóúñ¿¡]/i.test(expansionInput) ? 'es' : 'en';
+  }
+  if (englishCore && !translationsByLang.en) translationsByLang.en = englishCore;
 
   // Enriquecer siempre con variantes morfológicas y semillas CPC conocidas
   buildEnglishMorphVariants(englishCore).forEach(v => synSet.add(v));
@@ -235,40 +292,60 @@ export async function buildEnrichedSearchPlan(rawQuery, rawMode = 'hybrid', opti
   const orderedTerms = [];
   if (englishCore) orderedTerms.push(englishCore);
   for (const s of synSet) {
-    if (s.toLowerCase() !== englishCore.toLowerCase() && orderedTerms.length < 5) {
+    if (s.toLowerCase() !== englishCore.toLowerCase() && orderedTerms.length < 4) {
       orderedTerms.push(s);
     }
   }
+  // Añadir idiomas europeos clave (DE/FR/ES/PT) + Chino en la consulta principal y armar lote dedicado IP5 Asiático (ZH/JA/KO)
+  const latinLangCodes = ['de', 'fr', 'es', 'pt'];
+  const latinExtras = latinLangCodes
+    .map(c => translationsByLang[c])
+    .filter(Boolean);
+  const asianCjkTerms = ['zh', 'ja', 'ko']
+    .map(c => translationsByLang[c])
+    .filter(Boolean);
+
   const origClean = cleanQuoteTerm(expansionInput);
-  if (origClean && !orderedTerms.some(t => t.toLowerCase() === origClean.toLowerCase())) {
-    orderedTerms.push(origClean);
+  for (const extra of [...latinExtras, origClean]) {
+    if (extra && !orderedTerms.some(t => t.toLowerCase() === extra.toLowerCase()) && orderedTerms.length < 8) {
+      orderedTerms.push(extra);
+    }
   }
+  // Incluir chino directamente en la lista global visible y en la consulta Google combinada cuando quepa
+  const zhTerm = translationsByLang.zh;
+  const googleTermsList = zhTerm && !orderedTerms.includes(zhTerm)
+    ? [...orderedTerms.slice(0, 6), zhTerm]
+    : orderedTerms;
 
   const cpcList = Array.from(cpcMap.entries()).slice(0, 4).map(([code, label]) => ({ code, label }));
-  const quotedOrTerms = orderedTerms.map(t => (t.includes(' ') ? `"${t}"` : t));
-  const multilingualOrExpr = quotedOrTerms.length > 1 ? `(${quotedOrTerms.join(' OR ')})` : (quotedOrTerms[0] || origClean);
+  const quoteTerm = t => (t.includes(' ') ? `"${t}"` : t);
+  const googleOrExpr = googleTermsList.length > 1 ? `(${googleTermsList.map(quoteTerm).join(' OR ')})` : quoteTerm(googleTermsList[0] || origClean);
+  const latinOrExpr = orderedTerms.length > 1 ? `(${orderedTerms.map(quoteTerm).join(' OR ')})` : quoteTerm(orderedTerms[0] || origClean);
+  const asianIp5Query = asianCjkTerms.length > 1
+    ? `(${asianCjkTerms.map(quoteTerm).join(' OR ')})`
+    : (asianCjkTerms[0] ? quoteTerm(asianCjkTerms[0]) : null);
+
   const cpcCodesOnly = cpcList.map(c => c.code);
   const cpcOrExpr = cpcCodesOnly.length > 1 ? `(${cpcCodesOnly.join(' OR ')})` : (cpcCodesOnly[0] || '');
 
-  // Si el usuario eligió un CPC explícito, priorizar filtro conjunto; sino ampliar combinando ambos
-  let googleQuery = multilingualOrExpr;
+  let googleQuery = googleOrExpr;
   let classificationQuery = null;
   if (explicitCpcs.length > 0) {
-    googleQuery = `${multilingualOrExpr} (${explicitCpcs.join(' OR ')})`;
+    googleQuery = `${googleOrExpr} (${explicitCpcs.join(' OR ')})`;
     classificationQuery = explicitCpcs.join(' OR ');
   } else if (mode === 'classification' && cpcOrExpr) {
     googleQuery = englishCore
-      ? `(${cpcOrExpr}) (${englishCore.includes(' ') ? `"${englishCore}"` : englishCore} OR ${orderedTerms[1] ? `"${orderedTerms[1]}"` : englishCore})`
+      ? `(${cpcOrExpr}) (${quoteTerm(englishCore)} OR ${orderedTerms[1] ? quoteTerm(orderedTerms[1]) : quoteTerm(englishCore)})`
       : cpcOrExpr;
     classificationQuery = cpcOrExpr;
   } else if (cpcOrExpr) {
-    googleQuery = multilingualOrExpr;
+    googleQuery = googleOrExpr;
     classificationQuery = englishCore
-      ? `(${cpcOrExpr}) ${englishCore.includes(' ') ? `"${englishCore}"` : englishCore}`
+      ? `(${cpcOrExpr}) ${quoteTerm(englishCore)}`
       : cpcOrExpr;
   }
 
-  const europePmcQuery = multilingualOrExpr;
+  const europePmcQuery = latinOrExpr;
   const patentBriefQuery = englishCore || origClean;
   const openAlexQuery = englishCore || origClean;
 
@@ -277,10 +354,12 @@ export async function buildEnrichedSearchPlan(rawQuery, rawMode = 'hybrid', opti
     search_mode: mode,
     detected_language: detectedLang,
     english_core: englishCore || origClean,
-    expanded_terms: orderedTerms,
+    translations_by_lang: translationsByLang,
+    expanded_terms: [...orderedTerms, ...asianCjkTerms.filter(t => !orderedTerms.includes(t))],
     applied_cpcs: cpcList,
     google_query: googleQuery,
     classification_query: classificationQuery,
+    asian_ip5_query: asianIp5Query,
     europe_pmc_query: europePmcQuery,
     patent_brief_query: patentBriefQuery,
     openalex_query: openAlexQuery,

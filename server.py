@@ -157,10 +157,16 @@ def build_enriched_search_plan(raw_query, raw_mode='hybrid', api_key='', provide
     detected_lang = 'auto'
     english_core = ''
     syn_list = []
+    translations_by_lang = {}
     cpc_map = {}
     for c in explicit_cpcs:
         cpc_map[c] = f"Clasificación aplicada {c}"
     expansion_source = 'heuristic'
+
+    ip5_langs = [
+        ('en', 'en'), ('zh', 'zh-CN'), ('ja', 'ja'), ('ko', 'ko'),
+        ('de', 'de'), ('fr', 'fr'), ('pt', 'pt'), ('es', 'es')
+    ]
 
     gkey = (api_key or os.environ.get('GEMINI_API_KEY', '')).strip()
     if gkey and (not provider or provider == 'gemini'):
@@ -168,10 +174,10 @@ def build_enriched_search_plan(raw_query, raw_mode='hybrid', api_key='', provide
             prompt = f"""Translate and expand this patent/technology search query into structured JSON ONLY (no markdown).
 Input query: "{exp_input}"
 Return exact JSON schema:
-{{"detected_language":"es|en|pt|fr|de|auto","english_core":"concise English canonical technical term (2-4 words)","synonyms":["3 to 5 concise English patent synonyms"],"cpc_codes":[{{"code":"CPC group like F04D or F04D13/06","label":"short Spanish label max 48 chars"}}]}}"""
+{{"detected_language":"es|en|zh|ja|ko|de|fr|pt|auto","english_core":"concise English canonical technical term (2-4 words)","translations":{{"en":"English","zh":"Simplified Chinese","ja":"Japanese","ko":"Korean","de":"German","fr":"French","pt":"Portuguese","es":"Spanish"}},"synonyms":["3 to 5 concise English patent synonyms"],"cpc_codes":[{{"code":"CPC group like F04D or F04D13/06","label":"short Spanish label max 48 chars"}}]}}"""
             url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
-            req = urllib.request.Request(url, headers={'Content-Type': 'application/json', 'x-goog-api-key': gkey}, data=json.dumps({"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"temperature": 0.1, "maxOutputTokens": 360}}).encode('utf-8'))
-            with urllib.request.urlopen(req, timeout=3) as resp:
+            req = urllib.request.Request(url, headers={'Content-Type': 'application/json', 'x-goog-api-key': gkey}, data=json.dumps({"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"temperature": 0.1, "maxOutputTokens": 520}}).encode('utf-8'))
+            with urllib.request.urlopen(req, timeout=3.5) as resp:
                 gd = json.loads(resp.read().decode('utf-8'))
                 raw_txt = gd.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
                 cleaned = re.sub(r'```json|```', '', raw_txt, flags=re.I).strip()
@@ -181,6 +187,11 @@ Return exact JSON schema:
                     if parsed_ai.get('english_core'):
                         detected_lang = str(parsed_ai.get('detected_language') or 'auto')[:12]
                         english_core = _clean_qterm(parsed_ai['english_core'])
+                        if isinstance(parsed_ai.get('translations'), dict):
+                            for code, _ in ip5_langs:
+                                tv = _clean_qterm(parsed_ai['translations'].get(code))
+                                if tv:
+                                    translations_by_lang[code] = tv
                         for s_item in (parsed_ai.get('synonyms') or []):
                             cs = _clean_qterm(s_item)
                             if cs and cs not in syn_list:
@@ -190,24 +201,43 @@ Return exact JSON schema:
                             if re.match(r'^[A-H]\d{2}[A-Z](?:\d+(?:\/\d+)?)?$', code) and code not in cpc_map:
                                 lbl = str(c_item.get('label') if isinstance(c_item, dict) else '') or f"Clase CPC {code}"
                                 cpc_map[code] = lbl[:60]
-                        expansion_source = 'gemini+cpc'
+                        expansion_source = 'gemini+ip5+cpc'
         except Exception:
             pass
 
+    missing_langs = [(code, tl) for code, tl in ip5_langs if code not in translations_by_lang]
+    if missing_langs:
+        def _tr_single(pair):
+            c_code, tl_code = pair
+            try:
+                tu = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl={urllib.parse.quote(tl_code)}&dt=t&q={urllib.parse.quote(exp_input)}"
+                with urllib.request.urlopen(urllib.request.Request(tu, headers={'User-Agent': 'Mozilla/5.0'}), timeout=2) as tr_resp:
+                    tr_data = json.loads(tr_resp.read().decode('utf-8'))
+                    tr_txt = ''.join(seg[0] for seg in (tr_data[0] or []) if seg and seg[0])
+                    src_l = tr_data[2][:12] if (len(tr_data) > 2 and isinstance(tr_data[2], str)) else 'auto'
+                    if tr_txt.strip():
+                        return (c_code, _clean_qterm(tr_txt), src_l)
+            except Exception:
+                pass
+            return (c_code, None, 'auto')
+
+        with ThreadPoolExecutor(max_workers=len(missing_langs)) as tr_ex:
+            for c_code, tr_val, src_l in tr_ex.map(_tr_single, missing_langs):
+                if tr_val:
+                    translations_by_lang[c_code] = tr_val
+                if detected_lang == 'auto' and src_l != 'auto':
+                    detected_lang = src_l
+        if not english_core and translations_by_lang.get('en'):
+            english_core = translations_by_lang['en']
+        if expansion_source == 'heuristic':
+            expansion_source = 'translate-ip5+cpc' if cpc_map else 'translate-ip5+heuristic'
+
     if not english_core:
-        try:
-            tu = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q={urllib.parse.quote(exp_input)}"
-            with urllib.request.urlopen(urllib.request.Request(tu, headers={'User-Agent': 'Mozilla/5.0'}), timeout=2) as tr_resp:
-                tr_data = json.loads(tr_resp.read().decode('utf-8'))
-                tr_txt = ''.join(seg[0] for seg in (tr_data[0] or []) if seg and seg[0])
-                if tr_txt.strip():
-                    english_core = _clean_qterm(tr_txt)
-                    if len(tr_data) > 2 and isinstance(tr_data[2], str):
-                        detected_lang = tr_data[2][:12]
-                    expansion_source = 'translate+cpc' if cpc_map else 'translate+heuristic'
-        except Exception:
-            english_core = _clean_qterm(exp_input)
+        english_core = _clean_qterm(exp_input)
+        if detected_lang == 'auto':
             detected_lang = 'es' if re.search(r'[áéíóúñ¿¡]', exp_input, re.I) else 'en'
+    if english_core and 'en' not in translations_by_lang:
+        translations_by_lang['en'] = english_core
 
     words = english_core.split()
     if len(words) >= 2:
@@ -233,30 +263,38 @@ Return exact JSON schema:
     if english_core:
         ordered_terms.append(english_core)
     for s_item in syn_list:
-        if s_item.lower() != english_core.lower() and len(ordered_terms) < 5 and s_item not in ordered_terms:
+        if s_item.lower() != english_core.lower() and len(ordered_terms) < 4 and s_item not in ordered_terms:
             ordered_terms.append(s_item)
+    latin_extras = [translations_by_lang.get(c) for c in ('de', 'fr', 'es', 'pt') if translations_by_lang.get(c)]
+    asian_cjk = [translations_by_lang.get(c) for c in ('zh', 'ja', 'ko') if translations_by_lang.get(c)]
+
     orig_clean = _clean_qterm(exp_input)
-    if orig_clean and not any(t.lower() == orig_clean.lower() for t in ordered_terms):
-        ordered_terms.append(orig_clean)
+    for extra in latin_extras + [orig_clean]:
+        if extra and not any(t.lower() == extra.lower() for t in ordered_terms) and len(ordered_terms) < 8:
+            ordered_terms.append(extra)
+
+    zh_term = translations_by_lang.get('zh')
+    google_terms = (ordered_terms[:6] + [zh_term]) if (zh_term and zh_term not in ordered_terms) else ordered_terms
 
     cpc_list = [{"code": k, "label": v} for k, v in list(cpc_map.items())[:4]]
-    quoted_terms = [f'"{t}"' if ' ' in t else t for t in ordered_terms]
-    multi_or = f"({' OR '.join(quoted_terms)})" if len(quoted_terms) > 1 else (quoted_terms[0] if quoted_terms else orig_clean)
+    q_fmt = lambda t: f'"{t}"' if ' ' in t else t
+    google_or = f"({' OR '.join(q_fmt(t) for t in google_terms)})" if len(google_terms) > 1 else (q_fmt(google_terms[0]) if google_terms else orig_clean)
+    latin_or = f"({' OR '.join(q_fmt(t) for t in ordered_terms)})" if len(ordered_terms) > 1 else (q_fmt(ordered_terms[0]) if ordered_terms else orig_clean)
+    asian_ip5_q = f"({' OR '.join(q_fmt(t) for t in asian_cjk)})" if len(asian_cjk) > 1 else (q_fmt(asian_cjk[0]) if asian_cjk else None)
+
     cpc_codes = [c['code'] for c in cpc_list]
     cpc_or = f"({' OR '.join(cpc_codes)})" if len(cpc_codes) > 1 else (cpc_codes[0] if cpc_codes else '')
 
-    google_q = multi_or
+    google_q = google_or
     class_q = None
     if explicit_cpcs:
-        google_q = f"{multi_or} ({' OR '.join(explicit_cpcs)})"
+        google_q = f"{google_or} ({' OR '.join(explicit_cpcs)})"
         class_q = " OR ".join(explicit_cpcs)
     elif mode == 'classification' and cpc_or:
-        en_part = f'"{english_core}"' if ' ' in english_core else english_core
-        google_q = f"({cpc_or}) {en_part}" if english_core else cpc_or
+        google_q = f"({cpc_or}) {q_fmt(english_core)}" if english_core else cpc_or
         class_q = cpc_or
     elif cpc_or:
-        en_part = f'"{english_core}"' if ' ' in english_core else english_core
-        class_q = f"({cpc_or}) {en_part}" if english_core else cpc_or
+        class_q = f"({cpc_or}) {q_fmt(english_core)}" if english_core else cpc_or
 
     oa_q = english_core or orig_clean
 
@@ -265,11 +303,13 @@ Return exact JSON schema:
         "search_mode": mode,
         "detected_language": detected_lang,
         "english_core": english_core or orig_clean,
-        "expanded_terms": ordered_terms,
+        "translations_by_lang": translations_by_lang,
+        "expanded_terms": ordered_terms + [t for t in asian_cjk if t not in ordered_terms],
         "applied_cpcs": cpc_list,
         "google_query": google_q,
         "classification_query": class_q,
-        "europe_pmc_query": multi_or,
+        "asian_ip5_query": asian_ip5_q,
+        "europe_pmc_query": latin_or,
         "patent_brief_query": english_core or orig_clean,
         "openalex_query": oa_q,
         "expansion_source": expansion_source
@@ -1220,6 +1260,7 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes, los demás proyect
                 "search_mode": plan['search_mode'],
                 "detected_language": plan['detected_language'],
                 "english_core": plan['english_core'],
+                "translations_by_lang": plan.get('translations_by_lang', {}),
                 "expanded_terms": plan['expanded_terms'],
                 "applied_cpcs": plan['applied_cpcs'],
                 "effective_query_google": plan['openalex_query'],
@@ -1306,10 +1347,11 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes, los demás proyect
         pmc_total_found = 0
         brief_total_found = 0
 
-        # Orquestación Concurrente Multi-Fuente (Multilingüe + Clasificación CPC + Paginación)
-        with ThreadPoolExecutor(max_workers=6) as executor:
+        # Orquestación Concurrente Multi-Fuente (Multilingüe IP5 8 idiomas + Clasificación CPC + Paginación)
+        with ThreadPoolExecutor(max_workers=7) as executor:
             future_google = None
             future_google_class = None
+            future_google_asian = None
             future_pmc = None
             future_brief = None
 
@@ -1328,6 +1370,8 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes, los demás proyect
                     class_q = f'{rot_cpc} "{rot_term}"'
                 if class_q and class_q != page_primary_q and plan['search_mode'] != 'exact':
                     future_google_class = executor.submit(query_google_patents, class_q, 'classification')
+                if plan.get('asian_ip5_query') and plan['search_mode'] != 'exact':
+                    future_google_asian = executor.submit(query_google_patents, plan['asian_ip5_query'], 'native-ip5-cjk')
 
             if source in ['all', 'europepmc']:
                 future_pmc = executor.submit(query_europe_pmc, plan['europe_pmc_query'], page)
@@ -1337,6 +1381,7 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes, los demás proyect
 
             g_primary = []
             g_class = []
+            g_asian = []
             if future_google:
                 try:
                     g_res = future_google.result()
@@ -1356,6 +1401,14 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes, los demás proyect
                 except Exception as e:
                     print(f"Error procesando Google Patents Clasificación: {e}")
 
+            if future_google_asian:
+                try:
+                    ga_res = future_google_asian.result()
+                    g_asian = ga_res.get('results', [])[:6]
+                    google_total_found = max(google_total_found, int(ga_res.get('total_found', 0) or 0))
+                except Exception as e:
+                    print(f"Error procesando Google Patents IP5 Asiático: {e}")
+
             # Si no había CPC en plan pero Google devolvió summary.cpc, ejecutar consulta secundaria rápida por clasificación
             if source in ['all', 'google'] and not plan['classification_query'] and cpc_summaries and plan['search_mode'] != 'exact':
                 top_real = [c['code'] for c in cpc_summaries if c.get('code')][:2]
@@ -1372,10 +1425,10 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes, los demás proyect
                     except Exception:
                         pass
 
-            # Intercalar Google keywords + clasificación sin duplicados
+            # Intercalar Google keywords + clasificación + IP5 asiático sin duplicados
             seen_g = set()
-            for i in range(max(len(g_primary), len(g_class))):
-                for group in (g_primary, g_class):
+            for i in range(max(len(g_primary), len(g_class), len(g_asian))):
+                for group in (g_primary, g_class, g_asian):
                     if i < len(group):
                         item = group[i]
                         pub = item.get('publication_number')
@@ -1432,6 +1485,7 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes, los demás proyect
                 "search_mode": plan['search_mode'],
                 "detected_language": plan['detected_language'],
                 "english_core": plan['english_core'],
+                "translations_by_lang": plan.get('translations_by_lang', {}),
                 "expanded_terms": plan['expanded_terms'],
                 "applied_cpcs": plan['applied_cpcs'],
                 "effective_query_google": plan['google_query'],
