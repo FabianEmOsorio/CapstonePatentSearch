@@ -22,7 +22,8 @@ export default async function handler(req, res) {
     const plan = await buildEnrichedSearchPlan(safeQuery, mode);
     const effectiveQ = plan.openalex_query || safeQuery;
     const encodedQ = encodeURIComponent(effectiveQ);
-    const url = `https://api.openalex.org/works?search=${encodedQ}&per_page=15&page=${safePage}&mailto=fabianem.osorio@gmail.com`;
+    const oaKey = (process.env.OPENALEX_API_KEY || '').trim();
+    const url = `https://api.openalex.org/works?search=${encodedQ}&per_page=15&page=${safePage}&mailto=fabianem.osorio@gmail.com${oaKey ? `&api_key=${encodeURIComponent(oaKey)}` : ''}`;
 
     const response = await fetch(url, {
       headers: {
@@ -30,7 +31,61 @@ export default async function handler(req, res) {
       }
     });
 
+    // Fallback resiliente si OpenAlex limita por IP compartida (429): consultar Europe PMC Literatura Académica
     if (!response.ok) {
+      if (response.status === 429 || response.status >= 500) {
+        const pmcLitUrl = `https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=${encodeURIComponent(effectiveQ)}&format=json&resultType=core&pageSize=15&page=${safePage}`;
+        const pmcResp = await fetch(pmcLitUrl);
+        if (pmcResp.ok) {
+          const pmcData = await pmcResp.json();
+          const pmcItems = pmcData.resultList?.result || [];
+          const worksFallback = pmcItems.map(item => {
+            const authors = (item.authorList?.author || []).map(a => a.fullName).filter(Boolean);
+            const doi = item.doi ? `https://doi.org/${item.doi}` : null;
+            const pdfUrl = item.isOpenAccess === 'Y' && item.pmcid ? `https://europepmc.org/articles/${encodeURIComponent(item.pmcid)}?pdf=render` : null;
+            return {
+              id: item.id,
+              doi: doi,
+              doi_url: doi,
+              title: item.title || 'Sin título registrado',
+              publication_year: item.pubYear || 'N/A',
+              publication_date: String(item.firstPublicationDate || item.pubYear || 'N/A'),
+              authors: authors.slice(0, 5).join('; ') || item.authorString || 'No especificados',
+              primary_author: authors[0] || 'No especificado',
+              journal: item.journalTitle || 'Publicación Científica',
+              type: 'Artículo científico',
+              cited_by_count: parseInt(item.citedByCount || 0, 10) || 0,
+              is_oa: item.isOpenAccess === 'Y',
+              oa_status: item.isOpenAccess === 'Y' ? 'open' : 'closed',
+              pdf_url: pdfUrl,
+              landing_url: doi || `https://europepmc.org/article/MED/${encodeURIComponent(item.id || '')}`,
+              concepts: [],
+              snippet: item.abstractText || 'Resumen disponible en el enlace oficial de la publicación.',
+              source: 'Europe PMC Académico (Respaldo OpenAlex)',
+              source_badge: 'openalex'
+            };
+          });
+          const pmcTotal = Number(pmcData.hitCount || worksFallback.length) || 0;
+          return res.status(200).json({
+            query: safeQuery,
+            total_found: pmcTotal,
+            results_count: worksFallback.length,
+            organic_results: worksFallback,
+            works: worksFallback,
+            search_meta: {
+              original_query: plan.original_query,
+              search_mode: plan.search_mode,
+              detected_language: plan.detected_language,
+              english_core: plan.english_core,
+              expanded_terms: plan.expanded_terms,
+              applied_cpcs: plan.applied_cpcs,
+              effective_query_google: effectiveQ,
+              expansion_source: `${plan.expansion_source} (fallback EuropePMC)`,
+              total_global_estimated: pmcTotal
+            }
+          });
+        }
+      }
       throw new Error(`OpenAlex respondió con código HTTP ${response.status}`);
     }
 

@@ -254,7 +254,7 @@ Return exact JSON schema:
         en_part = f'"{english_core}"' if ' ' in english_core else english_core
         class_q = f"({cpc_or}) {en_part}" if english_core else cpc_or
 
-    oa_q = f'("{english_core}" OR "{orig_clean}")' if (english_core and english_core.lower() != orig_clean.lower()) else orig_clean
+    oa_q = english_core or orig_clean
 
     return {
         "original_query": original,
@@ -616,6 +616,40 @@ def query_openalex(q, page=1):
                 })
             return {"query": q, "total_found": total_count, "results_count": len(works), "organic_results": works}
     except Exception as e:
+        try:
+            pmc_lit_url = f"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query={urllib.parse.quote(q)}&format=json&resultType=core&pageSize=15&page={page}"
+            with urllib.request.urlopen(urllib.request.Request(pmc_lit_url, headers={'User-Agent': 'Mozilla/5.0'}), timeout=8) as r2:
+                pmc_d = json.loads(r2.read().decode('utf-8'))
+                works_fb = []
+                for item in pmc_d.get('resultList', {}).get('result', []):
+                    authors = [a.get('fullName') for a in (item.get('authorList', {}) or {}).get('author', []) if a.get('fullName')]
+                    doi = f"https://doi.org/{item['doi']}" if item.get('doi') else None
+                    pmcid = item.get('pmcid')
+                    pdf_u = f"https://europepmc.org/articles/{urllib.parse.quote(pmcid, safe='')}?pdf=render" if (item.get('isOpenAccess') == 'Y' and pmcid) else None
+                    works_fb.append({
+                        "id": item.get('id'),
+                        "doi": doi,
+                        "doi_url": doi,
+                        "title": (item.get('title') or 'Sin título registrado').strip(),
+                        "publication_year": item.get('pubYear') or 'N/A',
+                        "publication_date": str(item.get('firstPublicationDate') or item.get('pubYear') or 'N/A'),
+                        "authors": '; '.join(authors[:5]) or item.get('authorString') or 'No especificados',
+                        "primary_author": authors[0] if authors else 'No especificado',
+                        "journal": item.get('journalTitle') or 'Publicación Científica',
+                        "type": 'Artículo científico',
+                        "cited_by_count": int(item.get('citedByCount') or 0),
+                        "is_oa": item.get('isOpenAccess') == 'Y',
+                        "oa_status": 'open' if item.get('isOpenAccess') == 'Y' else 'closed',
+                        "pdf_url": pdf_u,
+                        "landing_url": doi or f"https://europepmc.org/article/MED/{urllib.parse.quote(str(item.get('id') or ''), safe='')}",
+                        "concepts": [],
+                        "snippet": item.get('abstractText') or 'Resumen disponible en el enlace oficial de la publicación.',
+                        "source": 'Europe PMC Académico (Respaldo OpenAlex)',
+                        "source_badge": 'openalex'
+                    })
+                return {"query": q, "total_found": int(pmc_d.get('hitCount') or len(works_fb)), "results_count": len(works_fb), "organic_results": works_fb}
+        except Exception:
+            pass
         return {"query": q, "total_found": 0, "results_count": 0, "organic_results": [], "error": sanitize_error_msg(e)}
 
 class PatentSearchHandler(http.server.SimpleHTTPRequestHandler):

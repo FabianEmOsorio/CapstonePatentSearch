@@ -106,7 +106,7 @@ Only include real standard CPC codes.`;
         generationConfig: { temperature: 0.1, maxOutputTokens: 360 }
       })
     },
-    2500
+    2500 + 700
   );
   if (!resp.ok) return null;
   const data = await resp.json();
@@ -263,9 +263,7 @@ export async function buildEnrichedSearchPlan(rawQuery, rawMode = 'hybrid', opti
 
   const europePmcQuery = multilingualOrExpr;
   const patentBriefQuery = englishCore || origClean;
-  const openAlexQuery = (englishCore && englishCore.toLowerCase() !== origClean.toLowerCase())
-    ? `("${englishCore}" OR "${origClean}")`
-    : origClean;
+  const openAlexQuery = englishCore || origClean;
 
   return {
     original_query: original,
