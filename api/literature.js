@@ -1,4 +1,5 @@
 import { applyApiSecurity, enforceOptionalAuth, enforceRateLimit, safeHttpUrl, sanitizeErrorMessage } from './_security.js';
+import { buildEnrichedSearchPlan } from './_query_expander.js';
 
 export default async function handler(req, res) {
   if (applyApiSecurity(req, res, 'GET,OPTIONS')) return;
@@ -8,7 +9,7 @@ export default async function handler(req, res) {
   if (!enforceOptionalAuth(req, res)) return; // [OPTIONAL AUTH - ENABLE_API_AUTH=true]
   if (!enforceRateLimit(req, res, { maxRequests: 45 })) return;
 
-  const { q, page = '1' } = req.query || {};
+  const { q, page = '1', mode = 'hybrid' } = req.query || {};
 
   if (!q || typeof q !== 'string' || !q.trim()) {
     return res.status(400).json({ error: 'Parámetro de búsqueda "q" es requerido' });
@@ -18,7 +19,9 @@ export default async function handler(req, res) {
   const safePage = Math.max(1, Math.min(100, parseInt(page, 10) || 1));
 
   try {
-    const encodedQ = encodeURIComponent(safeQuery);
+    const plan = await buildEnrichedSearchPlan(safeQuery, mode);
+    const effectiveQ = plan.openalex_query || safeQuery;
+    const encodedQ = encodeURIComponent(effectiveQ);
     const url = `https://api.openalex.org/works?search=${encodedQ}&per_page=15&page=${safePage}&mailto=fabianem.osorio@gmail.com`;
 
     const response = await fetch(url, {
@@ -106,7 +109,18 @@ export default async function handler(req, res) {
       total_found: totalCount,
       results_count: works.length,
       organic_results: works,
-      works: works
+      works: works,
+      search_meta: {
+        original_query: plan.original_query,
+        search_mode: plan.search_mode,
+        detected_language: plan.detected_language,
+        english_core: plan.english_core,
+        expanded_terms: plan.expanded_terms,
+        applied_cpcs: plan.applied_cpcs,
+        effective_query_google: effectiveQ,
+        expansion_source: plan.expansion_source,
+        total_global_estimated: totalCount
+      }
     });
 
   } catch (err) {

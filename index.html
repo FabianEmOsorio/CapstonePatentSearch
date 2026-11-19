@@ -3224,19 +3224,238 @@
     }
 
     .feed-container {
-      padding: 24px;
-      max-width: 1100px;
+      padding: 20px 24px 120px 24px;
+      max-width: 1120px;
       margin: 0 auto;
       width: 100%;
-      padding-bottom: 120px; /* Espacio para barra inferior */
+      transition: max-width 0.25s ease;
+    }
+    .feed-container.has-split-agent {
+      max-width: 1580px;
     }
 
-    /* Tarjeta Pericial del Agente */
-    .agent-panel-card {
+    /* BARRA CONMUTADORA DE ESPACIO DE TRABAJO (CHAT AGENTE VS PATENTES) */
+    .workspace-view-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 8px 12px;
+      margin-bottom: 14px;
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
+      border-radius: 10px;
+    }
+    .workspace-view-tabs {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-subtle);
+      padding: 3px;
+      border-radius: 999px;
+      flex-wrap: wrap;
+    }
+    .ws-view-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-medium);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ws-view-btn:hover {
+      color: var(--text-high);
+    }
+    .ws-view-btn.active {
+      background: var(--brand-primary);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 112, 243, 0.25);
+    }
+    .ws-view-btn.chat-tab.active {
+      background: var(--intel-purple);
+      box-shadow: 0 2px 8px rgba(168, 85, 247, 0.28);
+    }
+    .ws-zone-sep-indicator {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .ws-count-chip {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+    }
+    .ws-view-btn:not(.active) .ws-count-chip {
+      background: var(--bg-surface);
+      color: var(--text-medium);
+      border: 1px solid var(--border-color);
+    }
+
+    /* DOS PANELES ESTRICTAMENTE SEPARADOS */
+    .workspace-panes {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+    .agent-dock-pane {
+      display: none;
+      min-width: 0;
+    }
+    .workspace-panes.agent-open .agent-dock-pane {
+      display: block;
+    }
+    .results-dock-pane {
+      min-width: 0;
+    }
+
+    /* En escritorio: Split paralelo por defecto cuando el Agente está activo */
+    @media (min-width: 1080px) {
+      .workspace-panes.agent-open[data-layout="split"] {
+        grid-template-columns: minmax(360px, 430px) minmax(0, 1fr);
+      }
+      .app-main.drawer-open .workspace-panes.agent-open[data-layout="split"] {
+        grid-template-columns: minmax(310px, 360px) minmax(0, 1fr);
+      }
+      .workspace-panes.agent-open[data-layout="split"] .agent-dock-pane {
+        position: sticky;
+        top: 74px;
+        max-height: calc(100vh - 205px);
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+    }
+
+    /* Modo Solo Resultados */
+    .workspace-panes[data-layout="results"] .agent-dock-pane {
+      display: none !important;
+    }
+    /* Modo Solo Chat del Agente */
+    .workspace-panes[data-layout="chat"] .results-dock-pane {
+      display: none !important;
+    }
+    .workspace-panes[data-layout="chat"] .agent-dock-pane {
+      display: block !important;
+      position: static;
+      max-height: none;
+      max-width: 920px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* En móvil / tablet (<1080px): si está en split, mostrar franja arquitectónica sólida entre Agente y Patentes */
+    .zone-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.45px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .zone-banner.zone-agent {
+      background: rgba(168, 85, 247, 0.1);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    [data-theme="light"] .zone-banner.zone-agent {
+      color: #7e22ce;
+    }
+    .zone-banner.zone-results {
+      background: rgba(0, 112, 243, 0.09);
+      color: var(--brand-primary);
+      border: 1px solid rgba(0, 112, 243, 0.25);
+    }
+    .zone-jump-link {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0;
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 1px solid currentColor;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    /* Banner transparente de expansión semántica / clasificación */
+    .search-expansion-banner {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-left: 3px solid var(--brand-primary);
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      color: var(--text-medium);
+      display: none;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .search-expansion-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .search-expansion-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .exp-term-chip {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-high);
+      font-family: var(--font-mono);
+    }
+    .exp-cpc-chip {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(168, 85, 247, 0.12);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      color: #c084fc;
+      cursor: pointer;
+    }
+    [data-theme="light"] .exp-cpc-chip {
+      color: #7e22ce;
+    }
+    .exp-cpc-chip:hover {
+      background: rgba(168, 85, 247, 0.22);
+    }
+
+    /* Tarjeta Pericial del Agente (Identidad Visual Propia) */
+    .agent-panel-card {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.05) 0%, var(--bg-surface) 140px);
+      border: 1px solid rgba(168, 85, 247, 0.28);
+      border-left: 4px solid var(--intel-purple);
       border-radius: var(--radius-lg);
-      margin-bottom: 24px;
+      margin-bottom: 14px;
       overflow: hidden;
       box-shadow: var(--shadow-sm);
     }
@@ -4305,99 +4524,139 @@
   <main class="app-main" id="app-main-layout">
     <div class="feed-container" id="col-search-results">
 
-      <!-- Panel del Agente Pericial en Vivo -->
-      <section class="agent-panel-card ai-unified-panel" id="ai-unified-panel">
-        <div class="agent-panel-header">
-          <div class="agent-title-lockup">
-            <span class="agent-status-dot"></span>
-            <span class="agent-title">Dictamen Pericial & Asesoría Tecnológica</span>
-            <button class="model-tag-switcher" onclick="alternarModeloRapidoAvanzado()" id="ai-active-model-tag" title="Alternar entre Gemini Flash y Gemini Pro">gemini-3.5-flash-lite</button>
-          </div>
-          <div style="display: flex; gap: 8px;">
-            <button class="control-pill" onclick="copiarAnalisisIa()" id="copy-btn">Copiar</button>
-            <button class="control-pill" onclick="limpiarHistorialChatActual()">Limpiar Chat</button>
-            <button class="control-pill" onclick="minimizarPanelAiActual()">Minimizar</button>
+      <!-- Barra conmutadora explícita: cero mezcla entre Chat del Agente y Cards de Patentes -->
+      <div class="workspace-view-bar" id="workspace-view-switcher">
+        <div class="workspace-view-tabs" role="tablist" aria-label="Diseño del espacio de trabajo">
+          <button class="ws-view-btn active" id="ws-view-split" onclick="setWorkspaceView('split')" title="Ver el Chat del Agente a la izquierda y los Resultados a la derecha con scroll independiente">
+            <span>Vista Dividida (Chat | Patentes)</span>
+          </button>
+          <button class="ws-view-btn" id="ws-view-results" onclick="setWorkspaceView('results')" title="Mostrar únicamente las tarjetas de patentes y literatura">
+            <span>Solo Patentes / Resultados</span>
+            <span class="ws-count-chip" id="ws-tab-results-count">0</span>
+          </button>
+          <button class="ws-view-btn chat-tab" id="ws-view-chat" onclick="setWorkspaceView('chat')" title="Mostrar únicamente la conversación con el Agente Pericial">
+            <span>Solo Chat del Agente</span>
+            <span class="ws-count-chip" id="ws-tab-chat-count">0</span>
+          </button>
+        </div>
+        <div class="ws-zone-sep-indicator">
+          <span id="ws-active-layout-hint">Paneles separados con desplazamiento independiente</span>
+          <div id="btn-restore-ai-panel" style="display: none;">
+            <button class="control-pill" onclick="restaurarPanelAiMinimizado()">
+              <span>Mostrar Análisis del Agente Pericial</span>
+              <span class="badge" id="restore-chat-count">1</span>
+            </button>
           </div>
         </div>
+      </div>
 
-        <!-- Cuerpo de historial + turno activo del Agente -->
-        <div class="agent-reply-body" id="agent-reply-text">
-          <div id="ai-unified-content">
-            <div id="ai-unified-verdict-slot"></div>
+      <div class="workspace-panes" id="workspace-panes" data-layout="split">
+
+        <!-- ZONA A: ASISTENTE PERICIAL IA (SCROLL INDEPENDIENTE) -->
+        <aside class="agent-dock-pane" id="agent-dock-pane" aria-label="Conversación con el Agente Pericial">
+          <div class="zone-banner zone-agent">
+            <span>Zona Asistente IA &bull; Conversación</span>
+            <button class="zone-jump-link" onclick="irAZonaResultados()">Ver Patentes &darr;</button>
           </div>
-          <div id="ai-history-older-slot"></div>
-          <div id="ai-history-recent-slot"></div>
 
-          <!-- Turno en vivo: Traza de razonamiento arriba + Redacción progresiva abajo -->
-          <div id="agent-active-live-container" style="display: none; margin-top: 12px;">
-            <div id="agent-activity-slot"></div>
+          <section class="agent-panel-card ai-unified-panel" id="ai-unified-panel">
+            <div class="agent-panel-header">
+              <div class="agent-title-lockup">
+                <span class="agent-status-dot"></span>
+                <span class="agent-title">Dictamen Pericial & Asesoría Tecnológica</span>
+                <button class="model-tag-switcher" onclick="alternarModeloRapidoAvanzado()" id="ai-active-model-tag" title="Alternar entre Gemini Flash y Gemini Pro">gemini-3.5-flash-lite</button>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="control-pill" onclick="copiarAnalisisIa()" id="copy-btn">Copiar</button>
+                <button class="control-pill" onclick="limpiarHistorialChatActual()">Limpiar Chat</button>
+                <button class="control-pill" onclick="minimizarPanelAiActual()">Minimizar</button>
+              </div>
+            </div>
 
-            <div id="agent-streaming-reply-wrap" style="display: none; margin-top: 10px;">
-              <div id="agent-streaming-reply-content" class="ai-compiled-markdown antigravity-flow"></div>
+            <!-- Cuerpo de historial + turno activo del Agente -->
+            <div class="agent-reply-body" id="agent-reply-text">
+              <div id="ai-unified-content">
+                <div id="ai-unified-verdict-slot"></div>
+              </div>
+              <div id="ai-history-older-slot"></div>
+              <div id="ai-history-recent-slot"></div>
+
+              <!-- Turno en vivo: Traza de razonamiento arriba + Redacción progresiva abajo -->
+              <div id="agent-active-live-container" style="display: none; margin-top: 12px;">
+                <div id="agent-activity-slot"></div>
+
+                <div id="agent-streaming-reply-wrap" style="display: none; margin-top: 10px;">
+                  <div id="agent-streaming-reply-content" class="ai-compiled-markdown antigravity-flow"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Preguntas de seguimiento sugeridas -->
+            <div class="ai-unified-followups" id="ai-unified-followups" style="display: none;"></div>
+          </section>
+        </aside>
+
+        <!-- ZONA B: RESULTADOS DE PATENTES Y LITERATURA -->
+        <section class="results-dock-pane" id="results-dock-pane" aria-label="Resultados de búsqueda de patentes y literatura">
+          <div class="zone-banner zone-results" id="results-zone-banner" style="display: none;">
+            <span>Zona de Resultados &bull; Patentes &amp; Literatura</span>
+            <button class="zone-jump-link" onclick="setWorkspaceView('chat')">Ir al Chat IA</button>
+          </div>
+
+          <!-- Banner transparente de Búsqueda Enriquecida (Multi-idioma + CPC) -->
+          <div class="search-expansion-banner" id="search-expansion-banner"></div>
+
+          <!-- Dropdown / Franja de Inteligencia CPC -->
+          <div class="intel-dropdown" id="intel-dropdown" style="display: none; margin-bottom: 14px;">
+            <div class="intel-header" onclick="toggleIntelDropdown()">
+              <span style="font-weight: 600; font-size: 12.5px; color: var(--intel-purple);">Inteligencia de Clasificaciones Tecnológicas (CPC / IPC)</span>
+              <span class="intel-badge" id="intel-badge-count">0 detectadas</span>
+              <span class="intel-arrow" id="intel-arrow">▼</span>
+            </div>
+            <div class="intel-body" id="intel-body" style="display: none;">
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px;">
+                Clasificaciones dominantes detectadas en estos resultados. Haz clic en cualquiera para refinar la ecuación o realizar una segunda búsqueda por similitud de clase:
+              </div>
+              <div class="cpc-chips" id="cpc-chips-container"></div>
             </div>
           </div>
-        </div>
 
-        <!-- Preguntas de seguimiento sugeridas -->
-        <div class="ai-unified-followups" id="ai-unified-followups" style="display: none;"></div>
-      </section>
-
-      <!-- Boton para restaurar panel si fue minimizado -->
-      <div id="btn-restore-ai-panel" style="display: none; margin-bottom: 14px;">
-        <button class="control-pill" onclick="restaurarPanelAiMinimizado()">
-          <span>Mostrar Análisis del Agente Pericial</span>
-          <span class="badge" id="restore-chat-count">1</span>
-        </button>
-      </div>
-
-      <!-- Dropdown / Franja de Inteligencia CPC -->
-      <div class="intel-dropdown" id="intel-dropdown" style="display: none; margin-bottom: 14px;">
-        <div class="intel-header" onclick="toggleIntelDropdown()">
-          <span style="font-weight: 600; font-size: 12.5px; color: var(--intel-purple);">Inteligencia de Clasificaciones Tecnológicas (CPC / IPC)</span>
-          <span class="intel-badge" id="intel-badge-count">0 detectadas</span>
-          <span class="intel-arrow" id="intel-arrow">▼</span>
-        </div>
-        <div class="intel-body" id="intel-body" style="display: none;">
-          <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px;">
-            Clasificaciones dominantes detectadas en estos resultados. Haz clic en cualquiera para refinar la ecuación o realizar una segunda búsqueda por similitud de clase:
+          <!-- Barra de Filtros Activos -->
+          <div class="active-filters-container" id="active-filters-container" style="display: none;">
+            <div id="active-filters-chips" style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;"></div>
           </div>
-          <div class="cpc-chips" id="cpc-chips-container"></div>
-        </div>
-      </div>
 
-      <!-- Barra de Filtros Activos -->
-      <div class="active-filters-container" id="active-filters-container" style="display: none;">
-        <div id="active-filters-chips" style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;"></div>
-      </div>
-
-      <!-- Encabezado de Resultados: Contador, Pestañas, Exportación -->
-      <div class="feed-header" id="feed-header-controls">
-        <div class="feed-title-wrap" style="display: flex; align-items: center; gap: 10px;">
-          <span class="results-badge" id="results-count-badge">Resultados (0)</span>
-          <span class="active-query-pill" id="active-query-pill" style="display:none;">
-            Consulta: <strong id="active-query-text"></strong>
-          </span>
-          <div class="view-tabs" style="display: inline-flex; background: var(--bg-subtle); border-radius: var(--radius-full); padding: 2px;">
-            <button class="tab-btn active" id="tab-cards" onclick="cambiarVistaResultados('cards')">Tarjetas</button>
-            <button class="tab-btn" id="tab-raw" onclick="cambiarVistaResultados('raw')">JSON en Crudo</button>
+          <!-- Encabezado de Resultados: Contador, Pestañas, Exportación -->
+          <div class="feed-header" id="feed-header-controls">
+            <div class="feed-title-wrap" style="display: flex; align-items: center; gap: 10px;">
+              <span class="results-badge" id="results-count-badge">Resultados (0)</span>
+              <span class="active-query-pill" id="active-query-pill" style="display:none;">
+                Consulta: <strong id="active-query-text"></strong>
+              </span>
+              <div class="view-tabs" style="display: inline-flex; background: var(--bg-subtle); border-radius: var(--radius-full); padding: 2px;">
+                <button class="tab-btn active" id="tab-cards" onclick="cambiarVistaResultados('cards')">Tarjetas</button>
+                <button class="tab-btn" id="tab-raw" onclick="cambiarVistaResultados('raw')">JSON en Crudo</button>
+              </div>
+            </div>
+            <div class="feed-actions-wrap" style="display: flex; align-items: center; gap: 8px;">
+              <button class="control-pill" id="export-csv-btn" onclick="exportarResultadosCSV()" title="Descargar como hoja de cálculo CSV">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Exportar CSV
+              </button>
+              <button class="control-pill" id="export-dossier-btn" onclick="abrirDossierModal()" title="Generar informe técnico estructurado">Dossier FTO</button>
+              <button class="control-pill" onclick="abrirComparadorModal()" title="Comparar patentes seleccionadas lado a lado">Comparar Lado a Lado</button>
+            </div>
           </div>
-        </div>
-        <div class="feed-actions-wrap" style="display: flex; align-items: center; gap: 8px;">
-          <button class="control-pill" id="export-csv-btn" onclick="exportarResultadosCSV()" title="Descargar como hoja de cálculo CSV">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Exportar CSV
-          </button>
-          <button class="control-pill" id="export-dossier-btn" onclick="abrirDossierModal()" title="Generar informe técnico estructurado">Dossier FTO</button>
-          <button class="control-pill" onclick="abrirComparadorModal()" title="Comparar patentes seleccionadas lado a lado">Comparar Lado a Lado</button>
-        </div>
-      </div>
 
-      <!-- Contenedor Principal de Tarjetas (Bento Feed) -->
-      <div id="view-cards" class="cards-feed"></div>
+          <!-- Contenedor Principal de Tarjetas (Bento Feed) -->
+          <div id="view-cards" class="cards-feed"></div>
 
-      <!-- Vista JSON en Crudo -->
-      <div id="view-raw" style="display: none;">
-        <pre id="raw-output" class="raw-pre"></pre>
+          <!-- Vista JSON en Crudo -->
+          <div id="view-raw" style="display: none;">
+            <pre id="raw-output" class="raw-pre"></pre>
+          </div>
+
+        </section>
       </div>
 
     </div>
@@ -4455,6 +4714,29 @@
     <div class="command-controls-row">
       <div class="filter-pills-group">
         
+        <!-- Selector de Estrategia de Búsqueda (Híbrida CPC+Multi-idioma / Clasificación / Exacta) -->
+        <div style="position: relative;">
+          <div class="control-pill" onclick="toggleSearchModeMenu(event)" id="search-mode-pill-btn" title="Elegir cómo SMIT amplía tu búsqueda en las APIs globales">
+            <span id="current-search-mode-label">Modo: Híbrida (CPC + Multi-idioma)</span>
+            <span class="ag-pill-caret" id="search-mode-caret">▼</span>
+          </div>
+          <div class="ag-popup-menu" id="search-mode-popup-menu">
+            <div class="ag-menu-header">Estrategia de Búsqueda Global</div>
+            <div class="ag-menu-option selected" onclick="setSearchMode('hybrid', event)" id="opt-smode-hybrid">
+              <span class="ag-option-label">Híbrida (CPC + Multi-idioma + Sinónimos)</span>
+              <span class="ag-option-check" id="check-smode-hybrid">✓</span>
+            </div>
+            <div class="ag-menu-option" onclick="setSearchMode('classification', event)" id="opt-smode-classification">
+              <span class="ag-option-label">Por Clasificación Técnica (CPC / IPC)</span>
+              <span class="ag-option-check" id="check-smode-classification" style="display:none;">✓</span>
+            </div>
+            <div class="ag-menu-option" onclick="setSearchMode('exact', event)" id="opt-smode-exact">
+              <span class="ag-option-label">Palabras Clave Exactas (Sin traducción)</span>
+              <span class="ag-option-check" id="check-smode-exact" style="display:none;">✓</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Selector de Fuentes estilo Model Selector -->
         <div style="position: relative;">
           <div class="control-pill" onclick="toggleSourceMenu(event)" id="source-pill-btn">
@@ -4955,6 +5237,10 @@
     let allRetrievedPatents = [];
     let allRetrievedLiterature = [];
     let currentEngineMode = 'patents'; // 'patents' | 'literature'
+    let currentSearchMode = 'hybrid'; // 'hybrid' | 'classification' | 'exact'
+    let currentWorkspaceView = 'split'; // 'split' | 'results' | 'chat'
+    let lastTotalGlobalFound = 0;
+    let lastSearchMeta = null;
     let currentTab = 'cards';
     let currentSource = 'all';
     let currentSort = 'relevance';
@@ -5369,10 +5655,13 @@
           lastExecutedQuery = '';
           lastFetchedQuery = '';
           lastFetchedSource = '';
+          lastTotalGlobalFound = 0;
+          lastSearchMeta = null;
           allRetrievedPatents = [];
           allRetrievedLiterature = [];
           currentRenderedPatents = [];
           currentRenderedLiterature = [];
+          renderSearchExpansionBanner(null);
           const activeQueryPill = document.getElementById('active-query-pill');
           if (activeQueryPill) activeQueryPill.style.display = 'none';
           const intelDropdown = document.getElementById('intel-dropdown');
@@ -5700,9 +5989,17 @@
       lastExecutedQuery = '';
       lastFetchedQuery = '';
       lastFetchedSource = '';
+      lastTotalGlobalFound = 0;
+      lastSearchMeta = null;
+      allRetrievedPatents = [];
+      allRetrievedLiterature = [];
+      currentRenderedPatents = [];
+      currentRenderedLiterature = [];
+      renderSearchExpansionBanner(null);
       const pill = document.getElementById('active-query-pill');
       if (pill) pill.style.display = 'none';
       mostrarZeroState();
+      syncWorkspaceSplitClasses();
     }
 
     // =========================================================
@@ -5738,6 +6035,166 @@
         menu.classList.add('show');
         if (btn) btn.classList.add('open');
       }
+    }
+
+    function toggleSearchModeMenu(e) {
+      if (e) e.stopPropagation();
+      cerrarMenuFuentes();
+      cerrarMenuFiltros();
+      cerrarHeaderHealth();
+      const menu = document.getElementById('search-mode-popup-menu');
+      const btn = document.getElementById('search-mode-pill-btn');
+      if (!menu) return;
+      const isOpen = menu.classList.contains('show');
+      if (isOpen) {
+        cerrarMenuSearchMode();
+      } else {
+        menu.classList.add('show');
+        if (btn) btn.classList.add('open');
+      }
+    }
+
+    function cerrarMenuSearchMode() {
+      const menu = document.getElementById('search-mode-popup-menu');
+      const btn = document.getElementById('search-mode-pill-btn');
+      if (menu) menu.classList.remove('show');
+      if (btn) btn.classList.remove('open');
+    }
+
+    function setSearchMode(mode, e) {
+      if (e) e.stopPropagation();
+      const valid = ['hybrid', 'classification', 'exact'].includes(mode) ? mode : 'hybrid';
+      currentSearchMode = valid;
+      try { localStorage.setItem('capstone-search-mode', valid); } catch (err) {}
+
+      const labelMap = {
+        hybrid: 'Modo: Híbrida (CPC + Multi-idioma)',
+        classification: 'Modo: Clasificación CPC/IPC',
+        exact: 'Modo: Palabras Clave Exactas'
+      };
+      const lbl = document.getElementById('current-search-mode-label');
+      if (lbl) lbl.textContent = labelMap[valid];
+
+      ['hybrid', 'classification', 'exact'].forEach(m => {
+        const chk = document.getElementById(`check-smode-${m}`);
+        const opt = document.getElementById(`opt-smode-${m}`);
+        if (chk) chk.style.display = m === valid ? 'inline' : 'none';
+        if (opt) opt.classList.toggle('selected', m === valid);
+      });
+      cerrarMenuSearchMode();
+
+      if (lastExecutedQuery) {
+        buscar(lastExecutedQuery, { forceSearch: true, skipAgent: true });
+      }
+    }
+
+    function setWorkspaceView(view) {
+      const valid = ['split', 'results', 'chat'].includes(view) ? view : 'split';
+      currentWorkspaceView = valid;
+      try { localStorage.setItem('capstone-workspace-view', valid); } catch (err) {}
+
+      const panes = document.getElementById('workspace-panes');
+      const resultsBanner = document.getElementById('results-zone-banner');
+      if (panes) panes.setAttribute('data-layout', valid);
+
+      ['split', 'results', 'chat'].forEach(v => {
+        const btn = document.getElementById(`ws-view-${v}`);
+        if (btn) btn.classList.toggle('active', v === valid);
+      });
+
+      const hint = document.getElementById('ws-active-layout-hint');
+      if (hint) {
+        if (valid === 'split') hint.textContent = 'Chat IA a la izquierda | Patentes a la derecha (scroll independiente)';
+        else if (valid === 'results') hint.textContent = 'Vista enfocada exclusivamente en tarjetas de patentes y literatura';
+        else hint.textContent = 'Vista enfocada exclusivamente en el diálogo con el Agente Pericial';
+      }
+
+      if (valid === 'chat') {
+        mostrarPanelIa({ keepLayout: true });
+      }
+      if (resultsBanner) {
+        resultsBanner.style.display = (valid === 'split' && panes && panes.classList.contains('agent-open')) ? 'flex' : 'none';
+      }
+      syncWorkspaceSplitClasses();
+    }
+
+    function syncWorkspaceSplitClasses() {
+      const panel = document.getElementById('ai-unified-panel');
+      const panes = document.getElementById('workspace-panes');
+      const feed = document.getElementById('col-search-results');
+      const resultsBanner = document.getElementById('results-zone-banner');
+      const ws = getActiveWorkspace();
+      const history = ws ? (ws.chatHistory || []) : sessionChatHistory;
+      const isAgentOpen = Boolean(panel && panel.classList.contains('active'));
+
+      if (panes) panes.classList.toggle('agent-open', isAgentOpen);
+      if (feed) feed.classList.toggle('has-split-agent', isAgentOpen && currentWorkspaceView === 'split');
+      if (resultsBanner) {
+        resultsBanner.style.display = (isAgentOpen && currentWorkspaceView === 'split') ? 'flex' : 'none';
+      }
+
+      const resCntEl = document.getElementById('ws-tab-results-count');
+      const chatCntEl = document.getElementById('ws-tab-chat-count');
+      if (resCntEl) {
+        const activeCount = currentEngineMode === 'literature' ? (allRetrievedLiterature.length || 0) : (currentRenderedPatents.length || allRetrievedPatents.length || 0);
+        resCntEl.textContent = String(activeCount);
+      }
+      if (chatCntEl) {
+        chatCntEl.textContent = String((history || []).length);
+      }
+    }
+
+    function irAZonaResultados() {
+      if (window.innerWidth < 1080) {
+        setWorkspaceView('results');
+      } else {
+        const el = document.getElementById('results-dock-pane');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function renderSearchExpansionBanner(meta) {
+      const banner = document.getElementById('search-expansion-banner');
+      if (!banner) return;
+      if (!meta || (!meta.original_query && !meta.english_core)) {
+        banner.style.display = 'none';
+        banner.innerHTML = '';
+        return;
+      }
+      const modeNames = {
+        hybrid: 'Híbrida (Clasificación CPC + Multi-idioma)',
+        classification: 'Prioridad por Clasificación Técnica (CPC/IPC)',
+        exact: 'Palabras Clave Exactas'
+      };
+      const terms = Array.isArray(meta.expanded_terms) ? meta.expanded_terms.slice(0, 5) : [];
+      const cpcs = Array.isArray(meta.applied_cpcs) ? meta.applied_cpcs.slice(0, 4) : [];
+      const totalEst = Number(meta.total_global_estimated || 0);
+      const totalTxt = totalEst > 0
+        ? `Alcance estimado en red global: <strong>~${totalEst.toLocaleString('es-CO')}</strong> documentos`
+        : 'Búsqueda completada';
+
+      banner.style.display = 'flex';
+      banner.innerHTML = `
+        <div class="search-expansion-top">
+          <div>
+            <strong style="color: var(--text-high);">Estrategia: ${escapeHtml(modeNames[meta.search_mode] || meta.search_mode || 'Híbrida')}</strong>
+            ${meta.detected_language && meta.detected_language !== 'en' && meta.detected_language !== 'direct'
+              ? ` <span style="opacity:0.8;">(${escapeHtml(meta.detected_language.toUpperCase())} &rarr; EN: "${escapeHtml(meta.english_core || '')}")</span>`
+              : ''}
+            &nbsp;&bull;&nbsp; ${totalTxt}
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            ${meta.search_mode !== 'classification' ? `<button class="zone-jump-link" onclick="setSearchMode('classification')">Priorizar Clasificación CPC</button>` : ''}
+            ${meta.search_mode !== 'exact' ? `<button class="zone-jump-link" onclick="setSearchMode('exact')">Modo Exacto</button>` : `<button class="zone-jump-link" onclick="setSearchMode('hybrid')">Activar Multi-idioma + CPC</button>`}
+          </div>
+        </div>
+        ${terms.length > 0 || cpcs.length > 0 ? `
+          <div class="search-expansion-chips">
+            ${terms.length > 0 ? `<span style="font-size:11px; color:var(--text-muted);">Términos globales:</span>${terms.map(t => `<span class="exp-term-chip">${escapeHtml(t)}</span>`).join('')}` : ''}
+            ${cpcs.length > 0 ? `<span style="font-size:11px; color:var(--text-muted); margin-left:4px;">CPC aplicadas:</span>${cpcs.map(c => `<span class="exp-cpc-chip" onclick="refinarConCPC('${escapeJsAttr(c.code)}')" title="${escapeHtml(c.label || '')}">${escapeHtml(c.code)}</span>`).join('')}` : ''}
+          </div>
+        ` : ''}
+      `;
     }
 
     function toggleHeaderHealth(e) {
@@ -5799,6 +6256,9 @@
       }
       if (!e.target.closest('#source-pill-btn') && !e.target.closest('#source-popup-menu') && !e.target.closest('#health-submenu')) {
         cerrarMenuFuentes();
+      }
+      if (!e.target.closest('#search-mode-pill-btn') && !e.target.closest('#search-mode-popup-menu')) {
+        cerrarMenuSearchMode();
       }
       if (!e.target.closest('#filter-pill-btn') && !e.target.closest('#filter-popup-menu')) {
         cerrarMenuFiltros();
@@ -6103,20 +6563,29 @@
       AgentActivityTree.start(q);
 
       if (currentEngineMode === 'literature') {
-        cardsContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; padding: 30px; text-align: center;"><span class="thinking-spinner" style="margin-right:8px;"></span>Consultando literatura científica y papers arbitrados en OpenAlex...</div>';
+        cardsContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; padding: 30px; text-align: center;"><span class="thinking-spinner" style="margin-right:8px;"></span>Consultando literatura científica y papers arbitrados en OpenAlex (búsqueda multi-idioma)...</div>';
         try {
-          const res = await fetch(`/api/literature?q=${encodeURIComponent(q)}&page=1`);
+          const litQuery = (typeof customSearchTopic !== 'undefined' && customSearchTopic) ? customSearchTopic : q;
+          const res = await fetch(`/api/literature?q=${encodeURIComponent(litQuery)}&page=1&mode=${encodeURIComponent(currentSearchMode)}`);
           const data = await res.json();
           rawJsonData = data;
           if (rawOutput) rawOutput.textContent = JSON.stringify(data, null, 2);
           allRetrievedLiterature = data.organic_results || data.works || [];
+          lastTotalGlobalFound = Number(data.total_found || allRetrievedLiterature.length) || 0;
+          lastSearchMeta = data.search_meta || null;
+          renderSearchExpansionBanner(lastSearchMeta);
           if (intelDropdown) intelDropdown.style.display = 'none';
 
           const countBadge = document.getElementById('results-count-badge');
-          if (countBadge) countBadge.textContent = `${allRetrievedLiterature.length} papers`;
+          if (countBadge) {
+            countBadge.textContent = lastTotalGlobalFound > allRetrievedLiterature.length
+              ? `Resultados: ${allRetrievedLiterature.length} papers (~${lastTotalGlobalFound.toLocaleString('es-CO')} globales)`
+              : `${allRetrievedLiterature.length} papers`;
+          }
 
           AgentActivityTree.logStep('literature_fetched', `Recuperados ${allRetrievedLiterature.length} papers de OpenAlex en tiempo real`);
           renderizarLiteratura(allRetrievedLiterature);
+          syncWorkspaceSplitClasses();
           if (!options.skipAgent) {
             consultarAgenteIA(q, allRetrievedLiterature, false, q);
           } else {
@@ -6131,12 +6600,27 @@
         return;
       }
 
-      // MODO PATENTES
-      cardsContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; padding: 30px; text-align: center;"><span class="thinking-spinner" style="margin-right:8px;"></span>Consultando patentes en las redes oficiales conectadas (Google Patents, Europe PMC, PatentBrief)...</div>';
+      // MODO PATENTES (HÍBRIDA CPC + MULTI-IDIOMA / CLASIFICACIÓN / EXACTA)
+      cardsContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; padding: 30px; text-align: center;"><span class="thinking-spinner" style="margin-right:8px;"></span>Ampliando consulta multi-idioma y clasificaciones CPC en redes globales (Google Patents, Europe PMC, PatentBrief)...</div>';
 
       try {
         const apiQuery = typeof customSearchTopic !== 'undefined' && customSearchTopic ? customSearchTopic : q;
-        const res = await fetch(`/api/patents?q=${encodeURIComponent(apiQuery)}&source=${encodeURIComponent(currentSource)}`);
+        let res;
+        if (cfgAiKey && cfgAiKey.trim()) {
+          res = await fetch('/api/patents', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              q: apiQuery,
+              source: currentSource,
+              mode: currentSearchMode,
+              apiKey: cfgAiKey.trim(),
+              provider: cfgAiProvider
+            })
+          });
+        } else {
+          res = await fetch(`/api/patents?q=${encodeURIComponent(apiQuery)}&source=${encodeURIComponent(currentSource)}&mode=${encodeURIComponent(currentSearchMode)}`);
+        }
         const data = await res.json();
 
         rawJsonData = data;
@@ -6144,6 +6628,9 @@
         allRetrievedPatents = data.organic_results || [];
         lastFetchedQuery = q;
         lastFetchedSource = currentSource;
+        lastTotalGlobalFound = Number(data.total_found || allRetrievedPatents.length) || 0;
+        lastSearchMeta = data.search_meta || null;
+        renderSearchExpansionBanner(lastSearchMeta);
 
         if (data.cpc_summary && data.cpc_summary.length > 0) {
           registrarActividadUsuario({ cpcs: data.cpc_summary.map(c => c.code) });
@@ -6164,7 +6651,7 @@
           if (intelDropdown) intelDropdown.style.display = 'none';
         }
 
-        AgentActivityTree.logStep('patents_fetched', `Recuperadas ${allRetrievedPatents.length} patentes oficiales (${currentSource})`);
+        AgentActivityTree.logStep('patents_fetched', `Recuperadas ${allRetrievedPatents.length} patentes oficiales (${currentSource}, alcance ~${lastTotalGlobalFound.toLocaleString('es-CO')})`);
         applyFiltersAndRender();
         if (!options.skipAgent) {
           consultarAgenteIA(q, allRetrievedPatents, false, q);
@@ -6520,9 +7007,13 @@
         let tags = [];
         if (isShuffleActive && currentSource === 'all') tags.push('Shuffle APIs');
         if (isCountryShuffleActive) tags.push('Shuffle Países');
-        countBadge.textContent = tags.length ? `Resultados: ${filtered.length} (${tags.join(' · ')})` : `Resultados (${filtered.length})`;
+        const globalNote = lastTotalGlobalFound > filtered.length ? ` · ~${lastTotalGlobalFound.toLocaleString('es-CO')} globales` : '';
+        countBadge.textContent = tags.length
+          ? `Resultados: ${filtered.length}${globalNote} (${tags.join(' · ')})`
+          : `Resultados (${filtered.length}${globalNote})`;
       }
       renderizarPatentes(filtered);
+      syncWorkspaceSplitClasses();
     }
 
     function getJurisdictionFlag(pubNum) {
@@ -7865,6 +8356,7 @@
         if (panel && (!liveContainer || liveContainer.style.display === 'none')) {
           panel.classList.remove('active');
         }
+        syncWorkspaceSplitClasses();
         return;
       }
 
@@ -7913,6 +8405,7 @@
           });
         } catch (e) {}
       }
+      syncWorkspaceSplitClasses();
     }
 
     // =========================================================
@@ -8151,6 +8644,16 @@
           const label = th === 'light' ? 'Modo Claro' : (th === 'dark' ? 'Modo Oscuro' : 'Alternar Tema');
           return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('set_theme', '${escapeJsAttr(th)}')">Tema visual: <strong>${escapeHtml(label)}</strong></button></div>`);
         }
+        if (verb === 'SET_WORKSPACE_VIEW') {
+          const wv = attrs.view || 'split';
+          const wLabels = { split: 'Vista Dividida (Chat | Patentes)', results: 'Solo Patentes / Resultados', chat: 'Solo Chat del Agente' };
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('set_workspace_view', '${escapeJsAttr(wv)}')">Espacio de trabajo: <strong>${escapeHtml(wLabels[wv] || wv)}</strong></button></div>`);
+        }
+        if (verb === 'SEARCH_MODE') {
+          const sm = attrs.mode || 'hybrid';
+          const sLabels = { hybrid: 'Híbrida (CPC + Multi-idioma)', classification: 'Por Clasificación CPC/IPC', exact: 'Palabras Clave Exactas' };
+          return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('search_mode', '${escapeJsAttr(sm)}')">Modo búsqueda: <strong>${escapeHtml(sLabels[sm] || sm)}</strong></button></div>`);
+        }
         if (verb === 'SET_VIEW') {
           const v = attrs.view || 'cards';
           return pushWidget(`<div style="margin: 8px 0;"><button class="ai-action-btn" onclick="ejecutarAccionAgente('set_view', '${escapeJsAttr(v)}')">Vista: <strong>${escapeHtml(v === 'raw' ? 'JSON en Crudo' : 'Tarjetas')}</strong></button></div>`);
@@ -8309,6 +8812,10 @@
         mostrarNotificacion(`Tema cambiado a ${document.documentElement.getAttribute('data-theme') === 'light' ? 'Modo Claro' : 'Modo Oscuro'}.`, 'ok');
       } else if (a === 'set_view') {
         cambiarVista(val === 'raw' ? 'raw' : 'cards');
+      } else if (a === 'set_workspace_view') {
+        setWorkspaceView(val || 'split');
+      } else if (a === 'search_mode') {
+        setSearchMode(val || 'hybrid');
       } else if (a === 'toggle_intel') {
         const wantOpen = val !== 'false';
         if (wantOpen !== isIntelOpen) toggleIntelBody();
@@ -8460,6 +8967,10 @@
           setEngineMode(attrs.mode, { skipAgent: true });
         } else if (verb === 'SET_VIEW' && attrs.view) {
           cambiarVista(attrs.view === 'raw' ? 'raw' : 'cards');
+        } else if (verb === 'SET_WORKSPACE_VIEW' && attrs.view) {
+          setWorkspaceView(attrs.view);
+        } else if (verb === 'SEARCH_MODE' && attrs.mode) {
+          setSearchMode(attrs.mode);
         } else if (verb === 'TOGGLE_INTEL') {
           const wantOpen = attrs.open !== 'false';
           if (wantOpen !== isIntelOpen) toggleIntelBody();
@@ -8588,16 +9099,27 @@
       if (panel) panel.classList.remove('active');
       const restoreBtn = document.getElementById('btn-restore-ai-panel');
       if (restoreBtn) restoreBtn.style.display = 'inline-flex';
+      syncWorkspaceSplitClasses();
     }
 
-    function mostrarPanelIa() {
+    function mostrarPanelIa(opts = {}) {
       const panel = document.getElementById('ai-unified-panel');
       if (panel) {
         panel.classList.add('active');
+        if (!opts.keepLayout && currentWorkspaceView === 'results') {
+          currentWorkspaceView = window.innerWidth >= 1080 ? 'split' : 'chat';
+          const panes = document.getElementById('workspace-panes');
+          if (panes) panes.setAttribute('data-layout', currentWorkspaceView);
+          ['split', 'results', 'chat'].forEach(v => {
+            const btn = document.getElementById(`ws-view-${v}`);
+            if (btn) btn.classList.toggle('active', v === currentWorkspaceView);
+          });
+        }
         panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
       const restoreBtn = document.getElementById('btn-restore-ai-panel');
       if (restoreBtn) restoreBtn.style.display = 'none';
+      syncWorkspaceSplitClasses();
     }
 
     // =========================================================
@@ -8612,6 +9134,7 @@
       if (panel) panel.classList.add('active');
       if (restoreBtn) restoreBtn.style.display = 'none';
       if (modelTag) modelTag.textContent = cfgAiModel || 'Gemini Flash Lite';
+      syncWorkspaceSplitClasses();
 
       AgentActivityTree.start(query);
 
@@ -8638,6 +9161,8 @@
 
       const uiState = {
         engineMode: currentEngineMode,
+        searchMode: currentSearchMode,
+        workspaceView: currentWorkspaceView,
         selectedSource: currentSource,
         statusFilter: currentStatusFilter,
         jurisdictionFilter: currentJurisdictionFilter,
@@ -9335,6 +9860,14 @@
         }
         const safeThumb = sanitizeHttpUrl(p.thumbnail);
         const safePdf = sanitizeHttpUrl(p.pdf);
+        const strategyLabels = {
+          classification: 'Vía Clasificación CPC',
+          multilingual: 'Vía Multi-idioma',
+          hybrid: 'Híbrida'
+        };
+        const stratBadge = strategyLabels[p.match_strategy]
+          ? `<span class="cpc-badge" style="border-color:rgba(168,85,247,0.3); color:var(--text-medium);">${escapeHtml(strategyLabels[p.match_strategy])}</span>`
+          : '';
 
         return `
           <article class="patent-card" id="patent-card-${idx}">
@@ -9343,6 +9876,7 @@
                 <span class="patent-id-pill">${pubNum}</span>
                 <span class="fto-pill ${statusClass}">${statusText}</span>
                 <span class="cpc-badge">${sourceName}</span>
+                ${stratBadge}
               </div>
               <span style="font-size: 11.5px; color: var(--text-muted);">Pub: ${pubDate}</span>
             </div>
@@ -9709,6 +10243,34 @@
       }
       abrirComparadorPatentes(p1Id, p2Id);
     }
+
+    (function initWorkspaceAndSearchPrefs() {
+      try {
+        const savedMode = localStorage.getItem('capstone-search-mode');
+        if (savedMode && ['hybrid', 'classification', 'exact'].includes(savedMode)) {
+          currentSearchMode = savedMode;
+          const labelMap = {
+            hybrid: 'Modo: Híbrida (CPC + Multi-idioma)',
+            classification: 'Modo: Clasificación CPC/IPC',
+            exact: 'Modo: Palabras Clave Exactas'
+          };
+          const lbl = document.getElementById('current-search-mode-label');
+          if (lbl) lbl.textContent = labelMap[savedMode];
+          ['hybrid', 'classification', 'exact'].forEach(m => {
+            const chk = document.getElementById(`check-smode-${m}`);
+            const opt = document.getElementById(`opt-smode-${m}`);
+            if (chk) chk.style.display = m === savedMode ? 'inline' : 'none';
+            if (opt) opt.classList.toggle('selected', m === savedMode);
+          });
+        }
+        const savedView = localStorage.getItem('capstone-workspace-view');
+        if (savedView && ['split', 'results', 'chat'].includes(savedView)) {
+          setWorkspaceView(savedView);
+        } else {
+          syncWorkspaceSplitClasses();
+        }
+      } catch (e) {}
+    })();
 
   </script>
 

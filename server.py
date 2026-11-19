@@ -88,7 +88,190 @@ def extract_patent_classifications(pub_num):
     except Exception:
         return []
 
-def query_google_patents(q):
+TECHNICAL_CPC_SEEDS = [
+    (re.compile(r'\b(pump|bomba|impeller|centrifugal|hydraulic|suction)\b', re.I), [{"code": "F04D", "label": "Bombas rotodinámicas / flujo continuo"}, {"code": "F04B", "label": "Bombas de desplazamiento positivo"}], ["centrifugal pump", "liquid pump", "hydraulic pump", "submersible pump"]),
+    (re.compile(r'\b(battery|electrolyte|lithium|anode|cathode|bater[ií]a|acumulador)\b', re.I), [{"code": "H01M10/05", "label": "Baterías recargables / iones de litio"}, {"code": "H01M4/00", "label": "Electrodos electroquímicos"}], ["solid state battery", "electrochemical cell", "lithium ion battery", "secondary battery"]),
+    (re.compile(r'\b(solar|photovoltaic|panel solar|fotovoltaica|perovskite)\b', re.I), [{"code": "H02S", "label": "Generación de energía fotovoltaica"}, {"code": "H10K30/00", "label": "Dispositivos fotovoltaicos perovskita/orgánicos"}], ["photovoltaic module", "solar cell", "solar energy collector"]),
+    (re.compile(r'\b(robot|gripper|actuator|rob[oó]tica|brazo|manipulator|haptic)\b', re.I), [{"code": "B25J", "label": "Manipuladores y sistemas robóticos"}, {"code": "B25J15/00", "label": "Cabezales y pinzas de agarre"}], ["robotic manipulator", "soft actuator", "end effector", "robotic gripper"]),
+    (re.compile(r'\b(water filter|purifier|desalination|filtro de agua|purificador|osmosis|tratamiento de agua)\b', re.I), [{"code": "C02F", "label": "Tratamiento de agua y aguas residuales"}, {"code": "B01D", "label": "Separación y filtración de fluidos"}], ["water filtration", "water purification", "membrane filtration"]),
+    (re.compile(r'\b(sensor|biosensor|detection|medidor|detector)\b', re.I), [{"code": "G01N", "label": "Análisis e investigación de materiales"}, {"code": "G01D", "label": "Medición y transductores generales"}], ["optical sensor", "electrochemical sensor", "sensing device"]),
+    (re.compile(r'\b(drone|uav|quadcopter|dron|aeronave no tripulada)\b', re.I), [{"code": "B64U", "label": "Vehículos aéreos no tripulados (UAV)"}, {"code": "B64C", "label": "Aeronaves y control de vuelo"}], ["unmanned aerial vehicle", "autonomous drone", "aerial rotorcraft"]),
+    (re.compile(r'\b(wind turbine|aerogenerador|e[oó]lic[oa])\b', re.I), [{"code": "F03D", "label": "Motores eólicos y turbinas de viento"}], ["wind turbine", "wind power generator", "rotor blade"]),
+    (re.compile(r'\b(prosthetic|pr[oó]tesis|implant|medical|quir[uú]rgic|catheter|stent)\b', re.I), [{"code": "A61F", "label": "Prótesis e implantes médicos"}, {"code": "A61B", "label": "Diagnóstico y cirugía médica"}], ["medical prosthesis", "surgical device", "biomedical implant"]),
+    (re.compile(r'\b(motor|electric motor|inverter|motor el[eé]ctrico)\b', re.I), [{"code": "H02K", "label": "Máquinas dinamoeléctricas y motores"}, {"code": "H02P", "label": "Control de motores eléctricos"}], ["electric motor", "brushless motor", "stator rotor assembly"]),
+    (re.compile(r'\b(neural network|deep learning|artificial intelligence|inteligencia artificial|machine learning|modelo ia)\b', re.I), [{"code": "G06N3/08", "label": "Redes neuronales y aprendizaje profundo"}, {"code": "G06F", "label": "Procesamiento digital de datos"}], ["machine learning model", "neural network architecture", "deep learning inference"]),
+]
+
+def _clean_qterm(t):
+    return re.sub(r'\s+', ' ', re.sub(r'["<>\\]', ' ', str(t or ''))).strip()[:80]
+
+def build_enriched_search_plan(raw_query, raw_mode='hybrid', api_key='', provider=''):
+    original = str(raw_query or '').strip()[:500]
+    mode = str(raw_mode or 'hybrid').lower().strip()
+    if mode not in ('hybrid', 'classification', 'exact'):
+        mode = 'hybrid'
+
+    is_direct_id = bool(re.match(r'^(?:US|EP|WO|CN|JP|KR|DE|ES|GB|FR|BR|CO)[0-9]{4,12}[A-Z0-9]*$', original, re.I))
+    if not original or mode == 'exact' or is_direct_id:
+        return {
+            "original_query": original,
+            "search_mode": mode,
+            "detected_language": "direct",
+            "english_core": original,
+            "expanded_terms": [original],
+            "applied_cpcs": [],
+            "google_query": original,
+            "classification_query": None,
+            "europe_pmc_query": original,
+            "patent_brief_query": original,
+            "openalex_query": original,
+            "expansion_source": "direct-id" if is_direct_id else "exact"
+        }
+
+    explicit_cpcs = []
+    def _collect_cpc(m):
+        explicit_cpcs.append(m.group(1).upper())
+        return ' '
+    q_no_cpc = re.sub(r'\b(?:CPC|IPC):([A-H]\d{2}[A-Z](?:[0-9/]+)?)\b', _collect_cpc, original, flags=re.I)
+    q_no_cpc = re.sub(r'\s+', ' ', q_no_cpc).strip()
+
+    has_bool = bool(re.search(r'\b(?:AND|OR|NOT)\b|(?:CPC:|IPC:|TI=|AB=|CL=)', q_no_cpc, re.I))
+    if has_bool and not re.search(r'[áéíóúñ¿¡]', q_no_cpc, re.I):
+        base_q = q_no_cpc or original
+        return {
+            "original_query": original,
+            "search_mode": mode,
+            "detected_language": "boolean",
+            "english_core": base_q,
+            "expanded_terms": [base_q],
+            "applied_cpcs": [{"code": c, "label": f"Clasificación explícita {c}"} for c in explicit_cpcs],
+            "google_query": original,
+            "classification_query": " OR ".join(explicit_cpcs) if explicit_cpcs else None,
+            "europe_pmc_query": base_q,
+            "patent_brief_query": re.sub(r'\b(?:AND|OR|NOT)\b', ' ', re.sub(r'[()"]', ' ', base_q)).strip()[:80],
+            "openalex_query": base_q,
+            "expansion_source": "boolean-explicit"
+        }
+
+    exp_input = q_no_cpc or original
+    detected_lang = 'auto'
+    english_core = ''
+    syn_list = []
+    cpc_map = {}
+    for c in explicit_cpcs:
+        cpc_map[c] = f"Clasificación aplicada {c}"
+    expansion_source = 'heuristic'
+
+    gkey = (api_key or os.environ.get('GEMINI_API_KEY', '')).strip()
+    if gkey and (not provider or provider == 'gemini'):
+        try:
+            prompt = f"""Translate and expand this patent/technology search query into structured JSON ONLY (no markdown).
+Input query: "{exp_input}"
+Return exact JSON schema:
+{{"detected_language":"es|en|pt|fr|de|auto","english_core":"concise English canonical technical term (2-4 words)","synonyms":["3 to 5 concise English patent synonyms"],"cpc_codes":[{{"code":"CPC group like F04D or F04D13/06","label":"short Spanish label max 48 chars"}}]}}"""
+            url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+            req = urllib.request.Request(url, headers={'Content-Type': 'application/json', 'x-goog-api-key': gkey}, data=json.dumps({"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"temperature": 0.1, "maxOutputTokens": 360}}).encode('utf-8'))
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                gd = json.loads(resp.read().decode('utf-8'))
+                raw_txt = gd.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
+                cleaned = re.sub(r'```json|```', '', raw_txt, flags=re.I).strip()
+                s, e = cleaned.find('{'), cleaned.rfind('}')
+                if s != -1 and e != -1:
+                    parsed_ai = json.loads(cleaned[s:e+1])
+                    if parsed_ai.get('english_core'):
+                        detected_lang = str(parsed_ai.get('detected_language') or 'auto')[:12]
+                        english_core = _clean_qterm(parsed_ai['english_core'])
+                        for s_item in (parsed_ai.get('synonyms') or []):
+                            cs = _clean_qterm(s_item)
+                            if cs and cs not in syn_list:
+                                syn_list.append(cs)
+                        for c_item in (parsed_ai.get('cpc_codes') or []):
+                            code = re.sub(r'[^A-Z0-9/]', '', str(c_item.get('code') if isinstance(c_item, dict) else c_item).upper())[:14]
+                            if re.match(r'^[A-H]\d{2}[A-Z](?:\d+(?:\/\d+)?)?$', code) and code not in cpc_map:
+                                lbl = str(c_item.get('label') if isinstance(c_item, dict) else '') or f"Clase CPC {code}"
+                                cpc_map[code] = lbl[:60]
+                        expansion_source = 'gemini+cpc'
+        except Exception:
+            pass
+
+    if not english_core:
+        try:
+            tu = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q={urllib.parse.quote(exp_input)}"
+            with urllib.request.urlopen(urllib.request.Request(tu, headers={'User-Agent': 'Mozilla/5.0'}), timeout=2) as tr_resp:
+                tr_data = json.loads(tr_resp.read().decode('utf-8'))
+                tr_txt = ''.join(seg[0] for seg in (tr_data[0] or []) if seg and seg[0])
+                if tr_txt.strip():
+                    english_core = _clean_qterm(tr_txt)
+                    if len(tr_data) > 2 and isinstance(tr_data[2], str):
+                        detected_lang = tr_data[2][:12]
+                    expansion_source = 'translate+cpc' if cpc_map else 'translate+heuristic'
+        except Exception:
+            english_core = _clean_qterm(exp_input)
+            detected_lang = 'es' if re.search(r'[áéíóúñ¿¡]', exp_input, re.I) else 'en'
+
+    words = english_core.split()
+    if len(words) >= 2:
+        last_w = words[-1]
+        if not last_w.endswith('s'):
+            syn_list.append(" ".join(words[:-1] + [last_w + "s"]))
+
+    comb_text = f"{exp_input} {english_core}"
+    for rx, seed_cpcs, seed_syns in TECHNICAL_CPC_SEEDS:
+        if rx.search(comb_text):
+            for s_item in seed_syns:
+                if s_item not in syn_list:
+                    syn_list.append(s_item)
+            for sc in seed_cpcs:
+                if sc['code'] not in cpc_map:
+                    cpc_map[sc['code']] = sc['label']
+
+    ordered_terms = []
+    if english_core:
+        ordered_terms.append(english_core)
+    for s_item in syn_list:
+        if s_item.lower() != english_core.lower() and len(ordered_terms) < 5 and s_item not in ordered_terms:
+            ordered_terms.append(s_item)
+    orig_clean = _clean_qterm(exp_input)
+    if orig_clean and not any(t.lower() == orig_clean.lower() for t in ordered_terms):
+        ordered_terms.append(orig_clean)
+
+    cpc_list = [{"code": k, "label": v} for k, v in list(cpc_map.items())[:4]]
+    quoted_terms = [f'"{t}"' if ' ' in t else t for t in ordered_terms]
+    multi_or = f"({' OR '.join(quoted_terms)})" if len(quoted_terms) > 1 else (quoted_terms[0] if quoted_terms else orig_clean)
+    cpc_codes = [c['code'] for c in cpc_list]
+    cpc_or = f"({' OR '.join(cpc_codes)})" if len(cpc_codes) > 1 else (cpc_codes[0] if cpc_codes else '')
+
+    google_q = multi_or
+    class_q = None
+    if explicit_cpcs:
+        google_q = f"{multi_or} ({' OR '.join(explicit_cpcs)})"
+        class_q = " OR ".join(explicit_cpcs)
+    elif mode == 'classification' and cpc_or:
+        en_part = f'"{english_core}"' if ' ' in english_core else english_core
+        google_q = f"({cpc_or}) {en_part}" if english_core else cpc_or
+        class_q = cpc_or
+    elif cpc_or:
+        en_part = f'"{english_core}"' if ' ' in english_core else english_core
+        class_q = f"({cpc_or}) {en_part}" if english_core else cpc_or
+
+    oa_q = f'("{english_core}" OR "{orig_clean}")' if (english_core and english_core.lower() != orig_clean.lower()) else orig_clean
+
+    return {
+        "original_query": original,
+        "search_mode": mode,
+        "detected_language": detected_lang,
+        "english_core": english_core or orig_clean,
+        "expanded_terms": ordered_terms,
+        "applied_cpcs": cpc_list,
+        "google_query": google_q,
+        "classification_query": class_q,
+        "europe_pmc_query": multi_or,
+        "patent_brief_query": english_core or orig_clean,
+        "openalex_query": oa_q,
+        "expansion_source": expansion_source
+    }
+
+def query_google_patents(q, match_tag='multilingual'):
     """Consulta patentes en Google Patents (intenta motor directo XHR, fallback a SerpApi)"""
     results = []
     cpc_summaries = []
@@ -145,6 +328,7 @@ def query_google_patents(q):
                     results.append({
                         "source": "Google Patents",
                         "source_badge": "google",
+                        "match_strategy": match_tag,
                         "publication_number": pub_num,
                         "title": (pat.get('title') or 'Sin título registrado').strip(),
                         "snippet": (pat.get('snippet') or '').strip(),
@@ -505,13 +689,15 @@ class PatentSearchHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
-        if parsed.path in ('/api/translate', '/api/agent'):
+        if parsed.path in ('/api/translate', '/api/agent', '/api/patents'):
             if not self._enforce_optional_auth():
                 return
         if parsed.path == '/api/translate':
             self.handle_translate_post(parsed)
         elif parsed.path == '/api/agent':
             self.handle_agent_post(parsed)
+        elif parsed.path == '/api/patents':
+            self.handle_patents_post(parsed)
         else:
             self.send_error(404, "Endpoint not found")
 
@@ -806,11 +992,11 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes, los demás proyect
 - Memoria Global y Otros Chats: Usa el CONOCIMIENTO GENERAL DEL USUARIO y el MAPA GLOBAL DE PROYECTOS para responder sobre consultas o chats en otros proyectos, recordar preferencias con [ACTION:REMEMBER_USER note="..."], o actualizar ideas de inicio con [ACTION:REFRESH_SUGGESTIONS].
 - Metodologías: E-T-S, Filtro Cero (OpenAlex), FTO y Dominio Público, Normas PCT (Reglas 11-13), Citation Snowballing (US10268731B2), Regla de Todos los Elementos (US11947605B2), Océanos Azules (US9201966B2 / US9836805B2), y Protección IP de Software en Colombia/CAN.
 - Fuentes integradas: Activas en vivo (Google Patents, Europe PMC [EPO/WIPO], PatentBrief y OpenAlex) y listas para credenciales institucionales (EPO OPS y The Lens).
-- Botones de la interfaz SMIT (explicar con precisión si preguntan): Conmutador Patentes/Literatura, Selector Proyecto (+ Nuevo, Eliminar Proyecto), Glosario y Metodologías (5 pestañas), Dossier FTO, APIs & IA, 100% Online, Tema Oscuro/Claro, Ruta JTBD (1. Ecuación E-T-S, 2. Autocrítica PCT, 3. Dictamen FTO, 4. Mapa Competitivo y N Guardadas), Modelo IA (Flash/Pro), Copiar, Limpiar Chat, Minimizar, Tarjetas/JSON en Crudo, Exportar CSV, Comparar Lado a Lado, Inspeccionar Expediente (Ficha/PDF/Pantalla Completa), Snowballing Citas, Lámina Técnica, Guardar Semilla y Barra Inferior (+ Todas las fuentes, Shuffle 1 de c/API, Filtro País, Relevancia, Voz).
+- Botones de la interfaz SMIT (explicar con precisión si preguntan): Conmutador Patentes/Literatura, Selector Proyecto (+ Nuevo, Eliminar Proyecto), Conmutador de Espacio ("Vista Dividida", "Solo Patentes / Resultados", "Solo Chat del Agente"), Banner "Estrategia de Búsqueda Aplicada" (expansión multi-idioma y CPC), Glosario y Metodologías (5 pestañas), Dossier FTO, APIs & IA, 100% Online, Tema Oscuro/Claro, Ruta JTBD (1. Ecuación E-T-S, 2. Autocrítica PCT, 3. Dictamen FTO, 4. Mapa Competitivo y N Guardadas), Modelo IA (Flash/Pro), Copiar, Limpiar Chat, Minimizar, Tarjetas/JSON en Crudo, Exportar CSV, Comparar Lado a Lado, Inspeccionar Expediente (Ficha/PDF/Pantalla Completa), Snowballing Citas, Lámina Técnica, Guardar Semilla y Barra Inferior (Modo de Búsqueda Híbrida/Clasificación/Exacta, + Todas las fuentes, Shuffle 1 de c/API, Filtro País, Relevancia, Voz).
 - Control Directo de la Pestaña Activa y Proyectos (emite [ACTION:...] al instante cuando el usuario lo pida):
   * Tema: [ACTION:SET_THEME theme="dark|light|toggle"]
   * Proyectos (la transición de chat mantiene continuidad sin cortes): [ACTION:CREATE_PROJECT name="..." query="..."], [ACTION:SWITCH_PROJECT name="..."], [ACTION:RENAME_PROJECT name="" new_name="..." new_query=""], [ACTION:DELETE_PROJECT name="..."]
-  * Motor y Vistas: [ACTION:MODE mode="patents|literature"], [ACTION:SET_VIEW view="cards|raw"], [ACTION:TOGGLE_INTEL open="true|false"], [ACTION:OPEN_MODAL modal="glossary|dossier|settings|compare|new_project" tab="fuentes|cpc|estados|territorio|metodologias"], [ACTION:AUTO_EXPORT type="csv|dossier|print_dossier"], [ACTION:JTBD step="ecuacion|pct|fto|bi"]
+  * Motor, Espacio Dividido, Modo Búsqueda y Vistas: [ACTION:MODE mode="patents|literature"], [ACTION:SET_WORKSPACE_VIEW view="split|results|chat"], [ACTION:SEARCH_MODE mode="hybrid|classification|exact"], [ACTION:SET_VIEW view="cards|raw"], [ACTION:TOGGLE_INTEL open="true|false"], [ACTION:OPEN_MODAL modal="glossary|dossier|settings|compare|new_project" tab="fuentes|cpc|estados|territorio|metodologias"], [ACTION:AUTO_EXPORT type="csv|dossier|print_dossier"], [ACTION:JTBD step="ecuacion|pct|fto|bi"]
   * Panel IA y Voz: [ACTION:SET_MODEL tier="flash|pro"], [ACTION:PANEL action="minimize|restore|copy|clear"], [ACTION:TOGGLE_VOICE]
   * Búsqueda y Filtros: [ACTION:SEARCH query="..."], [ACTION:CLEAR_QUERY], [ACTION:AUTO_FILTER source="all|google|europepmc|patentbrief" jurisdiction="ALL|US|EP|WO|OTHER" status="all|active|inactive" year_from="YYYY" year_to="YYYY" sort="relevance|date_desc|date_asc|citations_desc" shuffle_api="on|off" shuffle_country="on|off" only_pinned="on|off"], [ACTION:RESET_FILTERS], [ACTION:FILTER_CPC code="..."]
   * Patentes: [ACTION:AUTO_INSPECT id="NUMERO" tab="dossier|pdf" fullscreen="true|false"], [ACTION:CLOSE_INSPECT], [ACTION:COMPARE ids="ID1,ID2"], [ACTION:SNOWBALL id="NUMERO"], [ACTION:SHOW_FIGURE id="NUMERO" fig=1], [ACTION:AUTO_PIN ids="ID1,ID2"], [ACTION:UNPIN ids="ID1,ID2"]
@@ -977,6 +1163,7 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes, los demás proyect
     def handle_literature(self, parsed):
         qs = urllib.parse.parse_qs(parsed.query)
         q = qs.get('q', [''])[0].strip()[:500]
+        raw_mode = qs.get('mode', ['hybrid'])[0].strip().lower()
         page_raw = qs.get('page', ['1'])[0].strip()
         try:
             page = max(1, min(100, int(page_raw)))
@@ -987,7 +1174,20 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes, los demás proyect
             self.send_json(400, {'error': 'Parámetro "q" es requerido'})
             return
 
-        res = query_openalex(q, page=page)
+        plan = build_enriched_search_plan(q, raw_mode)
+        res = query_openalex(plan['openalex_query'], page=page)
+        if isinstance(res, dict) and 'error' not in res:
+            res['search_meta'] = {
+                "original_query": plan['original_query'],
+                "search_mode": plan['search_mode'],
+                "detected_language": plan['detected_language'],
+                "english_core": plan['english_core'],
+                "expanded_terms": plan['expanded_terms'],
+                "applied_cpcs": plan['applied_cpcs'],
+                "effective_query_google": plan['openalex_query'],
+                "expansion_source": plan['expansion_source'],
+                "total_global_estimated": res.get('total_found', 0)
+            }
         self.send_json(200, res)
 
     def handle_translate(self, parsed):
@@ -1027,79 +1227,161 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes, los demás proyect
         except Exception as e:
             self.send_json(500, {"error": f"Error al traducir: {sanitize_error_msg(e)}"})
 
+    def handle_patents_post(self, parsed):
+        req_data = self._read_json_body()
+        if req_data is None:
+            return
+        q = str(req_data.get('q') or '').strip()[:500]
+        raw_source = str(req_data.get('source') or 'all').strip().lower()
+        raw_mode = str(req_data.get('mode') or 'hybrid').strip().lower()
+        api_key = str(req_data.get('apiKey') or '').strip()[:256]
+        provider = str(req_data.get('provider') or '').strip().lower()
+        self._execute_patents_search(q, raw_source, raw_mode, api_key, provider)
+
     def handle_patents(self, parsed):
         qs = urllib.parse.parse_qs(parsed.query)
         q = qs.get('q', [''])[0].strip()[:500]
         raw_source = qs.get('source', ['all'])[0].strip().lower()
+        raw_mode = qs.get('mode', ['hybrid'])[0].strip().lower()
+        self._execute_patents_search(q, raw_source, raw_mode)
+
+    def _execute_patents_search(self, q, raw_source, raw_mode='hybrid', api_key='', provider=''):
         source = raw_source if raw_source in ALLOWED_SOURCES else 'all'
 
         if not q:
             self.send_json(400, {'error': 'Parámetro "q" es requerido'})
             return
 
+        plan = build_enriched_search_plan(q, raw_mode, api_key=api_key, provider=provider)
         combined_results = []
         cpc_summaries = []
         source_message = None
-        total_found = 0
+        google_total_found = 0
+        pmc_total_found = 0
+        brief_total_found = 0
 
-        # Orquestación Concurrente Multi-Fuente
-        with ThreadPoolExecutor(max_workers=5) as executor:
+        # Orquestación Concurrente Multi-Fuente (Multilingüe + Clasificación CPC)
+        with ThreadPoolExecutor(max_workers=6) as executor:
             future_google = None
+            future_google_class = None
             future_pmc = None
             future_brief = None
 
-            # Lanzar hilos según la fuente seleccionada
             if source in ['all', 'google']:
-                future_google = executor.submit(query_google_patents, q)
+                g_tag = 'classification' if plan['search_mode'] == 'classification' else ('exact' if plan['search_mode'] == 'exact' else 'multilingual')
+                future_google = executor.submit(query_google_patents, plan['google_query'], g_tag)
+                if plan['classification_query'] and plan['classification_query'] != plan['google_query'] and plan['search_mode'] != 'exact':
+                    future_google_class = executor.submit(query_google_patents, plan['classification_query'], 'classification')
 
             if source in ['all', 'europepmc']:
-                future_pmc = executor.submit(query_europe_pmc, q)
+                future_pmc = executor.submit(query_europe_pmc, plan['europe_pmc_query'])
 
             if source in ['all', 'patentbrief']:
-                future_brief = executor.submit(query_patent_brief, q)
+                future_brief = executor.submit(query_patent_brief, plan['patent_brief_query'])
 
-            # Recolectar resultados de Google Patents
+            g_primary = []
+            g_class = []
             if future_google:
                 try:
                     g_res = future_google.result()
-                    combined_results.extend(g_res.get('results', []))
+                    g_primary = g_res.get('results', [])
                     cpc_summaries = g_res.get('cpc_summary', [])
-                    total_found += g_res.get('total_found', len(g_res.get('results', [])))
+                    google_total_found = max(google_total_found, int(g_res.get('total_found', 0) or 0))
                 except Exception as e:
                     print(f"Error procesando Google Patents: {e}")
 
-            # Recolectar resultados de Europe PMC (EPO/WIPO)
+            if future_google_class:
+                try:
+                    gc_res = future_google_class.result()
+                    g_class = gc_res.get('results', [])
+                    if not cpc_summaries:
+                        cpc_summaries = gc_res.get('cpc_summary', [])
+                    google_total_found = max(google_total_found, int(gc_res.get('total_found', 0) or 0))
+                except Exception as e:
+                    print(f"Error procesando Google Patents Clasificación: {e}")
+
+            # Si no había CPC en plan pero Google devolvió summary.cpc, ejecutar consulta secundaria rápida por clasificación
+            if source in ['all', 'google'] and not plan['classification_query'] and cpc_summaries and plan['search_mode'] != 'exact':
+                top_real = [c['code'] for c in cpc_summaries if c.get('code')][:2]
+                if top_real:
+                    for code in top_real:
+                        plan['applied_cpcs'].append({"code": code, "label": f"Clasificación dominante {code}"})
+                    try:
+                        cpc_expr = f"({' OR '.join(top_real)})" if len(top_real) > 1 else top_real[0]
+                        en_core = plan['english_core']
+                        sec_q = f"{cpc_expr} \"{en_core}\"" if en_core else cpc_expr
+                        sec_res = query_google_patents(sec_q, 'classification')
+                        g_class = sec_res.get('results', [])
+                        google_total_found = max(google_total_found, int(sec_res.get('total_found', 0) or 0))
+                    except Exception:
+                        pass
+
+            # Intercalar Google keywords + clasificación sin duplicados
+            seen_g = set()
+            for i in range(max(len(g_primary), len(g_class))):
+                for group in (g_primary, g_class):
+                    if i < len(group):
+                        item = group[i]
+                        pub = item.get('publication_number')
+                        if pub not in seen_g:
+                            seen_g.add(pub)
+                            combined_results.append(item)
+
             if future_pmc:
                 try:
                     pmc_res = future_pmc.result()
+                    for item in pmc_res:
+                        item['match_strategy'] = 'exact' if plan['search_mode'] == 'exact' else 'multilingual'
                     combined_results.extend(pmc_res)
-                    total_found += len(pmc_res)
+                    pmc_total_found = len(pmc_res)
                 except Exception as e:
                     print(f"Error procesando Europe PMC: {e}")
 
-            # Recolectar resultados de PatentBrief
             if future_brief:
                 try:
                     brief_res = future_brief.result()
+                    for item in brief_res:
+                        item['match_strategy'] = 'exact' if plan['search_mode'] == 'exact' else 'multilingual'
                     combined_results.extend(brief_res)
-                    total_found += len(brief_res)
+                    brief_total_found = len(brief_res)
                 except Exception as e:
                     print(f"Error procesando PatentBrief: {e}")
 
-        # Mensajes de aviso pedagógico si se seleccionan fuentes pendientes
+        # Deduplicación global
+        deduped = []
+        seen_global = set()
+        for r in combined_results:
+            pub = r.get('publication_number')
+            key = f"{r.get('source_badge')}:{pub}" if (pub and pub != 'N/A') else f"{r.get('source_badge')}:{r.get('title')}"
+            if key not in seen_global:
+                seen_global.add(key)
+                deduped.append(r)
+
         if source == 'lens':
             source_message = "El conector con The Lens API está implementado y a la espera de autorización definitiva del token académico en Lens.org. Seleccione 'Todas las fuentes' para consultar patentes activas."
         elif source == 'epo':
             source_message = "El conector con EPO OPS está implementado bajo la referencia administrativa 46581. Seleccione 'Todas las fuentes' o 'Europe PMC' para consultar patentes europeas oficiales."
 
+        total_found = (google_total_found + pmc_total_found + brief_total_found) or len(deduped)
         self.send_json(200, {
             "query": q,
             "source": source,
-            "total_found": total_found or len(combined_results),
-            "results_count": len(combined_results),
-            "organic_results": combined_results,
+            "total_found": total_found,
+            "results_count": len(deduped),
+            "organic_results": deduped,
             "cpc_summary": cpc_summaries,
-            "info_message": source_message
+            "info_message": source_message,
+            "search_meta": {
+                "original_query": plan['original_query'],
+                "search_mode": plan['search_mode'],
+                "detected_language": plan['detected_language'],
+                "english_core": plan['english_core'],
+                "expanded_terms": plan['expanded_terms'],
+                "applied_cpcs": plan['applied_cpcs'],
+                "effective_query_google": plan['google_query'],
+                "expansion_source": plan['expansion_source'],
+                "total_global_estimated": total_found
+            }
         })
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):

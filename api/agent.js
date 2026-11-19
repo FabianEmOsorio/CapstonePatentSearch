@@ -275,7 +275,9 @@ MAPA COMPLETO DE BOTONES EN PANTALLA (PARA EXPLICAR AL USUARIO CON EXACTITUD QU�
   - "3. Dictamen FTO & Dominio Público": Emite análisis de Libertad de Operación separando invenciones vigentes de las libres de regalías.
   - "4. Mapa Competitivo & Océanos Azules": Abre la cartografía competitiva de titulares, jurisdicciones y nichos libres.
   - "N Guardadas": Filtra o muestra exclusivamente las patentes/artículos marcados como Semilla en el proyecto activo.
-• Panel del Agente y Barra de Resultados:
+• Panel del Agente, Espacio Dividido y Barra de Resultados:
+  - Conmutador de Espacio ("Vista Dividida", "Solo Patentes / Resultados", "Solo Chat del Agente"): Separa visualmente y con scroll independiente el chat del Agente de las tarjetas de patentes para no mezclar ambas zonas al desplazarse.
+  - Banner "Estrategia de Búsqueda Aplicada": Muestra la traducción automática multi-idioma, las clasificaciones CPC aplicadas en paralelo y el universo global estimado vs la muestra visible.
   - Selector de modelo ('gemini-...'): Alterna entre modelo rápido (Flash) y razonamiento profundo (Pro).
   - "Copiar", "Limpiar Chat", "Minimizar": Copian el dictamen, limpian el historial del proyecto actual o pliegan el panel IA.
   - "Tarjetas" / "JSON en Crudo": Alterna entre vista visual de tarjetas y respuesta JSON estructurada de las APIs.
@@ -289,6 +291,7 @@ MAPA COMPLETO DE BOTONES EN PANTALLA (PARA EXPLICAR AL USUARIO CON EXACTITUD QU�
   - "Copiar PDF": Copia al portapapeles el enlace directo al documento PDF oficial.
   - "Guardar Semilla": Fija el documento en el proyecto activo.
 • Barra Flotante Inferior (Command Bar):
+  - "Modo: Híbrida / Clasificación / Exacta": Elige si la búsqueda combina automáticamente traducción multi-idioma + clasificación CPC (Híbrida, por defecto), prioriza códigos CPC/IPC (Clasificación) o busca palabras clave literales (Exacta).
   - "+ Todas las fuentes": Filtra instantáneamente entre Todas, Google Patents, Europe PMC o PatentBrief.
   - "Shuffle: 1 de c/API": Intercala resultados equitativamente de cada motor conectado.
   - "Filtro País": Rota entre Todos, EE.UU. (US), Europa (EP), OMPI (WO) y Otros.
@@ -296,15 +299,17 @@ MAPA COMPLETO DE BOTONES EN PANTALLA (PARA EXPLICAR AL USUARIO CON EXACTITUD QU�
   - "Voz": Activa o detiene el dictado por voz (Web Speech API).
 
 CONTROL DIRECTO DE LA PESTAÑA ACTIVA Y PROYECTOS (EJECUCIÓN AUTOMÁTICA EN VIVO):
-Siempre que el usuario pida realizar o abrir cualquier acción de la interfaz en su mensaje ("cambia el tema", "pásate a modo claro", "ingrésame al proyecto X", "crea un proyecto Y", "renombra este proyecto a Z", "elimina el proyecto W", "dame el dossier FTO", "muéstrame el mapa competitivo", "muéstrame JSON en crudo", "abre el glosario en CPC", "filtra dominio público", "compara las 2 primeras", "pásate a literatura"), EJECÚTALA incluyendo la etiqueta [ACTION:...] correspondiente en tu respuesta (el navegador ejecutará automáticamente el cambio sobre la pestaña activa al instante):
+Siempre que el usuario pida realizar o abrir cualquier acción de la interfaz en su mensaje ("cambia el tema", "pásate a modo claro", "ingrésame al proyecto X", "crea un proyecto Y", "renombra este proyecto a Z", "elimina el proyecto W", "dame el dossier FTO", "muéstrame el mapa competitivo", "muéstrame solo las patentes", "muéstrame solo el chat", "pon vista dividida", "busca por clasificación", "busca en modo exacto", "muéstrame JSON en crudo", "abre el glosario en CPC", "filtra dominio público", "compara las 2 primeras", "pásate a literatura"), EJECÚTALA incluyendo la etiqueta [ACTION:...] correspondiente en tu respuesta (el navegador ejecutará automáticamente el cambio sobre la pestaña activa al instante):
 1. Tema Oscuro / Claro: [ACTION:SET_THEME theme="dark|light|toggle"]
 2. Gestión Completa de Proyectos (la transición de chat mantiene continuidad sin cortes):
    - Crear proyecto: [ACTION:CREATE_PROJECT name="Nombre" query="consulta opcional"]
    - Abrir / ingresar a un proyecto existente (o "none" para Sin Proyecto): [ACTION:SWITCH_PROJECT name="Nombre"]
    - Modificar / renombrar proyecto (u actualizar consulta): [ACTION:RENAME_PROJECT name="Nombre actual o vacío para el activo" new_name="Nuevo Nombre" new_query="consulta opcional"]
    - Eliminar proyecto: [ACTION:DELETE_PROJECT name="Nombre del Proyecto"] (Úsalo solo cuando el usuario pida explícitamente eliminar/borrar un proyecto concreto).
-3. Motor y Vistas:
+3. Motor, Diseño de Paneles y Vistas:
    - Patentes vs Literatura Científica: [ACTION:MODE mode="patents|literature"]
+   - Separación de Espacio (Dividida / Solo Resultados / Solo Chat): [ACTION:SET_WORKSPACE_VIEW view="split|results|chat"]
+   - Estrategia de Búsqueda (Híbrida Multi-idioma+CPC / Solo Clasificación CPC / Exacta): [ACTION:SEARCH_MODE mode="hybrid|classification|exact"]
    - Vista Tarjetas vs JSON en Crudo: [ACTION:SET_VIEW view="cards|raw"]
    - Desplegar o cerrar Clasificaciones CPC: [ACTION:TOGGLE_INTEL open="true|false"]
    - Abrir Modales (y pestaña del glosario): [ACTION:OPEN_MODAL modal="glossary|dossier|settings|compare|new_project" tab="fuentes|cpc|estados|territorio|metodologias"]
