@@ -3382,22 +3382,34 @@
       .app-main.drawer-open .workspace-panes.agent-open[data-layout="split"] {
         grid-template-columns: minmax(310px, 360px) minmax(0, 1fr);
       }
-      .agent-dock-pane,
-      .results-dock-pane {
+      .agent-dock-pane {
+        position: relative;
+        z-index: 60;
         height: 100%;
         min-height: 0;
         overflow-y: auto;
         padding-right: 6px;
-        padding-bottom: 155px;
+        padding-bottom: 105px;
+        scrollbar-width: thin;
+      }
+      .results-dock-pane {
+        position: relative;
+        z-index: 1;
+        height: 100%;
+        min-height: 0;
+        overflow-y: auto;
+        padding-right: 6px;
+        padding-bottom: 145px;
         scrollbar-width: thin;
       }
       .inspection-drawer {
         position: relative !important;
+        z-index: 60 !important;
         top: 0 !important;
         height: 100% !important;
         min-height: 0;
         overflow-y: auto;
-        padding-bottom: 145px;
+        padding-bottom: 105px;
       }
     }
 
@@ -3888,31 +3900,33 @@
     }
 
     /* =========================================================
-       6. BARRA FLOTANTE DE BUSQUEDA + SCRIM GRADIENTE INFERIOR
+       6. BARRA FLOTANTE DE BUSQUEDA + GRADIENTE TRANSLUCIDO LOCALIZADO
+       Orden Z: fondo (1) -> chat / ficha (60) -> gradiente barra (84) -> barra busqueda (95)
        ========================================================= */
     .bottom-dock-scrim {
       position: fixed;
-      left: 0;
-      right: 0;
+      left: 50%;
+      transform: translateX(-50%);
       bottom: 0;
-      height: 155px;
+      width: min(1020px, 100vw);
+      height: 148px;
       pointer-events: none;
       z-index: 84;
-      background: linear-gradient(
-        to top,
-        rgba(11, 15, 23, 0.98) 38%,
-        rgba(11, 15, 23, 0.86) 68%,
-        rgba(11, 15, 23, 0.35) 88%,
-        transparent 100%
+      background: radial-gradient(
+        ellipse 74% 88% at 50% 86%,
+        rgba(11, 15, 23, 0.72) 0%,
+        rgba(11, 15, 23, 0.42) 52%,
+        rgba(11, 15, 23, 0.12) 76%,
+        transparent 92%
       );
     }
     [data-theme="light"] .bottom-dock-scrim {
-      background: linear-gradient(
-        to top,
-        rgba(241, 245, 249, 0.98) 38%,
-        rgba(241, 245, 249, 0.88) 68%,
-        rgba(241, 245, 249, 0.35) 88%,
-        transparent 100%
+      background: radial-gradient(
+        ellipse 74% 88% at 50% 86%,
+        rgba(241, 245, 249, 0.78) 0%,
+        rgba(241, 245, 249, 0.46) 52%,
+        rgba(241, 245, 249, 0.14) 76%,
+        transparent 92%
       );
     }
     .command-bar-wrapper {
@@ -3922,13 +3936,16 @@
       transform: translateX(-50%);
       width: 92%;
       max-width: 880px;
-      background: rgba(18, 24, 36, 0.96);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      border: 1px solid rgba(56, 189, 248, 0.28);
-      border-top: 1.5px solid rgba(56, 189, 248, 0.48);
+      background: linear-gradient(
+        180deg,
+        rgba(24, 31, 46, 0.56) 0%,
+        rgba(15, 20, 31, 0.76) 100%
+      );
+      backdrop-filter: blur(24px) saturate(1.25);
+      -webkit-backdrop-filter: blur(24px) saturate(1.25);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: var(--radius-lg);
-      box-shadow: 0 -10px 34px rgba(0, 0, 0, 0.62), 0 18px 44px rgba(0, 0, 0, 0.72);
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.36);
       padding: 10px 14px;
       z-index: 95;
       display: flex;
@@ -3936,10 +3953,13 @@
       gap: 8px;
     }
     [data-theme="light"] .command-bar-wrapper {
-      background: rgba(255, 255, 255, 0.97);
-      border-color: rgba(15, 23, 42, 0.16);
-      border-top: 1.5px solid rgba(0, 112, 243, 0.35);
-      box-shadow: 0 -8px 28px rgba(15, 23, 42, 0.12), 0 16px 36px rgba(15, 23, 42, 0.16);
+      background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.62) 0%,
+        rgba(244, 247, 251, 0.80) 100%
+      );
+      border-color: rgba(15, 23, 42, 0.08);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.10);
     }
 
     .command-input-row {
@@ -3965,9 +3985,12 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-top: 1px solid var(--border-color);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
       padding-top: 8px;
       font-size: 11.5px;
+    }
+    [data-theme="light"] .command-controls-row {
+      border-top-color: rgba(15, 23, 42, 0.07);
     }
     .filter-pills-group {
       display: flex;
