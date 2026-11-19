@@ -2,7 +2,7 @@
 <html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0d1117">
   <title>SMIT | Sistema Multifuente de Inteligencia Tecnológica</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230284c7'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='system-ui,sans-serif' font-weight='800' font-size='14' fill='white'%3ESM%3C/text%3E%3C/svg%3E">
@@ -3037,7 +3037,7 @@
     .app-header {
       background: transparent;
       border-bottom: 1px solid var(--border-color);
-      padding: 10px 20px;
+      padding: 8px 20px;
       margin-bottom: 0;
       display: flex;
       flex-wrap: nowrap;
@@ -3194,7 +3194,7 @@
     .jtbd-strip {
       background: var(--bg-surface);
       border-bottom: 1px solid var(--border-color);
-      padding: 8px 24px;
+      padding: 6px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -3998,6 +3998,25 @@
       gap: 6px;
       flex-wrap: wrap;
     }
+    .visually-hidden:where(:not(:focus-within, :active)) {
+      position: absolute !important;
+      clip-path: inset(50%) !important;
+      overflow: hidden !important;
+      width: 1px !important;
+      height: 1px !important;
+      margin: -1px !important;
+      padding: 0 !important;
+      border: 0 !important;
+      white-space: nowrap !important;
+    }
+    :where(a:any-link, button, [role="button"], input, textarea, select):focus-visible {
+      outline: 2px solid var(--brand-primary);
+      outline-offset: 2px;
+    }
+    .control-pill,
+    .tab-btn {
+      min-height: 26px;
+    }
     .control-pill {
       background: var(--bg-elevated);
       border: 1px solid var(--border-color);
@@ -4046,6 +4065,10 @@
       justify-content: center;
       z-index: 999;
       padding: 20px;
+      overscroll-behavior: contain;
+    }
+    .modal-content {
+      overscroll-behavior: contain;
     }
     .modal-overlay.open {
       display: flex !important;
@@ -4633,9 +4656,9 @@
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
         <span>1. Ecuación E-T-S / Booleana</span>
       </button>
-      <button class="jtbd-pill-btn" onclick="lanzarAsistenteJTBDPCT()" title="Autocrítica de patentabilidad (Novedad, Nivel Inventivo, Reglas 11-13 PCT)">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--intel-purple)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-        <span>2. Autocrítica PCT (Reglas 11–13)</span>
+      <button class="jtbd-pill-btn" onclick="lanzarAsistenteJTBDPCT()" title="Autocrítica de patentabilidad (Novedad, Nivel Inventivo y estructura PCT)">
+        <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--intel-purple)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        <span>2. Autocrítica PCT</span>
       </button>
       <button class="jtbd-pill-btn" onclick="lanzarAsistenteJTBDFTO()" title="Evaluar Libertad de Operación (FTO): patentes vigentes vs. dominio público">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -4664,7 +4687,7 @@
       <!-- Barra conmutadora explícita: cero mezcla entre Chat del Agente y Cards de Patentes -->
       <div class="workspace-view-bar" id="workspace-view-switcher">
         <div class="workspace-view-tabs" role="tablist" aria-label="Diseño del espacio de trabajo">
-          <button class="ws-view-btn active" id="ws-view-split" onclick="setWorkspaceView('split')" title="Ver el Chat del Agente a la izquierda y los Resultados a la derecha con scroll independiente">
+          <button class="ws-view-btn active" id="ws-view-split" onclick="setWorkspaceView('split')" title="Ver el Chat del Agente a la izquierda y los Resultados a la derecha">
             <span>Vista Dividida (Chat | Patentes)</span>
           </button>
           <button class="ws-view-btn" id="ws-view-results" onclick="setWorkspaceView('results')" title="Mostrar únicamente las tarjetas de patentes y literatura">
@@ -4677,7 +4700,7 @@
           </button>
         </div>
         <div class="ws-zone-sep-indicator">
-          <span id="ws-active-layout-hint">Paneles separados con desplazamiento independiente</span>
+          <span id="ws-active-layout-hint" style="display: none;"></span>
           <div id="btn-restore-ai-panel" style="display: none;">
             <button class="control-pill" onclick="restaurarPanelAiMinimizado()">
               <span>Mostrar Análisis del Agente Pericial</span>
@@ -4689,7 +4712,7 @@
 
       <div class="workspace-panes" id="workspace-panes" data-layout="split">
 
-        <!-- ZONA A: ASISTENTE PERICIAL IA (SCROLL INDEPENDIENTE) -->
+        <!-- ZONA A: ASISTENTE PERICIAL IA -->
         <aside class="agent-dock-pane" id="agent-dock-pane" aria-label="Conversación con el Agente Pericial">
           <div class="zone-banner zone-agent">
             <span>Zona Asistente IA &bull; Conversación</span>
@@ -4839,9 +4862,11 @@
   </main>
 
   <!-- 5. COMMAND BAR INFERIOR FLOTANTE + GRADIENTE SEPARADOR -->
+  <search id="search-command-landmark" style="display: contents;">
   <div class="bottom-dock-scrim" aria-hidden="true"></div>
   <div class="command-bar-wrapper">
-    <div class="command-input-row">
+    <form class="command-input-row" onsubmit="event.preventDefault(); buscar();">
+      <label for="query-input" class="visually-hidden">Conceptos técnicos, palabras clave, ecuaciones de patente o pregunta para el Agente Pericial</label>
       <textarea 
         id="query-input" 
         class="command-input" 
@@ -4849,30 +4874,30 @@
         placeholder="Escribe conceptos técnicos, palabras clave, ecuaciones de patente o haz una pregunta directa al Agente Pericial..."
         onkeydown="handleQueryInputKey(event)"
       ></textarea>
-      <button class="send-query-btn" id="ag-search-btn" onclick="ejecutarBusquedaDesdePrompt()" title="Buscar o consultar al Agente">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      <button type="submit" class="send-query-btn" id="ag-search-btn" title="Buscar o consultar al Agente" aria-label="Buscar o enviar consulta">
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
-    </div>
+    </form>
     <div class="command-controls-row">
       <div class="filter-pills-group">
         
         <!-- Selector de Estrategia de Búsqueda (Híbrida CPC+Multi-idioma / Clasificación / Exacta) -->
         <div style="position: relative;">
-          <div class="control-pill" onclick="toggleSearchModeMenu(event)" id="search-mode-pill-btn" title="Elegir cómo SMIT amplía tu búsqueda en las APIs globales">
+          <button type="button" class="control-pill" onclick="toggleSearchModeMenu(event)" id="search-mode-pill-btn" title="Elegir cómo SMIT amplía tu búsqueda en las APIs globales" aria-haspopup="true">
             <span id="current-search-mode-label">Modo: Híbrida (CPC + Multi-idioma)</span>
-            <span class="ag-pill-caret" id="search-mode-caret">▼</span>
-          </div>
+            <span class="ag-pill-caret" id="search-mode-caret" aria-hidden="true">▼</span>
+          </button>
           <div class="ag-popup-menu" id="search-mode-popup-menu">
             <div class="ag-menu-header">Estrategia de Búsqueda Global</div>
-            <div class="ag-menu-option selected" onclick="setSearchMode('hybrid', event)" id="opt-smode-hybrid">
+            <div class="ag-menu-option selected" role="button" tabindex="0" onclick="setSearchMode('hybrid', event)" id="opt-smode-hybrid">
               <span class="ag-option-label">Híbrida (CPC + Multi-idioma + Sinónimos)</span>
               <span class="ag-option-check" id="check-smode-hybrid">✓</span>
             </div>
-            <div class="ag-menu-option" onclick="setSearchMode('classification', event)" id="opt-smode-classification">
+            <div class="ag-menu-option" role="button" tabindex="0" onclick="setSearchMode('classification', event)" id="opt-smode-classification">
               <span class="ag-option-label">Por Clasificación Técnica (CPC / IPC)</span>
               <span class="ag-option-check" id="check-smode-classification" style="display:none;">✓</span>
             </div>
-            <div class="ag-menu-option" onclick="setSearchMode('exact', event)" id="opt-smode-exact">
+            <div class="ag-menu-option" role="button" tabindex="0" onclick="setSearchMode('exact', event)" id="opt-smode-exact">
               <span class="ag-option-label">Palabras Clave Exactas (Sin traducción)</span>
               <span class="ag-option-check" id="check-smode-exact" style="display:none;">✓</span>
             </div>
@@ -4881,28 +4906,28 @@
 
         <!-- Selector de Fuentes estilo Model Selector -->
         <div style="position: relative;">
-          <div class="control-pill" onclick="toggleSourceMenu(event)" id="source-pill-btn">
-            <span style="font-weight: 700; color: #8b949e;">+</span>
+          <button type="button" class="control-pill" onclick="toggleSourceMenu(event)" id="source-pill-btn" aria-haspopup="true">
+            <span style="font-weight: 700; color: #8b949e;" aria-hidden="true">+</span>
             <span id="current-source-label">Todas las fuentes</span>
-            <span class="ag-pill-caret" id="source-caret">▼</span>
-          </div>
+            <span class="ag-pill-caret" id="source-caret" aria-hidden="true">▼</span>
+          </button>
 
           <!-- Menú Flotante de Fuentes -->
           <div class="ag-popup-menu" id="source-popup-menu"><div id="health-submenu" style="display:none;"></div>
             <div class="ag-menu-header">Fuentes de Información</div>
-            <div class="ag-menu-option selected" onclick="seleccionarFuenteDirecta('all', event)" id="opt-juris-all">
+            <div class="ag-menu-option selected" role="button" tabindex="0" onclick="seleccionarFuenteDirecta('all', event)" id="opt-juris-all">
               <span class="ag-option-label">Todas las fuentes combinadas</span>
               <span class="ag-option-check" id="check-all">✓</span>
             </div>
-            <div class="ag-menu-option" onclick="seleccionarFuenteDirecta('google', event)" id="opt-juris-google">
+            <div class="ag-menu-option" role="button" tabindex="0" onclick="seleccionarFuenteDirecta('google', event)" id="opt-juris-google">
               <span class="ag-option-label">Google Patents Engine</span>
               <span class="ag-option-check" id="check-google" style="display:none;">✓</span>
             </div>
-            <div class="ag-menu-option" onclick="seleccionarFuenteDirecta('europepmc', event)" id="opt-juris-europepmc">
+            <div class="ag-menu-option" role="button" tabindex="0" onclick="seleccionarFuenteDirecta('europepmc', event)" id="opt-juris-europepmc">
               <span class="ag-option-label">Europe PMC (EPO / WIPO)</span>
               <span class="ag-option-check" id="check-europepmc" style="display:none;">✓</span>
             </div>
-            <div class="ag-menu-option" onclick="seleccionarFuenteDirecta('patentbrief', event)" id="opt-juris-patentbrief">
+            <div class="ag-menu-option" role="button" tabindex="0" onclick="seleccionarFuenteDirecta('patentbrief', event)" id="opt-juris-patentbrief">
               <span class="ag-option-label">PatentBrief (Tecnología Amigable)</span>
               <span class="ag-option-check" id="check-patentbrief" style="display:none;">✓</span>
             </div>
@@ -4910,38 +4935,38 @@
         </div>
 
         <!-- Shuffle: 1 de c/API -->
-        <div class="control-pill" onclick="toggleShuffle()" id="shuffle-pill-btn" title="Intercalar 1 resultado de cada API de forma equitativa">
+        <button type="button" class="control-pill" onclick="toggleShuffle()" id="shuffle-pill-btn" title="Intercalar 1 resultado de cada API de forma equitativa">
           <span id="shuffle-label">Shuffle: 1 de c/API (On)</span>
-        </div>
+        </button>
 
         <!-- Filtro País / Territorio -->
-        <div class="control-pill" onclick="rotarJurisdiccionDirecta()" id="country-shuffle-pill-btn" title="Rotar filtro de jurisdicción (Todos, EE.UU., Europa, OMPI, Otros)">
+        <button type="button" class="control-pill" onclick="rotarJurisdiccionDirecta()" id="country-shuffle-pill-btn" title="Rotar filtro de jurisdicción (Todos, EE.UU., Europa, OMPI, Otros)">
           <span id="country-shuffle-label">Filtro País: Todos</span>
-        </div>
+        </button>
 
         <!-- Ordenamiento y Filtros Avanzados -->
         <div style="position: relative;">
-          <div class="control-pill" onclick="toggleFilterMenu(event)" id="filter-pill-btn">
+          <button type="button" class="control-pill" onclick="toggleFilterMenu(event)" id="filter-pill-btn" aria-haspopup="true">
             <span id="current-sort-label">Relevancia</span>
-            <span class="ag-pill-caret" id="filter-caret">▼</span>
-          </div>
+            <span class="ag-pill-caret" id="filter-caret" aria-hidden="true">▼</span>
+          </button>
 
           <!-- Menú Pop-up de Ordenamiento y Filtros -->
           <div class="ag-popup-menu" id="filter-popup-menu">
             <div class="ag-menu-header">Criterio de Ordenamiento</div>
-            <div class="ag-menu-option selected" onclick="aplicarOrdenDirecto('relevance', event)" id="opt-sort-rel">
+            <div class="ag-menu-option selected" role="button" tabindex="0" onclick="aplicarOrdenDirecto('relevance', event)" id="opt-sort-rel">
               <span class="ag-option-label">Mayor Relevancia Técnica</span>
               <span class="ag-option-check" id="check-sort-rel">✓</span>
             </div>
-            <div class="ag-menu-option" onclick="aplicarOrdenDirecto('citations', event)" id="opt-sort-cits">
+            <div class="ag-menu-option" role="button" tabindex="0" onclick="aplicarOrdenDirecto('citations', event)" id="opt-sort-cits">
               <span class="ag-option-label">Mayor Impacto (Citas hacia adelante)</span>
               <span class="ag-option-check" id="check-sort-cits" style="display:none;">✓</span>
             </div>
-            <div class="ag-menu-option" onclick="aplicarOrdenDirecto('date_desc', event)" id="opt-sort-date">
+            <div class="ag-menu-option" role="button" tabindex="0" onclick="aplicarOrdenDirecto('date_desc', event)" id="opt-sort-date">
               <span class="ag-option-label">Más Recientes (Prioridad)</span>
               <span class="ag-option-check" id="check-sort-date" style="display:none;">✓</span>
             </div>
-            <div class="ag-menu-option" onclick="aplicarOrdenDirecto('date_asc', event)" id="opt-sort-date-asc">
+            <div class="ag-menu-option" role="button" tabindex="0" onclick="aplicarOrdenDirecto('date_asc', event)" id="opt-sort-date-asc">
               <span class="ag-option-label">Más Antiguas (Patentes Seminales)</span>
               <span class="ag-option-check" id="check-sort-date-asc" style="display:none;">✓</span>
             </div>
@@ -4986,6 +5011,7 @@
       </div>
     </div>
   </div>
+  </search>
 
   <div id="smit-toast" class="smit-toast" role="status" aria-live="polite"></div>
 
@@ -5413,16 +5439,29 @@
     }
 
     // =========================================================
-    // CONTROL UNIVERSAL DE MODALES (MODERN WEB GUIDANCE: LIGHT DISMISS & FOCUS)
+    // CONTROL UNIVERSAL DE MODALES (MODERN WEB GUIDANCE: LIGHT DISMISS, INERT & FOCUS)
     // =========================================================
+    function setBackgroundLandmarksInert(isInert) {
+      ['top-anchored-shell', 'app-main-layout', 'search-command-landmark'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (isInert) el.setAttribute('inert', '');
+        else el.removeAttribute('inert');
+      });
+    }
+
     function openModal(modalId) {
       const modal = typeof modalId === 'string' ? document.getElementById(modalId) : modalId;
       if (!modal) return;
+      modal._previousFocus = document.activeElement;
+      if (!modal.getAttribute('role')) modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
       modal.classList.add('open');
       modal.style.display = 'flex';
+      setBackgroundLandmarksInert(true);
       // Auto-enfoque accesible en el primer input o boton de cierre
       setTimeout(() => {
-        const focusable = modal.querySelector('input:not([type="hidden"]), select, textarea, button:not(.btn-close-modal)');
+        const focusable = modal.querySelector('input:not([type="hidden"]), select, textarea, button:not(.btn-close-modal)') || modal.querySelector('.btn-close-modal');
         if (focusable) focusable.focus();
       }, 50);
     }
@@ -5430,8 +5469,15 @@
     function closeModal(modalId) {
       const modal = typeof modalId === 'string' ? document.getElementById(modalId) : modalId;
       if (!modal) return;
+      const prevFocus = modal._previousFocus;
       modal.classList.remove('open');
       modal.style.display = 'none';
+      if (!document.querySelector('.modal-overlay.open')) {
+        setBackgroundLandmarksInert(false);
+        if (prevFocus && typeof prevFocus.focus === 'function' && document.contains(prevFocus)) {
+          try { prevFocus.focus({ preventScroll: true }); } catch (e) {}
+        }
+      }
     }
 
     // Funciones de conveniencia y compatibilidad
@@ -5787,43 +5833,22 @@
         if (label) label.textContent = `Proyecto: ${ws.name}`;
         actualizarContadorPinned();
         if (!options.preservePanel) {
-          renderizarHistorialChatActual();
+          renderizarHistorialChatActual({ scrollToBottom: true });
         }
-        if (ws.query && ws.query.trim()) {
-          buscar(ws.query, { skipAgent: !!options.skipAgent });
-        } else {
-          lastExecutedQuery = '';
-          lastFetchedQuery = '';
-          lastFetchedSource = '';
-          lastTotalGlobalFound = 0;
-          lastSearchMeta = null;
-          allRetrievedPatents = [];
-          allRetrievedLiterature = [];
-          currentRenderedPatents = [];
-          currentRenderedLiterature = [];
-          renderSearchExpansionBanner(null);
-          const activeQueryPill = document.getElementById('active-query-pill');
-          if (activeQueryPill) activeQueryPill.style.display = 'none';
-          const intelDropdown = document.getElementById('intel-dropdown');
-          if (intelDropdown) intelDropdown.style.display = 'none';
-          const rawOutput = document.getElementById('raw-output');
-          if (rawOutput) rawOutput.textContent = '';
-          mostrarZeroState();
-        }
+        restaurarUltimaBusquedaEstado(ws, {
+          allowFetchIfMissing: true,
+          skipAgent: !!options.skipAgent
+        });
       } else {
         if (label) label.textContent = 'Sin Proyecto';
         actualizarContadorPinned();
         if (!options.preservePanel) {
-          renderizarHistorialChatActual();
+          renderizarHistorialChatActual({ scrollToBottom: true });
         }
-        lastExecutedQuery = '';
-        lastFetchedQuery = '';
-        lastFetchedSource = '';
-        allRetrievedPatents = [];
-        allRetrievedLiterature = [];
-        const activeQueryPill = document.getElementById('active-query-pill');
-        if (activeQueryPill) activeQueryPill.style.display = 'none';
-        mostrarZeroState();
+        restaurarUltimaBusquedaEstado(null, {
+          allowFetchIfMissing: false,
+          skipAgent: true
+        });
       }
 
       const menu = document.getElementById('workspace-popup-menu');
@@ -6061,7 +6086,7 @@
     // =========================================================
     // MODO DE MOTOR (PATENTES vs LITERATURA)
     // =========================================================
-    function setEngineMode(mode, options = {}) {
+    function syncEngineModeUi(mode) {
       const normalized = mode === 'literature' ? 'literature' : 'patents';
       currentEngineMode = normalized;
       const btnPatents = document.getElementById('engine-btn-patents');
@@ -6090,7 +6115,10 @@
         if (activeFiltersBar) activeFiltersBar.style.display = 'none';
         if (qInput) qInput.placeholder = 'Escribe temas académicos, artículos científicos, autores o DOI (OpenAlex)...';
       }
+    }
 
+    function setEngineMode(mode, options = {}) {
+      syncEngineModeUi(mode);
       if (lastExecutedQuery) {
         buscar(lastExecutedQuery, { skipAgent: !!options.skipAgent });
       } else {
@@ -6121,6 +6149,10 @@
           return;
         }
         e.preventDefault();
+        // Proteger IME (chino, japones, coreano o tildes compuestas) contra envio prematuro
+        if (e.isComposing || e.keyCode === 229) {
+          return;
+        }
         buscar();
       }
     }
@@ -6135,6 +6167,7 @@
       allRetrievedLiterature = [];
       currentRenderedPatents = [];
       currentRenderedLiterature = [];
+      limpiarUltimaBusquedaEstado(getActiveWorkspace());
       renderSearchExpansionBanner(null);
       const pill = document.getElementById('active-query-pill');
       if (pill) pill.style.display = 'none';
@@ -6244,9 +6277,16 @@
 
       const hint = document.getElementById('ws-active-layout-hint');
       if (hint) {
-        if (valid === 'split') hint.textContent = 'Chat IA a la izquierda | Patentes a la derecha (scroll independiente)';
-        else if (valid === 'results') hint.textContent = 'Vista enfocada exclusivamente en tarjetas de patentes y literatura';
-        else hint.textContent = 'Vista enfocada exclusivamente en el diálogo con el Agente Pericial';
+        if (valid === 'split') {
+          hint.textContent = '';
+          hint.style.display = 'none';
+        } else if (valid === 'results') {
+          hint.style.display = 'inline';
+          hint.textContent = 'Vista enfocada exclusivamente en tarjetas de patentes y literatura';
+        } else {
+          hint.style.display = 'inline';
+          hint.textContent = 'Vista enfocada exclusivamente en el diálogo con el Agente Pericial';
+        }
       }
 
       if (valid === 'chat') {
@@ -6637,6 +6677,189 @@
     // =========================================================
     // MOTOR PRINCIPAL DE BUSQUEDA
     // =========================================================
+    function getSessionLastSearchKey() {
+      return 'capstone_session_last_search_' + userUuid;
+    }
+
+    function renderizarInteligenciaCpc(cpcSummary) {
+      const intelDropdown = document.getElementById('intel-dropdown');
+      const cntEl = document.getElementById('intel-badge-count');
+      const chipsContainer = document.getElementById('cpc-chips-container');
+      if (Array.isArray(cpcSummary) && cpcSummary.length > 0) {
+        if (intelDropdown) intelDropdown.style.display = 'block';
+        if (cntEl) cntEl.textContent = `${cpcSummary.length} clases detectadas`;
+        if (chipsContainer) {
+          chipsContainer.innerHTML = cpcSummary.map(item => `
+            <div class="cpc-chip" onclick="refinarConCPC('${escapeJsAttr(item.code)}')" title="Hacer clic para refinar con ${escapeHtml(item.code)}">
+              <span>${escapeHtml(item.type)}:</span>
+              <strong>${escapeHtml(item.code)}</strong>
+              <span class="cpc-pct">${item.percentage}%</span>
+            </div>
+          `).join('');
+        }
+      } else {
+        if (intelDropdown) intelDropdown.style.display = 'none';
+      }
+    }
+
+    function guardarUltimaBusquedaEstado(payload) {
+      if (!payload || !payload.query) return;
+      const ws = getActiveWorkspace();
+      const compactResults = Array.isArray(payload.results) ? payload.results.slice(0, 45) : [];
+      const snapshot = {
+        query: payload.query,
+        engineMode: payload.engineMode || currentEngineMode || 'patents',
+        searchMode: payload.searchMode || currentSearchMode || 'hybrid',
+        source: payload.source || currentSource || 'all',
+        totalGlobalFound: Number(payload.totalGlobalFound || compactResults.length) || 0,
+        searchMeta: payload.searchMeta || null,
+        cpcSummary: Array.isArray(payload.cpcSummary) ? payload.cpcSummary.slice(0, 24) : [],
+        results: compactResults,
+        savedAt: Date.now()
+      };
+      if (ws) {
+        ws.query = payload.query;
+        ws.lastSearch = snapshot;
+        try {
+          guardarWorkspacesState();
+        } catch (err) {
+          // Si localStorage excede cuota, recortar figuras y conservar primeros 18 registros
+          ws.lastSearch = {
+            ...snapshot,
+            results: compactResults.slice(0, 18).map(r => {
+              const slim = { ...r };
+              delete slim.figures;
+              return slim;
+            })
+          };
+          try { guardarWorkspacesState(); } catch (e2) {}
+        }
+      } else {
+        try {
+          localStorage.setItem(getSessionLastSearchKey(), JSON.stringify(snapshot));
+        } catch (err) {
+          try {
+            const slimSnap = { ...snapshot, results: compactResults.slice(0, 18) };
+            localStorage.setItem(getSessionLastSearchKey(), JSON.stringify(slimSnap));
+          } catch (e2) {}
+        }
+      }
+    }
+
+    function limpiarUltimaBusquedaEstado(ws) {
+      if (ws) {
+        delete ws.lastSearch;
+        ws.query = '';
+        try { guardarWorkspacesState(); } catch (e) {}
+      } else {
+        try { localStorage.removeItem(getSessionLastSearchKey()); } catch (e) {}
+      }
+    }
+
+    function restaurarUltimaBusquedaEstado(ws, options = {}) {
+      let snap = (ws && ws.lastSearch && Array.isArray(ws.lastSearch.results)) ? ws.lastSearch : null;
+      if (!snap && !ws) {
+        try {
+          const rawSession = localStorage.getItem(getSessionLastSearchKey());
+          if (rawSession) {
+            const parsed = JSON.parse(rawSession);
+            if (parsed && Array.isArray(parsed.results) && parsed.results.length > 0) snap = parsed;
+          }
+        } catch (e) {}
+      }
+
+      if (snap && Array.isArray(snap.results) && snap.results.length > 0) {
+        const mode = snap.engineMode === 'literature' ? 'literature' : 'patents';
+        syncEngineModeUi(mode);
+        if (snap.searchMode && ['hybrid', 'classification', 'exact'].includes(snap.searchMode)) {
+          currentSearchMode = snap.searchMode;
+          const labelMap = {
+            hybrid: 'Modo: Híbrida (CPC + Multi-idioma)',
+            classification: 'Modo: Clasificación CPC/IPC',
+            exact: 'Modo: Palabras Clave Exactas'
+          };
+          const lbl = document.getElementById('current-search-mode-label');
+          if (lbl) lbl.textContent = labelMap[currentSearchMode];
+          ['hybrid', 'classification', 'exact'].forEach(m => {
+            const chk = document.getElementById(`check-smode-${m}`);
+            const opt = document.getElementById(`opt-smode-${m}`);
+            if (chk) chk.style.display = m === currentSearchMode ? 'inline' : 'none';
+            if (opt) opt.classList.toggle('selected', m === currentSearchMode);
+          });
+        }
+
+        lastExecutedQuery = snap.query || (ws ? ws.query : '') || '';
+        lastFetchedQuery = lastExecutedQuery;
+        lastFetchedSource = snap.source || currentSource || 'all';
+        lastTotalGlobalFound = Number(snap.totalGlobalFound || snap.results.length) || 0;
+        lastSearchMeta = snap.searchMeta || null;
+        currentSearchPage = 1;
+
+        const activeQueryPill = document.getElementById('active-query-pill');
+        const activeQueryText = document.getElementById('active-query-text');
+        if (activeQueryPill && activeQueryText && lastExecutedQuery) {
+          activeQueryText.textContent = `"${lastExecutedQuery}"`;
+          activeQueryPill.style.display = 'inline-flex';
+        }
+
+        renderSearchExpansionBanner(lastSearchMeta);
+        rawJsonData = {
+          search_meta: lastSearchMeta,
+          total_found: lastTotalGlobalFound,
+          cpc_summary: snap.cpcSummary || [],
+          organic_results: snap.results
+        };
+        const rawOutput = document.getElementById('raw-output');
+        if (rawOutput) rawOutput.textContent = JSON.stringify(rawJsonData, null, 2);
+
+        if (mode === 'literature') {
+          allRetrievedPatents = [];
+          allRetrievedLiterature = snap.results;
+          const intelDropdown = document.getElementById('intel-dropdown');
+          if (intelDropdown) intelDropdown.style.display = 'none';
+          const countBadge = document.getElementById('results-count-badge');
+          if (countBadge) {
+            countBadge.textContent = lastTotalGlobalFound > allRetrievedLiterature.length
+              ? `Resultados: ${allRetrievedLiterature.length} papers (~${lastTotalGlobalFound.toLocaleString('es-CO')} globales)`
+              : `${allRetrievedLiterature.length} papers`;
+          }
+          renderizarLiteratura(allRetrievedLiterature);
+        } else {
+          allRetrievedLiterature = [];
+          allRetrievedPatents = snap.results;
+          renderizarInteligenciaCpc(snap.cpcSummary || []);
+          applyFiltersAndRender();
+        }
+        syncWorkspaceSplitClasses();
+        return true;
+      }
+
+      if (options.allowFetchIfMissing && ws && ws.query && ws.query.trim()) {
+        buscar(ws.query, { skipAgent: !!options.skipAgent });
+        return true;
+      }
+
+      lastExecutedQuery = '';
+      lastFetchedQuery = '';
+      lastFetchedSource = '';
+      lastTotalGlobalFound = 0;
+      lastSearchMeta = null;
+      allRetrievedPatents = [];
+      allRetrievedLiterature = [];
+      currentRenderedPatents = [];
+      currentRenderedLiterature = [];
+      renderSearchExpansionBanner(null);
+      const activeQueryPill = document.getElementById('active-query-pill');
+      if (activeQueryPill) activeQueryPill.style.display = 'none';
+      const intelDropdown = document.getElementById('intel-dropdown');
+      if (intelDropdown) intelDropdown.style.display = 'none';
+      const rawOutput = document.getElementById('raw-output');
+      if (rawOutput) rawOutput.textContent = '';
+      mostrarZeroState();
+      syncWorkspaceSplitClasses();
+      return false;
+    }
+
     async function buscar(customQuery, options = {}) {
       const qInput = document.getElementById('query-input');
       const searchBtn = document.getElementById('ag-search-btn');
@@ -6734,6 +6957,16 @@
 
           AgentActivityTree.logStep('literature_fetched', `Recuperados ${allRetrievedLiterature.length} papers de OpenAlex en tiempo real`);
           renderizarLiteratura(allRetrievedLiterature);
+          guardarUltimaBusquedaEstado({
+            query: q,
+            engineMode: 'literature',
+            searchMode: currentSearchMode,
+            source: currentSource,
+            totalGlobalFound: lastTotalGlobalFound,
+            searchMeta: lastSearchMeta,
+            cpcSummary: [],
+            results: allRetrievedLiterature
+          });
           syncWorkspaceSplitClasses();
           if (!options.skipAgent) {
             consultarAgenteIA(q, allRetrievedLiterature, false, q);
@@ -6783,25 +7016,21 @@
 
         if (data.cpc_summary && data.cpc_summary.length > 0) {
           registrarActividadUsuario({ cpcs: data.cpc_summary.map(c => c.code) });
-          if (intelDropdown) intelDropdown.style.display = 'block';
-          const cntEl = document.getElementById('intel-badge-count');
-          if (cntEl) cntEl.textContent = `${data.cpc_summary.length} clases detectadas`;
-          const chipsContainer = document.getElementById('cpc-chips-container');
-          if (chipsContainer) {
-            chipsContainer.innerHTML = data.cpc_summary.map(item => `
-              <div class="cpc-chip" onclick="refinarConCPC('${escapeJsAttr(item.code)}')" title="Hacer clic para refinar con ${escapeHtml(item.code)}">
-                <span>${escapeHtml(item.type)}:</span>
-                <strong>${escapeHtml(item.code)}</strong>
-                <span class="cpc-pct">${item.percentage}%</span>
-              </div>
-            `).join('');
-          }
-        } else {
-          if (intelDropdown) intelDropdown.style.display = 'none';
         }
+        renderizarInteligenciaCpc(data.cpc_summary || []);
 
         AgentActivityTree.logStep('patents_fetched', `Recuperadas ${allRetrievedPatents.length} patentes oficiales (${currentSource}, alcance ~${lastTotalGlobalFound.toLocaleString('es-CO')})`);
         applyFiltersAndRender();
+        guardarUltimaBusquedaEstado({
+          query: q,
+          engineMode: 'patents',
+          searchMode: currentSearchMode,
+          source: currentSource,
+          totalGlobalFound: lastTotalGlobalFound,
+          searchMeta: lastSearchMeta,
+          cpcSummary: data.cpc_summary || [],
+          results: allRetrievedPatents
+        });
         if (!options.skipAgent) {
           consultarAgenteIA(q, allRetrievedPatents, false, q);
         } else {
@@ -6848,6 +7077,16 @@
           });
           currentSearchPage = nextPage;
           renderizarLiteratura(allRetrievedLiterature);
+          guardarUltimaBusquedaEstado({
+            query: lastExecutedQuery,
+            engineMode: 'literature',
+            searchMode: currentSearchMode,
+            source: currentSource,
+            totalGlobalFound: lastTotalGlobalFound,
+            searchMeta: lastSearchMeta,
+            cpcSummary: [],
+            results: allRetrievedLiterature
+          });
           syncWorkspaceSplitClasses();
           mostrarNotificacion(added > 0 ? `Se cargaron ${added} artículos científicos adicionales (Página ${nextPage}).` : 'No hubo artículos adicionales nuevos en este lote.', added > 0 ? 'ok' : 'info');
         } else {
@@ -6882,6 +7121,16 @@
           });
           currentSearchPage = nextPage;
           applyFiltersAndRender();
+          guardarUltimaBusquedaEstado({
+            query: lastExecutedQuery,
+            engineMode: 'patents',
+            searchMode: currentSearchMode,
+            source: currentSource,
+            totalGlobalFound: lastTotalGlobalFound,
+            searchMeta: lastSearchMeta,
+            cpcSummary: (rawJsonData && rawJsonData.cpc_summary) ? rawJsonData.cpc_summary : [],
+            results: allRetrievedPatents
+          });
           mostrarNotificacion(added > 0 ? `Se agregaron ${added} patentes nuevas al listado (Lote ${nextPage}).` : 'Las fuentes no arrojaron patentes inéditas adicionales para este lote.', added > 0 ? 'ok' : 'info');
         }
       } catch (err) {
@@ -7745,6 +7994,36 @@
       const q = lastExecutedQuery || 'No especificada';
       const fechaHoy = new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
+      const activeTotal = currentEngineMode === 'literature'
+        ? (allRetrievedLiterature ? allRetrievedLiterature.length : 0)
+        : (allRetrievedPatents ? allRetrievedPatents.length : 0);
+
+      if (activeTotal === 0) {
+        sheet.innerHTML = `
+          <div style="text-align: center; padding: 38px 20px; max-width: 520px; margin: 0 auto;">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brand-primary); font-weight: 700; margin-bottom: 8px;">
+              Dossier de Vigilancia Tecnológica y FTO
+            </div>
+            <h2 style="font-size: 18px; font-weight: 700; color: var(--text-high); margin: 0 0 10px 0;">
+              Aún no hay resultados activos en este espacio de trabajo
+            </h2>
+            <p style="font-size: 13px; color: var(--text-medium); line-height: 1.6; margin: 0 0 18px 0;">
+              Ejecuta primero una búsqueda de patentes o literatura científica para construir automáticamente la matriz FTO, la gráfica de titulares y la tabla exportable en PDF/HTML.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+              <button type="button" class="btn-dossier-export" onclick="cerrarDossierModal(); buscar('baterias de estado solido', { forceSearch: true });">
+                Cargar búsqueda de ejemplo
+              </button>
+              <button type="button" class="btn-ghost" onclick="cerrarDossierModal(); document.getElementById('query-input')?.focus();">
+                Ir a buscar manualmente
+              </button>
+            </div>
+          </div>
+        `;
+        openModal('dossier-modal');
+        return;
+      }
+
       if (currentEngineMode === 'literature') {
         const total = allRetrievedLiterature.length;
         const totalCitations = allRetrievedLiterature.reduce((acc, curr) => acc + (curr.cited_by_count || 0), 0);
@@ -8128,7 +8407,7 @@
 
     function lanzarAsistenteJTBDPCT() {
       const q = lastExecutedQuery ? `considerando los resultados de "${lastExecutedQuery}"` : 'para evaluar nuestra invencion';
-      preguntarAlAgente(`Realiza el cuestionario de autocritica de patentabilidad segun las Reglas 11 a 13 del Reglamento PCT ${q}: 1) Que aspectos tecnicos debemos fortalecer para asegurar Novedad y Nivel Inventivo? 2) Que errores comunes debemos evitar o corregir en las reivindicaciones independientes y dependientes?`);
+      preguntarAlAgente(`Realiza el cuestionario de autocritica de patentabilidad segun criterios PCT ${q}: 1) Que aspectos tecnicos debemos fortalecer para asegurar Novedad y Nivel Inventivo? 2) Que errores comunes debemos evitar o corregir en las reivindicaciones independientes y dependientes?`);
     }
 
     function lanzarAsistenteJTBDFTO() {
@@ -8145,6 +8424,21 @@
         abrirDossierModal();
       } else {
         preguntarAlAgente('Como identificamos a los lideres competitivos (Top Assignees), la distribucion territorial de patentes (USPTO, EPO, WIPO) y los Oceanos Azules (mercados sin proteccion concedida) en nuestra vigilancia tecnologica?');
+      }
+    }
+
+    // =========================================================
+    // SCROLL AUTOMATICO EXCLUSIVO DEL CHAT DEL AGENTE (SIN MOVER LA PAGINA)
+    // =========================================================
+    function scrollAgentChatToBottom(behavior = 'auto') {
+      const dock = document.getElementById('agent-dock-pane');
+      const panel = document.getElementById('ai-unified-panel');
+      if (dock && dock.scrollHeight > dock.clientHeight + 2) {
+        dock.scrollTo({ top: dock.scrollHeight, behavior });
+        return;
+      }
+      if (panel && panel.scrollHeight > panel.clientHeight + 2) {
+        panel.scrollTo({ top: panel.scrollHeight, behavior });
       }
     }
 
@@ -8180,6 +8474,7 @@
         const panel = document.getElementById('ai-unified-panel');
         if (panel) panel.classList.add('active');
         this.render();
+        requestAnimationFrame(() => scrollAgentChatToBottom('auto'));
 
         if (this.timerInterval) clearInterval(this.timerInterval);
         this.timerInterval = setInterval(() => {
@@ -8235,6 +8530,7 @@
           spinner.outerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
         }
         this.renderBodyOnly();
+        scrollAgentChatToBottom('auto');
       },
 
       toggle() {
@@ -8583,7 +8879,7 @@
       renderizarHistorialChatActual();
     }
 
-    function renderizarHistorialChatActual() {
+    function renderizarHistorialChatActual(opts = {}) {
       const ws = getActiveWorkspace();
       const olderSlot = document.getElementById('ai-history-older-slot');
       const recentSlot = document.getElementById('ai-history-recent-slot');
@@ -8653,6 +8949,9 @@
         } catch (e) {}
       }
       syncWorkspaceSplitClasses();
+      if (opts && opts.scrollToBottom) {
+        requestAnimationFrame(() => scrollAgentChatToBottom('auto'));
+      }
     }
 
     // =========================================================
@@ -8675,8 +8974,8 @@
       const tokens = text.match(/\S+|\s+/g) || [text];
       let tokenIdx = 0;
       const totalTokens = tokens.length;
-      const tokensPerTick = Math.max(1, Math.min(4, Math.ceil(totalTokens / 80)));
-      const intervalMs = 20;
+      const tokensPerTick = Math.max(1, Math.min(3, Math.ceil(totalTokens / 110)));
+      const intervalMs = 18;
 
       let isCancelled = false;
 
@@ -8694,15 +8993,13 @@
 
         targetElement.innerHTML = previewHtml + '<span class="agent-typing-cursor"></span>';
 
-        const panel = document.getElementById('ai-unified-panel');
-        if (panel) {
-          panel.scrollTop = panel.scrollHeight;
-        }
+        scrollAgentChatToBottom('auto');
 
         if (tokenIdx >= totalTokens) {
           clearInterval(intervalId);
           currentTypewriterCancel = null;
           renderMarkdownAndMath(text, targetElement);
+          requestAnimationFrame(() => scrollAgentChatToBottom('auto'));
           if (onComplete) onComplete();
         }
       }, intervalMs);
@@ -9362,7 +9659,7 @@
             if (btn) btn.classList.toggle('active', v === currentWorkspaceView);
           });
         }
-        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        requestAnimationFrame(() => scrollAgentChatToBottom('auto'));
       }
       const restoreBtn = document.getElementById('btn-restore-ai-panel');
       if (restoreBtn) restoreBtn.style.display = 'none';
@@ -9404,7 +9701,7 @@
       } else {
         sessionChatHistory.push(userTurnObj);
       }
-      renderizarHistorialChatActual();
+      renderizarHistorialChatActual({ scrollToBottom: true });
 
       const uiState = {
         engineMode: currentEngineMode,
@@ -9527,7 +9824,7 @@
           if (liveContainer) liveContainer.style.display = 'none';
           if (replyContent) replyContent.innerHTML = '';
 
-          renderizarHistorialChatActual();
+          renderizarHistorialChatActual({ scrollToBottom: true });
 
           if (data.follow_ups && data.follow_ups.length && followupsElem) {
             followupsElem.innerHTML = `
@@ -9538,7 +9835,7 @@
 
           if (panel && !/\[ACTION:PANEL\s+action=["']minimize["']\]/i.test(data.reply || '')) {
             panel.classList.add('active');
-            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            requestAnimationFrame(() => scrollAgentChatToBottom('auto'));
           }
         });
 
@@ -10407,9 +10704,12 @@
         if (wsLabel) wsLabel.textContent = 'Sin Proyecto';
       }
       actualizarContadorPinned();
-      renderizarHistorialChatActual();
+      renderizarHistorialChatActual({ scrollToBottom: true });
 
-      mostrarZeroState();
+      restaurarUltimaBusquedaEstado(ws, {
+        allowFetchIfMissing: true,
+        skipAgent: true
+      });
       renderDynamicApisHealth();
     });
 

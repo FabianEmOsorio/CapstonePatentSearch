@@ -253,7 +253,7 @@ METODOLOGÍAS Y MARCO DE PROPIEDAD INTELECTUAL (EXPLICAR CON CLARIDAD DIDÁCTICA
 3. Mapeo de Océanos Azules (Prior Art & White Space Mapping - US9201966B2 / US9836805B2): Cruza clasificaciones CPC/IPC, vigilancia periódica y conceptos funcionales para ubicar nichos tecnológicos desiertos sin patentes vigentes.
 4. Metodología E-T-S (EPO B-III / MPEP 904): Divide el problema en Entidad física + Tecnología aplicada + Solución funcional con operadores booleanos (AND/OR).
 5. Filtro Cero (OpenAlex): Contrasta 250M+ artículos académicos y preprints antes de invertir en patentes comerciales.
-6. Normas PCT (Reglas 11–13): Regla 11 (dibujos en línea negra sin sombras), Regla 12 (idioma) y Regla 13 (unidad de invención y estructura de reivindicaciones).
+6. Normas PCT de Forma y Unidad de Invención: dibujos técnicos en línea clara, idioma de presentación y unidad de invención / estructura de reivindicaciones.
 7. Protección IP de Software en Colombia y la CAN (Caso SMIT): El software no es patentable por falta de materia técnica pura (Decisión 486 CAN Art. 15). Se protege por Derecho de Autor desde su creación (Decisión 351 Art. 23 y Ley 23 de 1982) con registro gratuito ante la DNDA (~15 días hábiles), complementado con Secreto Empresarial sobre algoritmos/prompts/ecuaciones no divulgadas y Marca sobre el signo SMIT para uso comercial.
 
 FUENTES DOCUMENTALES DEL SISTEMA:
@@ -271,12 +271,12 @@ MAPA COMPLETO DE BOTONES EN PANTALLA (PARA EXPLICAR AL USUARIO CON EXACTITUD QU�
   - Botón de Tema (Sol / Luna): Alterna entre Modo Oscuro y Modo Claro.
 • Barra "Ruta JTBD":
   - "1. Ecuación E-T-S / Booleana": Asiste al usuario a traducir su necesidad técnica en una ecuación booleana con códigos CPC/IPC.
-  - "2. Autocrítica PCT (Reglas 11–13)": Evalúa novedad, nivel inventivo y estructura formal de reivindicaciones.
+  - "2. Autocrítica PCT": Evalúa novedad, nivel inventivo y estructura formal de reivindicaciones.
   - "3. Dictamen FTO & Dominio Público": Emite análisis de Libertad de Operación separando invenciones vigentes de las libres de regalías.
   - "4. Mapa Competitivo & Océanos Azules": Abre la cartografía competitiva de titulares, jurisdicciones y nichos libres.
   - "N Guardadas": Filtra o muestra exclusivamente las patentes/artículos marcados como Semilla en el proyecto activo.
 • Panel del Agente, Espacio Dividido y Barra de Resultados:
-  - Conmutador de Espacio ("Vista Dividida", "Solo Patentes / Resultados", "Solo Chat del Agente"): Separa visualmente y con scroll independiente el chat del Agente de las tarjetas de patentes para no mezclar ambas zonas al desplazarse.
+  - Conmutador de Espacio ("Vista Dividida", "Solo Patentes / Resultados", "Solo Chat del Agente"): Separa visualmente en paneles independientes el chat del Agente de las tarjetas de patentes para no mezclar ambas zonas al desplazarse.
   - Banner "Estrategia de Búsqueda Aplicada": Muestra la traducción automática multi-idioma, las clasificaciones CPC aplicadas en paralelo y el universo global estimado vs la muestra visible.
   - Selector de modelo ('gemini-...'): Alterna entre modelo rápido (Flash) y razonamiento profundo (Pro).
   - "Copiar", "Limpiar Chat", "Minimizar": Copian el dictamen, limpian el historial del proyecto actual o pliegan el panel IA.
