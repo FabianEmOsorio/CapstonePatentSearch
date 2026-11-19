@@ -91,6 +91,7 @@ export default async function handler(req, res) {
   const q = (req.query?.q ?? body.q ?? '');
   const rawSource = (req.query?.source ?? body.source ?? 'all');
   const rawMode = (req.query?.mode ?? body.mode ?? 'hybrid');
+  const safePage = Math.max(1, Math.min(20, parseInt(req.query?.page ?? body.page ?? '1', 10) || 1));
   const optionalApiKey = typeof body.apiKey === 'string' ? body.apiKey.trim().slice(0, 256) : '';
   const optionalProvider = typeof body.provider === 'string' ? body.provider.trim().toLowerCase() : '';
   const SERPAPI_KEY = process.env.SERPAPI_KEY || "";
@@ -118,12 +119,19 @@ export default async function handler(req, res) {
 
   const tasks = [];
 
-  // 1. Google Patents (Multilingüe + Clasificación CPC paralela + fallback SerpApi)
+  // 1. Google Patents (Multilingüe + Clasificación CPC paralela + rotación de páginas + fallback SerpApi)
   if (source === 'all' || source === 'google') {
     tasks.push((async () => {
       try {
+        // En página > 1 enfocamos variantes sinónimas / CPC específicas para traer un lote distinto
+        let pagePrimaryQ = plan.google_query;
+        if (safePage > 1 && plan.expanded_terms.length > 1) {
+          const synTerm = plan.expanded_terms[(safePage - 1) % plan.expanded_terms.length];
+          const cpcCode = plan.applied_cpcs[(safePage - 2) % Math.max(1, plan.applied_cpcs.length)]?.code || '';
+          pagePrimaryQ = cpcCode ? `${cpcCode} "${synTerm}"` : `"${synTerm}"`;
+        }
         const primaryBatch = await fetchGoogleXhrBatch(
-          plan.google_query,
+          pagePrimaryQ,
           plan.search_mode === 'classification' ? 'classification' : (plan.search_mode === 'exact' ? 'exact' : 'multilingual'),
           10
         );
@@ -131,6 +139,11 @@ export default async function handler(req, res) {
         let classBatch = null;
         if (plan.search_mode !== 'exact') {
           let classQueryToRun = plan.classification_query;
+          if (safePage > 1 && plan.applied_cpcs.length > 0) {
+            const rotCpc = plan.applied_cpcs[(safePage - 1) % plan.applied_cpcs.length]?.code;
+            const rotTerm = plan.expanded_terms[safePage % plan.expanded_terms.length] || plan.english_core;
+            classQueryToRun = rotCpc ? `${rotCpc} "${rotTerm}"` : classQueryToRun;
+          }
           // Si no teníamos CPCs previos pero Google devolvió summary.cpc, usar las 2 clases dominantes reales
           if (!classQueryToRun && primaryBatch?.cpc_summary?.length > 0) {
             const topRealCpcs = primaryBatch.cpc_summary.map(c => c.code).filter(Boolean).slice(0, 2);
@@ -142,7 +155,7 @@ export default async function handler(req, res) {
               }
             }
           }
-          if (classQueryToRun && classQueryToRun !== plan.google_query) {
+          if (classQueryToRun && classQueryToRun !== pagePrimaryQ) {
             classBatch = await fetchGoogleXhrBatch(classQueryToRun, 'classification', 8);
           }
         }
@@ -258,7 +271,7 @@ export default async function handler(req, res) {
       const timer = setTimeout(() => ctrl.abort(), 4500);
       try {
         const pmcQ = plan.europe_pmc_query || safeQ;
-        const pmcUrl = `https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=SRC:PAT+AND+${encodeURIComponent(pmcQ)}&format=json&resultType=core&pageSize=8`;
+        const pmcUrl = `https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=SRC:PAT+AND+${encodeURIComponent(pmcQ)}&format=json&resultType=core&pageSize=8&page=${safePage}`;
         const resp = await fetch(pmcUrl, { signal: ctrl.signal });
         if (resp.ok) {
           const data = await resp.json();

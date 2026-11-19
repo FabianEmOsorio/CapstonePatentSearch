@@ -2994,17 +2994,48 @@
       line-height: 1.6;
       padding: 0;
       -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
+      overflow-x: clip;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+    }
+
+    /* CABECERA ANCLADA SUPERIOR CON GRADIENTE SEPARADOR */
+    .top-anchored-shell {
+      position: sticky;
+      top: 0;
+      z-index: 120;
+      flex-shrink: 0;
+      background: rgba(16, 20, 29, 0.96);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.48);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.18);
+    }
+    [data-theme="light"] .top-anchored-shell {
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+      border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+    }
+    .top-anchored-shell::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      height: 22px;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(11, 15, 23, 0.72), transparent);
+    }
+    [data-theme="light"] .top-anchored-shell::after {
+      background: linear-gradient(to bottom, rgba(248, 250, 252, 0.75), transparent);
     }
 
     /* =========================================================
        1. APP HEADER UNIFICADO (ERGONOMIA NIVEL 1)
        ========================================================= */
     .app-header {
-      background: var(--bg-surface);
+      background: transparent;
       border-bottom: 1px solid var(--border-color);
       padding: 10px 20px;
       margin-bottom: 0;
@@ -3013,11 +3044,6 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
     }
 
     .brand-section {
@@ -3322,21 +3348,80 @@
       min-width: 0;
     }
 
-    /* En escritorio: Split paralelo por defecto cuando el Agente está activo */
+    /* En escritorio (>=1080px): Cockpit Anclado (barras laterales y superior siempre fijas al scrollear) */
     @media (min-width: 1080px) {
+      body {
+        height: 100dvh;
+        overflow: hidden;
+        padding-bottom: 0 !important;
+      }
+      .app-main {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+      }
+      .feed-container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        padding: 14px 24px 0 24px;
+      }
+      .workspace-view-bar {
+        flex-shrink: 0;
+      }
+      .workspace-panes {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        align-items: stretch;
+      }
       .workspace-panes.agent-open[data-layout="split"] {
         grid-template-columns: minmax(360px, 430px) minmax(0, 1fr);
       }
       .app-main.drawer-open .workspace-panes.agent-open[data-layout="split"] {
         grid-template-columns: minmax(310px, 360px) minmax(0, 1fr);
       }
-      .workspace-panes.agent-open[data-layout="split"] .agent-dock-pane {
-        position: sticky;
-        top: 74px;
-        max-height: calc(100vh - 205px);
+      .agent-dock-pane,
+      .results-dock-pane {
+        height: 100%;
+        min-height: 0;
         overflow-y: auto;
-        padding-right: 4px;
+        padding-right: 6px;
+        padding-bottom: 155px;
+        scrollbar-width: thin;
       }
+      .inspection-drawer {
+        position: relative !important;
+        top: 0 !important;
+        height: 100% !important;
+        min-height: 0;
+        overflow-y: auto;
+        padding-bottom: 145px;
+      }
+    }
+
+    /* Footer de cobertura global y paginación */
+    .global-coverage-footer {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .global-coverage-explain {
+      font-size: 12.5px;
+      color: var(--text-medium);
+      line-height: 1.5;
+    }
+    .global-coverage-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
     }
 
     /* Modo Solo Resultados */
@@ -3803,31 +3888,58 @@
     }
 
     /* =========================================================
-       6. BARRA FLOTANTE DE BUSQUEDA (COMMAND BAR / GLASSMORPHISM)
+       6. BARRA FLOTANTE DE BUSQUEDA + SCRIM GRADIENTE INFERIOR
        ========================================================= */
+    .bottom-dock-scrim {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 155px;
+      pointer-events: none;
+      z-index: 84;
+      background: linear-gradient(
+        to top,
+        rgba(11, 15, 23, 0.98) 38%,
+        rgba(11, 15, 23, 0.86) 68%,
+        rgba(11, 15, 23, 0.35) 88%,
+        transparent 100%
+      );
+    }
+    [data-theme="light"] .bottom-dock-scrim {
+      background: linear-gradient(
+        to top,
+        rgba(241, 245, 249, 0.98) 38%,
+        rgba(241, 245, 249, 0.88) 68%,
+        rgba(241, 245, 249, 0.35) 88%,
+        transparent 100%
+      );
+    }
     .command-bar-wrapper {
       position: fixed;
-      bottom: 20px;
+      bottom: 16px;
       left: 50%;
       transform: translateX(-50%);
       width: 92%;
-      max-width: 860px;
-      background: rgba(16, 20, 29, 0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      max-width: 880px;
+      background: rgba(18, 24, 36, 0.96);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      border-top: 1.5px solid rgba(56, 189, 248, 0.48);
       border-radius: var(--radius-lg);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
-      padding: 8px 12px;
-      z-index: 90;
+      box-shadow: 0 -10px 34px rgba(0, 0, 0, 0.62), 0 18px 44px rgba(0, 0, 0, 0.72);
+      padding: 10px 14px;
+      z-index: 95;
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
     [data-theme="light"] .command-bar-wrapper {
-      background: rgba(255, 255, 255, 0.9);
-      border-color: rgba(0, 0, 0, 0.15);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+      background: rgba(255, 255, 255, 0.97);
+      border-color: rgba(15, 23, 42, 0.16);
+      border-top: 1.5px solid rgba(0, 112, 243, 0.35);
+      box-shadow: 0 -8px 28px rgba(15, 23, 42, 0.12), 0 16px 36px rgba(15, 23, 42, 0.16);
     }
 
     .command-input-row {
@@ -4295,7 +4407,7 @@
     /* Responsividad integral (Tablet / Móvil sin desbordamiento horizontal) */
     html, body {
       max-width: 100%;
-      overflow-x: hidden;
+      overflow-x: clip;
     }
     .feed-container,
     .agent-panel-card,
@@ -4409,7 +4521,8 @@
 </head>
 <body>
 
-  <!-- 1. APP HEADER UNIFICADO (1 SOLA LINEA COMPACTA, MAXIMA ERGONOMIA) -->
+  <!-- 1 & 2. CABECERA ANCLADA + RUTA JTBD -->
+  <div class="top-anchored-shell" id="top-anchored-shell">
   <header class="app-header">
     <div class="brand-section">
       <div class="brand-logo-badge">SMIT</div>
@@ -4519,6 +4632,7 @@
       </button>
     </div>
   </section>
+  </div>
 
   <!-- 3. MAIN LAYOUT: FEED BENTO + DRAWER ADAPTATIVO -->
   <main class="app-main" id="app-main-layout">
@@ -4697,7 +4811,8 @@
     </aside>
   </main>
 
-  <!-- 5. COMMAND BAR INFERIOR FLOTANTE (DOCK DE MAXIMA PRODUCTIVIDAD) -->
+  <!-- 5. COMMAND BAR INFERIOR FLOTANTE + GRADIENTE SEPARADOR -->
+  <div class="bottom-dock-scrim" aria-hidden="true"></div>
   <div class="command-bar-wrapper">
     <div class="command-input-row">
       <textarea 
@@ -5241,6 +5356,8 @@
     let currentWorkspaceView = 'split'; // 'split' | 'results' | 'chat'
     let lastTotalGlobalFound = 0;
     let lastSearchMeta = null;
+    let currentSearchPage = 1;
+    let isLoadingMoreResults = false;
     let currentTab = 'cards';
     let currentSource = 'all';
     let currentSort = 'relevance';
@@ -6534,6 +6651,7 @@
 
       // Registrar tema en el perfil persistente del usuario
       registrarActividadUsuario({ query: customSearchTopic || q });
+      currentSearchPage = 1;
 
       // Vaciado inmediato del campo de texto y actualización del chip de consulta activa
       lastExecutedQuery = q;
@@ -6671,6 +6789,104 @@
       const q = lastExecutedQuery || '';
       const newQ = `${q} CPC:${cpcCode}`.trim();
       buscar(newQ);
+    }
+
+    async function cargarMasResultados() {
+      if (isLoadingMoreResults || !lastExecutedQuery) return;
+      isLoadingMoreResults = true;
+      const btn = document.getElementById('btn-load-more-results');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Cargando siguiente lote...';
+      }
+      const nextPage = currentSearchPage + 1;
+      try {
+        if (currentEngineMode === 'literature') {
+          const res = await fetch(`/api/literature?q=${encodeURIComponent(lastExecutedQuery)}&page=${nextPage}&mode=${encodeURIComponent(currentSearchMode)}`);
+          const data = await res.json();
+          const newItems = data.organic_results || data.works || [];
+          const existingIds = new Set(allRetrievedLiterature.map(w => w.id || w.doi || w.title));
+          let added = 0;
+          newItems.forEach(item => {
+            const k = item.id || item.doi || item.title;
+            if (!existingIds.has(k)) {
+              existingIds.add(k);
+              allRetrievedLiterature.push(item);
+              added++;
+            }
+          });
+          currentSearchPage = nextPage;
+          renderizarLiteratura(allRetrievedLiterature);
+          syncWorkspaceSplitClasses();
+          mostrarNotificacion(added > 0 ? `Se cargaron ${added} artículos científicos adicionales (Página ${nextPage}).` : 'No hubo artículos adicionales nuevos en este lote.', added > 0 ? 'ok' : 'info');
+        } else {
+          let res;
+          if (cfgAiKey && cfgAiKey.trim()) {
+            res = await fetch('/api/patents', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                q: lastExecutedQuery,
+                source: currentSource,
+                mode: currentSearchMode,
+                page: nextPage,
+                apiKey: cfgAiKey.trim(),
+                provider: cfgAiProvider
+              })
+            });
+          } else {
+            res = await fetch(`/api/patents?q=${encodeURIComponent(lastExecutedQuery)}&source=${encodeURIComponent(currentSource)}&mode=${encodeURIComponent(currentSearchMode)}&page=${nextPage}`);
+          }
+          const data = await res.json();
+          const newItems = data.organic_results || [];
+          const existingKeys = new Set(allRetrievedPatents.map(p => p.publication_number && p.publication_number !== 'N/A' ? `${p.source_badge}:${p.publication_number}` : `${p.source_badge}:${p.title}`));
+          let added = 0;
+          newItems.forEach(p => {
+            const k = p.publication_number && p.publication_number !== 'N/A' ? `${p.source_badge}:${p.publication_number}` : `${p.source_badge}:${p.title}`;
+            if (!existingKeys.has(k)) {
+              existingKeys.add(k);
+              allRetrievedPatents.push(p);
+              added++;
+            }
+          });
+          currentSearchPage = nextPage;
+          applyFiltersAndRender();
+          mostrarNotificacion(added > 0 ? `Se agregaron ${added} patentes nuevas al listado (Lote ${nextPage}).` : 'Las fuentes no arrojaron patentes inéditas adicionales para este lote.', added > 0 ? 'ok' : 'info');
+        }
+      } catch (err) {
+        mostrarNotificacion('No se pudo cargar el lote siguiente en este momento.', 'warn');
+      } finally {
+        isLoadingMoreResults = false;
+        const btnAfter = document.getElementById('btn-load-more-results');
+        if (btnAfter) {
+          btnAfter.disabled = false;
+          btnAfter.textContent = 'Cargar más resultados';
+        }
+      }
+    }
+
+    function buildGlobalCoverageFooterHtml(loadedCount, isLit) {
+      if (!loadedCount) return '';
+      const total = Math.max(loadedCount, Number(lastTotalGlobalFound || 0));
+      const extQuery = encodeURIComponent((lastSearchMeta && lastSearchMeta.effective_query_google) || lastExecutedQuery || '');
+      const extUrl = isLit
+        ? `https://openalex.org/works?search=${encodeURIComponent((lastSearchMeta && lastSearchMeta.english_core) || lastExecutedQuery || '')}`
+        : `https://patents.google.com/?q=${extQuery}`;
+      const extLabel = isLit ? 'Abrir listado completo en OpenAlex' : 'Explorar universo completo en Google Patents';
+
+      return `
+        <div class="global-coverage-footer" id="global-coverage-footer">
+          <div class="global-coverage-explain">
+            <strong>¿Qué significa "${loadedCount}${total > loadedCount ? ` · ~${total.toLocaleString('es-CO')} globales` : ''}"?</strong>
+            Se muestran <strong>${loadedCount} documentos representativos</strong> (Lote ${currentSearchPage}) de un universo aproximado de <strong>${total.toLocaleString('es-CO')} coincidencias</strong> indexadas mundialmente. Se carga por lotes para mantener velocidad instantánea y permitir que el Agente lea los registros sin saturar tu navegador.
+          </div>
+          <div class="global-coverage-actions">
+            <button class="card-btn primary" id="btn-load-more-results" onclick="cargarMasResultados()">Cargar más resultados (Lote ${currentSearchPage + 1})</button>
+            <button class="card-btn" onclick="lanzarAsistenteJTBDEcuacion()">Acotar universo con Ecuación E-T-S</button>
+            <a class="card-btn" href="${sanitizeHttpUrl(extUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(extLabel)} &rarr;</a>
+          </div>
+        </div>
+      `;
     }
 
     // =========================================================
@@ -9666,6 +9882,7 @@
       `;
       renderizarGridSugerencias(initialItems);
       actualizarSugerenciasConIA(false);
+      syncWorkspaceSplitClasses();
     }
 
     // =========================================================
@@ -9757,7 +9974,7 @@
             </div>
           </article>
         `;
-      }).join('');
+      }).join('') + buildGlobalCoverageFooterHtml(works.length, true);
     }
 
     function abrirSidebarLiteratura(idx) {
@@ -9919,7 +10136,7 @@
             </div>
           </article>
         `;
-      }).join('');
+      }).join('') + buildGlobalCoverageFooterHtml(patents.length, false);
     }
 
     // =========================================================

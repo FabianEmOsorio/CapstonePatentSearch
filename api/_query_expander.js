@@ -6,17 +6,17 @@
 const ALLOWED_MODES = new Set(['hybrid', 'classification', 'exact']);
 
 const TECHNICAL_CPC_SEEDS = [
-  { re: /\b(pump|bomba|impeller|centrifugal|hydraulic|suction)\b/i, cpcs: [{ code: 'F04D', label: 'Bombas rotodinámicas / flujo continuo' }, { code: 'F04B', label: 'Bombas de desplazamiento positivo' }], syn: ['centrifugal pump', 'liquid pump', 'hydraulic pump', 'submersible pump'] },
-  { re: /\b(battery|electrolyte|lithium|anode|cathode|bater[ií]a|acumulador)\b/i, cpcs: [{ code: 'H01M10/05', label: 'Baterías recargables / iones de litio' }, { code: 'H01M4/00', label: 'Electrodos electroquímicos' }], syn: ['solid state battery', 'electrochemical cell', 'lithium ion battery', 'secondary battery'] },
-  { re: /\b(solar|photovoltaic|panel solar|fotovoltaica|perovskite)\b/i, cpcs: [{ code: 'H02S', label: 'Generación de energía fotovoltaica' }, { code: 'H10K30/00', label: 'Dispositivos fotovoltaicos orgánicos/perovskita' }], syn: ['photovoltaic module', 'solar cell', 'solar energy collector'] },
-  { re: /\b(robot|gripper|actuator|rob[oó]tica|brazo|manipulator|haptic)\b/i, cpcs: [{ code: 'B25J', label: 'Manipuladores y sistemas robóticos' }, { code: 'B25J15/00', label: 'Cabezales y pinzas de agarre' }], syn: ['robotic manipulator', 'soft actuator', 'end effector', 'robotic gripper'] },
-  { re: /\b(water filter|purifier|desalination|filtro de agua|purificador|osmosis|tratamiento de agua)\b/i, cpcs: [{ code: 'C02F', label: 'Tratamiento de agua y aguas residuales' }, { code: 'B01D', label: 'Separación y filtración de fluidos' }], syn: ['water filtration', 'water purification', 'membrane filtration'] },
-  { re: /\b(sensor|biosensor|detection|medidor|detector)\b/i, cpcs: [{ code: 'G01N', label: 'Análisis e investigación de materiales' }, { code: 'G01D', label: 'Medición y transductores generales' }], syn: ['optical sensor', 'electrochemical sensor', 'sensing device'] },
-  { re: /\b(drone|uav|quadcopter|dron|aeronave no tripulada)\b/i, cpcs: [{ code: 'B64U', label: 'Vehículos aéreos no tripulados (UAV)' }, { code: 'B64C', label: 'Aeronaves y sistemas de control de vuelo' }], syn: ['unmanned aerial vehicle', 'autonomous drone', 'aerial rotorcraft'] },
-  { re: /\b(wind turbine|aerogenerador|e[oó]lic[oa])\b/i, cpcs: [{ code: 'F03D', label: 'Motores eólicos y turbinas de viento' }], syn: ['wind turbine', 'wind power generator', 'rotor blade'] },
-  { re: /\b(prosthetic|pr[oó]tesis|implant|medical|quir[uú]rgic|catheter|stent)\b/i, cpcs: [{ code: 'A61F', label: 'Prótesis e implantes médicos' }, { code: 'A61B', label: 'Diagnóstico y cirugía médica' }], syn: ['medical prosthesis', 'surgical device', 'biomedical implant'] },
-  { re: /\b(motor|electric motor|inverter|motor el[eé]ctrico)\b/i, cpcs: [{ code: 'H02K', label: 'Máquinas dinamoeléctricas y motores' }, { code: 'H02P', label: 'Control de motores eléctricos' }], syn: ['electric motor', 'brushless motor', 'stator rotor assembly'] },
-  { re: /\b(neural network|deep learning|artificial intelligence|inteligencia artificial|machine learning|modelo ia)\b/i, cpcs: [{ code: 'G06N3/08', label: 'Redes neuronales y aprendizaje profundo' }, { code: 'G06F', label: 'Procesamiento digital de datos' }], syn: ['machine learning model', 'neural network architecture', 'deep learning inference'] }
+  { re: /\b(pumps?|bombas?|pumping|impellers?|centrifugal|hydraulic|hidr[aá]ulic[oa]s?|suction|succi[oó]n)\b/i, cpcs: [{ code: 'F04D', label: 'Bombas rotodinámicas / flujo continuo' }, { code: 'F04B', label: 'Bombas de desplazamiento positivo' }], syn: ['centrifugal pump', 'liquid pump', 'hydraulic pump', 'submersible pump'] },
+  { re: /\b(batter(?:y|ies)|electrolytes?|lithium|anodes?|cathodes?|bater[ií]as?|acumuladores?)\b/i, cpcs: [{ code: 'H01M10/05', label: 'Baterías recargables / iones de litio' }, { code: 'H01M4/00', label: 'Electrodos electroquímicos' }], syn: ['solid state battery', 'electrochemical cell', 'lithium ion battery', 'secondary battery'] },
+  { re: /\b(solares?|solar|photovoltaics?|fotovoltaic[oa]s?|perovskites?)\b/i, cpcs: [{ code: 'H02S', label: 'Generación de energía fotovoltaica' }, { code: 'H10K30/00', label: 'Dispositivos fotovoltaicos orgánicos/perovskita' }], syn: ['photovoltaic module', 'solar cell', 'solar energy collector'] },
+  { re: /\b(robots?|grippers?|actuators?|actuadores?|rob[oó]tica|brazos?|manipulators?|haptic)\b/i, cpcs: [{ code: 'B25J', label: 'Manipuladores y sistemas robóticos' }, { code: 'B25J15/00', label: 'Cabezales y pinzas de agarre' }], syn: ['robotic manipulator', 'soft actuator', 'end effector', 'robotic gripper'] },
+  { re: /\b(water filters?|purifiers?|desalination|filtros? de agua|purificadores?|osmosis|tratamiento de agua)\b/i, cpcs: [{ code: 'C02F', label: 'Tratamiento de agua y aguas residuales' }, { code: 'B01D', label: 'Separación y filtración de fluidos' }], syn: ['water filtration', 'water purification', 'membrane filtration'] },
+  { re: /\b(sensors?|biosensors?|detection|medidores?|detectores?|sensores?)\b/i, cpcs: [{ code: 'G01N', label: 'Análisis e investigación de materiales' }, { code: 'G01D', label: 'Medición y transductores generales' }], syn: ['optical sensor', 'electrochemical sensor', 'sensing device'] },
+  { re: /\b(drones?|uavs?|quadcopters?|aeronaves? no tripuladas?)\b/i, cpcs: [{ code: 'B64U', label: 'Vehículos aéreos no tripulados (UAV)' }, { code: 'B64C', label: 'Aeronaves y sistemas de control de vuelo' }], syn: ['unmanned aerial vehicle', 'autonomous drone', 'aerial rotorcraft'] },
+  { re: /\b(wind turbines?|aerogeneradores?|e[oó]lic[oa]s?)\b/i, cpcs: [{ code: 'F03D', label: 'Motores eólicos y turbinas de viento' }], syn: ['wind turbine', 'wind power generator', 'rotor blade'] },
+  { re: /\b(prosthetics?|pr[oó]tesis|implants?|implantes?|medical|quir[uú]rgic[oa]s?|catheters?|stents?)\b/i, cpcs: [{ code: 'A61F', label: 'Prótesis e implantes médicos' }, { code: 'A61B', label: 'Diagnóstico y cirugía médica' }], syn: ['medical prosthesis', 'surgical device', 'biomedical implant'] },
+  { re: /\b(motors?|motores?|electric motors?|inverters?)\b/i, cpcs: [{ code: 'H02K', label: 'Máquinas dinamoeléctricas y motores' }, { code: 'H02P', label: 'Control de motores eléctricos' }], syn: ['electric motor', 'brushless motor', 'stator rotor assembly'] },
+  { re: /\b(neural networks?|deep learning|artificial intelligence|inteligencia artificial|machine learning|redes? neuronales?)\b/i, cpcs: [{ code: 'G06N3/08', label: 'Redes neuronales y aprendizaje profundo' }, { code: 'G06F', label: 'Procesamiento digital de datos' }], syn: ['machine learning model', 'neural network architecture', 'deep learning inference'] }
 ];
 
 export function normalizeSearchMode(rawMode) {
@@ -41,13 +41,20 @@ function buildEnglishMorphVariants(englishCore) {
   const clean = cleanQuoteTerm(englishCore);
   if (!clean) return [];
   const words = clean.split(' ').filter(Boolean);
-  const variants = new Set([clean]);
+  const variants = new Set();
   if (words.length >= 2) {
     const last = words[words.length - 1];
-    if (!last.endsWith('s')) variants.add([...words.slice(0, -1), `${last}s`].join(' '));
-    variants.add([...words.slice(0, -1), last.endsWith('y') ? `${last.slice(0, -1)}ies` : `${last}ing`].join(' '));
+    const singularLast = (last.endsWith('s') && !last.endsWith('ss') && last.length > 3) ? last.slice(0, -1) : last;
+    const singularForm = [...words.slice(0, -1), singularLast].join(' ');
+    variants.add(singularForm);
+    variants.add(clean);
+    if (!last.endsWith('s')) {
+      variants.add([...words.slice(0, -1), `${last}s`].join(' '));
+    }
+  } else {
+    variants.add(clean);
   }
-  return Array.from(variants).slice(0, 4);
+  return Array.from(variants).slice(0, 3);
 }
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = 2000) {

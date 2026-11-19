@@ -89,17 +89,17 @@ def extract_patent_classifications(pub_num):
         return []
 
 TECHNICAL_CPC_SEEDS = [
-    (re.compile(r'\b(pump|bomba|impeller|centrifugal|hydraulic|suction)\b', re.I), [{"code": "F04D", "label": "Bombas rotodinámicas / flujo continuo"}, {"code": "F04B", "label": "Bombas de desplazamiento positivo"}], ["centrifugal pump", "liquid pump", "hydraulic pump", "submersible pump"]),
-    (re.compile(r'\b(battery|electrolyte|lithium|anode|cathode|bater[ií]a|acumulador)\b', re.I), [{"code": "H01M10/05", "label": "Baterías recargables / iones de litio"}, {"code": "H01M4/00", "label": "Electrodos electroquímicos"}], ["solid state battery", "electrochemical cell", "lithium ion battery", "secondary battery"]),
-    (re.compile(r'\b(solar|photovoltaic|panel solar|fotovoltaica|perovskite)\b', re.I), [{"code": "H02S", "label": "Generación de energía fotovoltaica"}, {"code": "H10K30/00", "label": "Dispositivos fotovoltaicos perovskita/orgánicos"}], ["photovoltaic module", "solar cell", "solar energy collector"]),
-    (re.compile(r'\b(robot|gripper|actuator|rob[oó]tica|brazo|manipulator|haptic)\b', re.I), [{"code": "B25J", "label": "Manipuladores y sistemas robóticos"}, {"code": "B25J15/00", "label": "Cabezales y pinzas de agarre"}], ["robotic manipulator", "soft actuator", "end effector", "robotic gripper"]),
-    (re.compile(r'\b(water filter|purifier|desalination|filtro de agua|purificador|osmosis|tratamiento de agua)\b', re.I), [{"code": "C02F", "label": "Tratamiento de agua y aguas residuales"}, {"code": "B01D", "label": "Separación y filtración de fluidos"}], ["water filtration", "water purification", "membrane filtration"]),
-    (re.compile(r'\b(sensor|biosensor|detection|medidor|detector)\b', re.I), [{"code": "G01N", "label": "Análisis e investigación de materiales"}, {"code": "G01D", "label": "Medición y transductores generales"}], ["optical sensor", "electrochemical sensor", "sensing device"]),
-    (re.compile(r'\b(drone|uav|quadcopter|dron|aeronave no tripulada)\b', re.I), [{"code": "B64U", "label": "Vehículos aéreos no tripulados (UAV)"}, {"code": "B64C", "label": "Aeronaves y control de vuelo"}], ["unmanned aerial vehicle", "autonomous drone", "aerial rotorcraft"]),
-    (re.compile(r'\b(wind turbine|aerogenerador|e[oó]lic[oa])\b', re.I), [{"code": "F03D", "label": "Motores eólicos y turbinas de viento"}], ["wind turbine", "wind power generator", "rotor blade"]),
-    (re.compile(r'\b(prosthetic|pr[oó]tesis|implant|medical|quir[uú]rgic|catheter|stent)\b', re.I), [{"code": "A61F", "label": "Prótesis e implantes médicos"}, {"code": "A61B", "label": "Diagnóstico y cirugía médica"}], ["medical prosthesis", "surgical device", "biomedical implant"]),
-    (re.compile(r'\b(motor|electric motor|inverter|motor el[eé]ctrico)\b', re.I), [{"code": "H02K", "label": "Máquinas dinamoeléctricas y motores"}, {"code": "H02P", "label": "Control de motores eléctricos"}], ["electric motor", "brushless motor", "stator rotor assembly"]),
-    (re.compile(r'\b(neural network|deep learning|artificial intelligence|inteligencia artificial|machine learning|modelo ia)\b', re.I), [{"code": "G06N3/08", "label": "Redes neuronales y aprendizaje profundo"}, {"code": "G06F", "label": "Procesamiento digital de datos"}], ["machine learning model", "neural network architecture", "deep learning inference"]),
+    (re.compile(r'\b(pumps?|bombas?|pumping|impellers?|centrifugal|hydraulic|hidr[aá]ulic[oa]s?|suction|succi[oó]n)\b', re.I), [{"code": "F04D", "label": "Bombas rotodinámicas / flujo continuo"}, {"code": "F04B", "label": "Bombas de desplazamiento positivo"}], ["centrifugal pump", "liquid pump", "hydraulic pump", "submersible pump"]),
+    (re.compile(r'\b(batter(?:y|ies)|electrolytes?|lithium|anodes?|cathodes?|bater[ií]as?|acumuladores?)\b', re.I), [{"code": "H01M10/05", "label": "Baterías recargables / iones de litio"}, {"code": "H01M4/00", "label": "Electrodos electroquímicos"}], ["solid state battery", "electrochemical cell", "lithium ion battery", "secondary battery"]),
+    (re.compile(r'\b(solares?|solar|photovoltaics?|fotovoltaic[oa]s?|perovskites?)\b', re.I), [{"code": "H02S", "label": "Generación de energía fotovoltaica"}, {"code": "H10K30/00", "label": "Dispositivos fotovoltaicos perovskita/orgánicos"}], ["photovoltaic module", "solar cell", "solar energy collector"]),
+    (re.compile(r'\b(robots?|grippers?|actuators?|actuadores?|rob[oó]tica|brazos?|manipulators?|haptic)\b', re.I), [{"code": "B25J", "label": "Manipuladores y sistemas robóticos"}, {"code": "B25J15/00", "label": "Cabezales y pinzas de agarre"}], ["robotic manipulator", "soft actuator", "end effector", "robotic gripper"]),
+    (re.compile(r'\b(water filters?|purifiers?|desalination|filtros? de agua|purificadores?|osmosis|tratamiento de agua)\b', re.I), [{"code": "C02F", "label": "Tratamiento de agua y aguas residuales"}, {"code": "B01D", "label": "Separación y filtración de fluidos"}], ["water filtration", "water purification", "membrane filtration"]),
+    (re.compile(r'\b(sensors?|biosensors?|detection|medidores?|detectores?|sensores?)\b', re.I), [{"code": "G01N", "label": "Análisis e investigación de materiales"}, {"code": "G01D", "label": "Medición y transductores generales"}], ["optical sensor", "electrochemical sensor", "sensing device"]),
+    (re.compile(r'\b(drones?|uavs?|quadcopters?|aeronaves? no tripuladas?)\b', re.I), [{"code": "B64U", "label": "Vehículos aéreos no tripulados (UAV)"}, {"code": "B64C", "label": "Aeronaves y control de vuelo"}], ["unmanned aerial vehicle", "autonomous drone", "aerial rotorcraft"]),
+    (re.compile(r'\b(wind turbines?|aerogeneradores?|e[oó]lic[oa]s?)\b', re.I), [{"code": "F03D", "label": "Motores eólicos y turbinas de viento"}], ["wind turbine", "wind power generator", "rotor blade"]),
+    (re.compile(r'\b(prosthetics?|pr[oó]tesis|implants?|implantes?|medical|quir[uú]rgic[oa]s?|catheters?|stents?)\b', re.I), [{"code": "A61F", "label": "Prótesis e implantes médicos"}, {"code": "A61B", "label": "Diagnóstico y cirugía médica"}], ["medical prosthesis", "surgical device", "biomedical implant"]),
+    (re.compile(r'\b(motors?|motores?|electric motors?|inverters?)\b', re.I), [{"code": "H02K", "label": "Máquinas dinamoeléctricas y motores"}, {"code": "H02P", "label": "Control de motores eléctricos"}], ["electric motor", "brushless motor", "stator rotor assembly"]),
+    (re.compile(r'\b(neural networks?|deep learning|artificial intelligence|inteligencia artificial|machine learning|redes? neuronales?)\b', re.I), [{"code": "G06N3/08", "label": "Redes neuronales y aprendizaje profundo"}, {"code": "G06F", "label": "Procesamiento digital de datos"}], ["machine learning model", "neural network architecture", "deep learning inference"]),
 ]
 
 def _clean_qterm(t):
@@ -212,7 +212,11 @@ Return exact JSON schema:
     words = english_core.split()
     if len(words) >= 2:
         last_w = words[-1]
-        if not last_w.endswith('s'):
+        if last_w.endswith('s') and not last_w.endswith('ss') and len(last_w) > 3:
+            singular_form = " ".join(words[:-1] + [last_w[:-1]])
+            if singular_form not in syn_list:
+                syn_list.insert(0, singular_form)
+        elif not last_w.endswith('s'):
             syn_list.append(" ".join(words[:-1] + [last_w + "s"]))
 
     comb_text = f"{exp_input} {english_core}"
@@ -447,11 +451,11 @@ def query_google_patents(q, match_tag='multilingual'):
 
     return {"results": results, "cpc_summary": cpc_summaries, "total_found": total_found}
 
-def query_europe_pmc(q):
+def query_europe_pmc(q, page=1):
     """Consulta la base oficial europea de patentes de Europe PMC (EPO EP... y WIPO WO...)"""
     results = []
     try:
-        url = f"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=SRC:PAT+AND+{urllib.parse.quote(q)}&format=json&resultType=core&pageSize=8"
+        url = f"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=SRC:PAT+AND+{urllib.parse.quote(q)}&format=json&resultType=core&pageSize=8&page={max(1, int(page))}"
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=8) as resp:
             data = json.loads(resp.read().decode('utf-8'))
@@ -1268,18 +1272,26 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes, los demás proyect
         q = str(req_data.get('q') or '').strip()[:500]
         raw_source = str(req_data.get('source') or 'all').strip().lower()
         raw_mode = str(req_data.get('mode') or 'hybrid').strip().lower()
+        try:
+            page = max(1, min(20, int(req_data.get('page', 1))))
+        except Exception:
+            page = 1
         api_key = str(req_data.get('apiKey') or '').strip()[:256]
         provider = str(req_data.get('provider') or '').strip().lower()
-        self._execute_patents_search(q, raw_source, raw_mode, api_key, provider)
+        self._execute_patents_search(q, raw_source, raw_mode, api_key, provider, page=page)
 
     def handle_patents(self, parsed):
         qs = urllib.parse.parse_qs(parsed.query)
         q = qs.get('q', [''])[0].strip()[:500]
         raw_source = qs.get('source', ['all'])[0].strip().lower()
         raw_mode = qs.get('mode', ['hybrid'])[0].strip().lower()
-        self._execute_patents_search(q, raw_source, raw_mode)
+        try:
+            page = max(1, min(20, int(qs.get('page', ['1'])[0])))
+        except Exception:
+            page = 1
+        self._execute_patents_search(q, raw_source, raw_mode, page=page)
 
-    def _execute_patents_search(self, q, raw_source, raw_mode='hybrid', api_key='', provider=''):
+    def _execute_patents_search(self, q, raw_source, raw_mode='hybrid', api_key='', provider='', page=1):
         source = raw_source if raw_source in ALLOWED_SOURCES else 'all'
 
         if not q:
@@ -1294,7 +1306,7 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes, los demás proyect
         pmc_total_found = 0
         brief_total_found = 0
 
-        # Orquestación Concurrente Multi-Fuente (Multilingüe + Clasificación CPC)
+        # Orquestación Concurrente Multi-Fuente (Multilingüe + Clasificación CPC + Paginación)
         with ThreadPoolExecutor(max_workers=6) as executor:
             future_google = None
             future_google_class = None
@@ -1303,12 +1315,22 @@ Posees pleno conocimiento del Glosario Técnico, las Fuentes, los demás proyect
 
             if source in ['all', 'google']:
                 g_tag = 'classification' if plan['search_mode'] == 'classification' else ('exact' if plan['search_mode'] == 'exact' else 'multilingual')
-                future_google = executor.submit(query_google_patents, plan['google_query'], g_tag)
-                if plan['classification_query'] and plan['classification_query'] != plan['google_query'] and plan['search_mode'] != 'exact':
-                    future_google_class = executor.submit(query_google_patents, plan['classification_query'], 'classification')
+                page_primary_q = plan['google_query']
+                if page > 1 and len(plan['expanded_terms']) > 1:
+                    syn_term = plan['expanded_terms'][(page - 1) % len(plan['expanded_terms'])]
+                    cpc_code = plan['applied_cpcs'][(page - 2) % len(plan['applied_cpcs'])]['code'] if plan['applied_cpcs'] else ''
+                    page_primary_q = f'{cpc_code} "{syn_term}"' if cpc_code else f'"{syn_term}"'
+                future_google = executor.submit(query_google_patents, page_primary_q, g_tag)
+                class_q = plan['classification_query']
+                if page > 1 and plan['applied_cpcs']:
+                    rot_cpc = plan['applied_cpcs'][(page - 1) % len(plan['applied_cpcs'])]['code']
+                    rot_term = plan['expanded_terms'][page % len(plan['expanded_terms'])] if plan['expanded_terms'] else plan['english_core']
+                    class_q = f'{rot_cpc} "{rot_term}"'
+                if class_q and class_q != page_primary_q and plan['search_mode'] != 'exact':
+                    future_google_class = executor.submit(query_google_patents, class_q, 'classification')
 
             if source in ['all', 'europepmc']:
-                future_pmc = executor.submit(query_europe_pmc, plan['europe_pmc_query'])
+                future_pmc = executor.submit(query_europe_pmc, plan['europe_pmc_query'], page)
 
             if source in ['all', 'patentbrief']:
                 future_brief = executor.submit(query_patent_brief, plan['patent_brief_query'])
