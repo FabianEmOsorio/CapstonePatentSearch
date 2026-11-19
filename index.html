@@ -2217,6 +2217,7 @@
       border: 1px solid var(--border-color);
       border-radius: 4px;
       padding: 2px 8px;
+      min-height: 24px;
       font-size: 11px;
       color: var(--brand-primary);
       cursor: pointer;
@@ -7717,9 +7718,14 @@
           <span style="font-family: monospace; font-size: 12px; font-weight: 700; color: var(--brand-primary);">${pubNum}</span>
           ${statusBadgeHtml}
         </div>
-        <h3 style="font-size: 15px; font-weight: 700; color: var(--text-high); line-height: 1.35; margin-bottom: 12px;">
-          ${title}
-        </h3>
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 12px;">
+          <h3 id="${suffix}-dossier-title" style="font-size: 15px; font-weight: 700; color: var(--text-high); line-height: 1.35; margin: 0; flex: 1;">
+            ${title}
+          </h3>
+          <button type="button" class="btn-translate" id="${suffix}-trans-title-btn" onclick="toggleTraduccionSidebarTitle('${suffix}')" style="flex-shrink: 0;">
+            <span>Traducir título</span>
+          </button>
+        </div>
 
         ${friendlyHtml}
 
@@ -10284,9 +10290,14 @@
               <span style="font-size: 11.5px; color: var(--text-muted);">Año: ${year}</span>
             </div>
 
-            <h2 class="card-title" onclick="abrirSidebarLiteratura(${idx})" title="Inspeccionar artículo">
-              ${title}
-            </h2>
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 10px;">
+              <h2 class="card-title" id="lit-title-${idx}" onclick="abrirSidebarLiteratura(${idx})" title="Inspeccionar artículo" style="margin: 0; flex: 1;">
+                ${title}
+              </h2>
+              <button type="button" class="btn-translate" id="title-trans-btn-lit-${idx}" onclick="toggleTraduccionTituloLit(${idx}, event)" style="flex-shrink: 0; margin-top: 2px;" title="Traducir título al español">
+                <span>Traducir título</span>
+              </button>
+            </div>
 
             ${snippet ? `
               <div style="font-size: 12px; color: var(--text-medium); line-height: 1.55; margin-bottom: 12px;">
@@ -10444,9 +10455,14 @@
               <span style="font-size: 11.5px; color: var(--text-muted);">Pub: ${pubDate}</span>
             </div>
 
-            <h2 class="card-title" onclick="abrirSidebarPatente(${idx})" title="Inspeccionar expediente">
-              ${title}
-            </h2>
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 10px;">
+              <h2 class="card-title" id="patent-title-${idx}" onclick="abrirSidebarPatente(${idx})" title="Inspeccionar expediente" style="margin: 0; flex: 1;">
+                ${title}
+              </h2>
+              <button type="button" class="btn-translate" id="title-trans-btn-${idx}" onclick="toggleTraduccionTitulo(${idx}, event)" style="flex-shrink: 0; margin-top: 2px;" title="Traducir título al español">
+                <span>Traducir título</span>
+              </button>
+            </div>
 
             ${friendlySummaryHtml}
 
@@ -10502,6 +10518,7 @@
         btn.innerHTML = `<span>${labelRevert}</span>`;
         return;
       }
+      btn.disabled = true;
       btn.innerHTML = `<span>Traduciendo...</span>`;
       try {
         const res = await fetch('/api/translate', {
@@ -10520,7 +10537,38 @@
         }
       } catch (e) {
         btn.innerHTML = `<span>Error</span>`;
+      } finally {
+        btn.disabled = false;
       }
+    }
+
+    async function toggleTraduccionTitulo(idx, ev) {
+      if (ev) ev.stopPropagation();
+      const p = currentRenderedPatents[idx];
+      if (!p || !p.title) return;
+      const btn = document.getElementById(`title-trans-btn-${idx}`);
+      const textElem = document.getElementById(`patent-title-${idx}`);
+      const originalTitle = decodeSafePlainText(p.title);
+      await traducirTextoElemento(originalTitle, btn, textElem, 'Traducir título', 'Título original');
+    }
+
+    async function toggleTraduccionTituloLit(idx, ev) {
+      if (ev) ev.stopPropagation();
+      const w = currentRenderedLiterature[idx];
+      if (!w || !w.title) return;
+      const btn = document.getElementById(`title-trans-btn-lit-${idx}`);
+      const textElem = document.getElementById(`lit-title-${idx}`);
+      const originalTitle = decodeSafePlainText(w.title);
+      await traducirTextoElemento(originalTitle, btn, textElem, 'Traducir título', 'Título original');
+    }
+
+    async function toggleTraduccionSidebarTitle(suffix = 'ins') {
+      const p = currentActivePatentData;
+      if (!p || !p.title) return;
+      const btn = document.getElementById(`${suffix}-trans-title-btn`);
+      const textElem = document.getElementById(`${suffix}-dossier-title`);
+      const originalTitle = decodeSafePlainText(p.title);
+      await traducirTextoElemento(originalTitle, btn, textElem, 'Traducir título', 'Título original');
     }
 
     async function toggleTraduccion(idx) {
